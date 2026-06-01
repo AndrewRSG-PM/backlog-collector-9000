@@ -1,0 +1,29 @@
+name: Order Sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Target date (YYYY-MM-DD). Default: tomorrow.'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry run — do not write to Monday'
+        required: false
+        default: 'false'
+
+jobs:
+  order-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run Order Sync
+        env:
+          FLOAT_JWT: ${{ secrets.FLOAT_JWT }}
+          MONDAY_TOKEN: ${{ secrets.MONDAY_TOKEN }}
+          TARGET_DATE: ${{ inputs.date }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: node scripts/order-sync.js
