@@ -155,11 +155,39 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
   )
 }
 
+function FloatFailBanner() {
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    getLatestRun(WORKFLOWS.floatCheck).then(run => {
+      if (run?.status === 'completed' && run?.conclusion === 'failure') setFailed(true)
+    }).catch(() => {})
+  }, [])
+
+  if (!failed) return null
+
+  return (
+    <div className="border border-red-900/50 bg-red-950/20 px-5 py-3 flex items-center justify-between gap-4">
+      <span className="text-red-400 text-sm">
+        ⚠ Останній Float Check завершився з помилкою. Можливо, протух JWT токен.
+      </span>
+      <button
+        onClick={() => document.dispatchEvent(new CustomEvent('open-settings'))}
+        className="text-xs border border-red-800 text-red-400 hover:border-red-500 hover:text-red-300 px-3 py-1.5 transition-colors flex-shrink-0"
+      >
+        UPDATE TOKEN
+      </button>
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const [date, setDate] = useState(todayPlus1())
 
   return (
     <div className="space-y-8">
+      <FloatFailBanner />
+
       {/* Date selector */}
       <div>
         <div className="text-base text-[#555] tracking-wider mb-3">TARGET DATE</div>

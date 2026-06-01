@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import RobotLogo from './RobotLogo'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SettingsModal from './SettingsModal'
 
 const navItems = [
@@ -11,6 +11,12 @@ const navItems = [
 
 export default function Layout() {
   const [settingsOpen, setSettingsOpen] = useState(false)
+
+  useEffect(() => {
+    const handler = () => setSettingsOpen(true)
+    document.addEventListener('open-settings', handler)
+    return () => document.removeEventListener('open-settings', handler)
+  }, [])
 
   return (
     <div className="min-h-screen flex flex-col">

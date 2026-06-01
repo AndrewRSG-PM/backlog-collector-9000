@@ -61,6 +61,41 @@ export async function readConfigFile(path) {
   return { data: JSON.parse(content), sha: data.sha }
 }
 
+// Update a GitHub Actions secret (encrypts with repo public key)
+export async function updateGitHubSecret(secretName, secretValue) {
+  // 1. Get repo public key
+  const pkRes = await fetch(
+    `${BASE}/repos/${OWNER}/${REPO}/actions/secrets/public-key`,
+    { headers: headers() }
+  )
+  if (!pkRes.ok) throw new Error(`Could not get public key: HTTP ${pkRes.status}`)
+  const { key_id, key: keyBase64 } = await pkRes.json()
+
+  // 2. Encrypt using libsodium (crypto_box_seal)
+  const sodium = await import('libsodium-wrappers')
+  await sodium.default.ready
+  const lib = sodium.default
+  const publicKey  = lib.from_base64(keyBase64, lib.base64_variants.ORIGINAL)
+  const secretBytes = lib.from_string(secretValue)
+  const encrypted  = lib.crypto_box_seal(secretBytes, publicKey)
+  const encryptedB64 = lib.to_base64(encrypted, lib.base64_variants.ORIGINAL)
+
+  // 3. PUT secret
+  const res = await fetch(
+    `${BASE}/repos/${OWNER}/${REPO}/actions/secrets/${secretName}`,
+    {
+      method: 'PUT',
+      headers: { ...headers(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ encrypted_value: encryptedB64, key_id }),
+    }
+  )
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.message || `HTTP ${res.status}`)
+  }
+  return true
+}
+
 // Write/update a file in the repo (creates a commit)
 export async function writeConfigFile(path, content, sha, message) {
   const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
