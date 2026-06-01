@@ -7,48 +7,48 @@ const CONFIGS = [
     file: 'config/float_check_exceptions.json',
     title: 'Float Check',
     description: 'max_hours per artist, tag_filter, timeoff_type',
-    columns: ['name_pattern', 'type', 'value'],
-    placeholder: { name_pattern: 'Bohdan', type: 'max_hours', value: '10' },
+    columns: ['name', 'type', 'value', 'applies_to', 'note'],
+    placeholder: { name: 'Bohdan', type: 'max_hours', value: '10', applies_to: 'float_check', note: '' },
   },
   {
     key: 'name_exceptions',
     file: 'config/name_exceptions.json',
     title: 'Name Exceptions',
     description: 'Float name → Monday search name',
-    columns: ['float_name', 'monday_name'],
-    placeholder: { float_name: 'Roman Alexeyechkin', monday_name: 'Alekseechkin' },
+    columns: ['float_name', 'monday_search', 'note'],
+    placeholder: { float_name: 'Roman Alexeyechkin', monday_search: 'Alekseechkin', note: '' },
   },
   {
     key: 'skip_tasks_exact',
     file: 'config/skip_tasks_exact.json',
     title: 'Skip Tasks (exact)',
     description: 'Назви задач які не отримують Order (точний збіг)',
-    columns: ['task_name'],
-    placeholder: { task_name: 'Art Direction' },
+    columns: ['task_name', 'note'],
+    placeholder: { task_name: 'Art Direction', note: '' },
   },
   {
     key: 'skip_tasks_contain',
     file: 'config/skip_tasks_contain.json',
     title: 'Skip Tasks (contains)',
     description: 'Підрядки — якщо задача містить, пропускається',
-    columns: ['substring'],
-    placeholder: { substring: 'QA' },
+    columns: ['substring', 'note'],
+    placeholder: { substring: 'QA', note: '' },
   },
   {
     key: 'project_exceptions',
     file: 'config/project_exceptions.json',
     title: 'Project Exceptions',
     description: 'Float project → Monday project або pm_override',
-    columns: ['float_project', 'monday_project', 'pm_override'],
-    placeholder: { float_project: 'SpacePlay', monday_project: '', pm_override: 'Andrew Holovko' },
+    columns: ['float_project', 'monday_project', 'pm_override', 'note'],
+    placeholder: { float_project: 'SpacePlay', monday_project: '', pm_override: 'Andrew Holovko', note: '' },
   },
   {
     key: 'pm_discord',
     file: 'config/pm_discord.json',
     title: 'PM Discord',
     description: 'PM name → Discord user ID',
-    columns: ['pm_name', 'discord_id'],
-    placeholder: { pm_name: 'Andrew Holovko', discord_id: '1473964446652039168' },
+    columns: ['pm_name', 'discord_id', 'note'],
+    placeholder: { pm_name: 'Andrew Holovko', discord_id: '1473964446652039168', note: '' },
   },
 ]
 
@@ -127,7 +127,7 @@ function TableEditor({ config }) {
           <thead>
             <tr className="border-b border-[#2a2a2a]">
               {config.columns.map(col => (
-                <th key={col} className="text-left text-[#555] tracking-wider py-2 pr-4 font-normal">
+                <th key={col} className="text-left text-[#555] tracking-wider py-3 pr-4 font-normal text-sm">
                   {col.toUpperCase().replace(/_/g, ' ')}
                 </th>
               ))}
@@ -150,7 +150,7 @@ function TableEditor({ config }) {
                       type="text"
                       value={row[col] || ''}
                       onChange={e => updateCell(i, col, e.target.value)}
-                      className="w-full bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#e5e5e5] px-2 py-1 text-xs font-mono focus:outline-none focus:bg-[#0d0d0d] min-w-[120px]"
+                      className="w-full bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#e5e5e5] px-2 py-1.5 text-sm font-mono focus:outline-none focus:bg-[#0d0d0d] min-w-[160px]"
                     />
                   </td>
                 ))}
@@ -173,14 +173,14 @@ function TableEditor({ config }) {
       <div className="flex items-center gap-3 pt-1">
         <button
           onClick={addRow}
-          className="text-xs text-[#666] hover:text-[#aaa] border border-[#2a2a2a] hover:border-[#444] px-3 py-1.5 transition-colors"
+          className="text-sm text-[#666] hover:text-[#aaa] border border-[#2a2a2a] hover:border-[#444] px-4 py-2 transition-colors"
         >
           + ADD ROW
         </button>
         <button
           onClick={save}
           disabled={saving}
-          className="text-xs tracking-wider border border-[#444] text-[#aaa] hover:border-[#888] hover:text-white px-4 py-1.5 transition-colors disabled:opacity-40"
+          className="text-sm tracking-wider border border-[#444] text-[#aaa] hover:border-[#888] hover:text-white px-5 py-2 transition-colors disabled:opacity-40"
         >
           {saving ? '...' : saved ? '✓ SAVED' : 'SAVE'}
         </button>
@@ -216,7 +216,7 @@ export default function Exceptions() {
           <button
             key={c.key}
             onClick={() => setActive(c.key)}
-            className={`text-xs tracking-wider px-3 py-1.5 border transition-colors ${
+            className={`text-sm tracking-wider px-4 py-2 border transition-colors ${
               active === c.key
                 ? 'border-[#e5e5e5] text-white bg-[#1a1a1a]'
                 : 'border-transparent text-[#555] hover:text-[#888] hover:border-[#333]'
@@ -230,7 +230,7 @@ export default function Exceptions() {
       {/* Active config */}
       {config && (
         <div>
-          <div className="text-[10px] text-[#444] mb-4">{config.description}</div>
+          <div className="text-sm text-[#555] mb-4">{config.description}</div>
           <TableEditor key={config.key} config={config} />
         </div>
       )}

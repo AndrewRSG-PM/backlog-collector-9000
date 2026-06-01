@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "substring": "QA",
+    "note": "Any task with QA anywhere in name"
+  },
+  {
+    "substring": "1:1",
+    "note": "Any task with 1:1 anywhere in name"
+  }
+]

@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "float_name": "Roman Alexeyechkin",
+    "monday_search": "Alekseechkin",
+    "note": "Different spelling in Monday"
+  },
+  {
+    "float_name": "Hanna Zuikova",
+    "monday_search": "Hanna",
+    "note": "Monday has first name only"
+  },
+  {
+    "float_name": "Liliya Kalachova",
+    "monday_search": "Liliya",
+    "note": "Monday has first name only"
+  },
+  {
+    "float_name": "Roman Tanych",
+    "monday_search": "VanHazy",
+    "note": "Nickname in Monday"
+  }
+]

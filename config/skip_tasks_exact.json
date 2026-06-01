@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "task_name": "Art Direction",
+    "note": "PM overhead"
+  },
+  {
+    "task_name": "RSG ORG",
+    "note": "Internal org task"
+  },
+  {
+    "task_name": "Tech Support",
+    "note": "Internal support task"
+  },
+  {
+    "task_name": "Playables \\ Creatives PM Support",
+    "note": "PM support task"
+  }
+]

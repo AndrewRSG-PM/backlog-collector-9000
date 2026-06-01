@@ -1,1 +1,52 @@
-[]
+[
+  {
+    "pm_name": "Nick Boichenko",
+    "discord_id": "1331997837860405260",
+    "note": ""
+  },
+  {
+    "pm_name": "Alina Shevchuk",
+    "discord_id": "1329372254450225177",
+    "note": ""
+  },
+  {
+    "pm_name": "Andrew Holovko",
+    "discord_id": "1473964446652039168",
+    "note": ""
+  },
+  {
+    "pm_name": "Anna Riapolova",
+    "discord_id": "894601664093356063",
+    "note": ""
+  },
+  {
+    "pm_name": "Hanna Pavlovska",
+    "discord_id": "1187007896341463175",
+    "note": ""
+  },
+  {
+    "pm_name": "Oleksandr Salabai",
+    "discord_id": "923128286266130432",
+    "note": ""
+  },
+  {
+    "pm_name": "Polina Chaviak",
+    "discord_id": "1074700213354238094",
+    "note": ""
+  },
+  {
+    "pm_name": "Roman Tkachenko",
+    "discord_id": "1033054881189203978",
+    "note": ""
+  },
+  {
+    "pm_name": "Yegor Khrushch",
+    "discord_id": "1256354350721138750",
+    "note": ""
+  },
+  {
+    "pm_name": "Valeriia Dubina",
+    "discord_id": "1498262798256570419",
+    "note": ""
+  }
+]

@@ -18,7 +18,7 @@ export default function Layout() {
       <header className="border-b border-[#2a2a2a] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <RobotLogo size={36} />
-          <span className="text-white font-bold text-sm tracking-widest select-none">
+          <span className="text-white font-bold text-base tracking-widest select-none">
             BACKLOG-COLLECTOR-9000
           </span>
         </div>
@@ -31,7 +31,7 @@ export default function Layout() {
                 to={to}
                 end={to === '/'}
                 className={({ isActive }) =>
-                  `px-3 py-1.5 text-xs tracking-wider border transition-colors ${
+                  `px-4 py-2 text-sm tracking-wider border transition-colors ${
                     isActive
                       ? 'border-[#e5e5e5] text-white bg-[#1a1a1a]'
                       : 'border-transparent text-[#666] hover:text-[#aaa] hover:border-[#333]'
@@ -45,7 +45,7 @@ export default function Layout() {
 
           <button
             onClick={() => setSettingsOpen(true)}
-            className="px-3 py-1.5 text-xs tracking-wider border border-[#2a2a2a] text-[#666] hover:text-[#aaa] hover:border-[#444] transition-colors"
+            className="px-4 py-2 text-sm tracking-wider border border-[#2a2a2a] text-[#666] hover:text-[#aaa] hover:border-[#444] transition-colors"
           >
             ⚙ SETTINGS
           </button>

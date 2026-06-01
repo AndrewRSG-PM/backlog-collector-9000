@@ -1,1 +1,37 @@
-[]
+[
+  {
+    "name": "Danylo Panchenko",
+    "type": "max_hours",
+    "value": "9",
+    "applies_to": "float_check",
+    "note": "OK up to 9h (not flagged as > 8h)"
+  },
+  {
+    "name": "⌛",
+    "type": "name_pattern",
+    "value": "skip_entirely",
+    "applies_to": "float_check",
+    "note": "Float-check only — order-sync все одно проставляє ордери"
+  },
+  {
+    "name": "Fix Price",
+    "type": "tag_filter",
+    "value": "skip_entirely",
+    "applies_to": "float_check",
+    "note": "Float-check only — order-sync все одно проставляє ордери"
+  },
+  {
+    "name": "Dead",
+    "type": "timeoff_type",
+    "value": "count_as_off",
+    "applies_to": "float_check",
+    "note": "Count as off/vacation — not flagged as unplanned"
+  },
+  {
+    "name": "RSG Vacation",
+    "type": "timeoff_type",
+    "value": "count_as_off",
+    "applies_to": "float_check",
+    "note": "Count as off/vacation — not flagged as unplanned"
+  }
+]
