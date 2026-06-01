@@ -36,7 +36,7 @@ function ActionButton({ label, onClick, disabled, variant = 'primary', className
       onClick={onClick}
       disabled={disabled}
       className={`
-        px-6 py-3 text-sm tracking-wider font-bold border transition-all
+        px-7 py-3.5 text-base tracking-wider font-bold border transition-all
         ${variant === 'primary'
           ? 'border-[#e5e5e5] text-white hover:bg-[#1a1a1a] disabled:opacity-30 disabled:cursor-not-allowed'
           : 'border-[#444] text-[#888] hover:border-[#888] hover:text-[#ccc] disabled:opacity-30 disabled:cursor-not-allowed'
@@ -99,14 +99,14 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
   }
 
   return (
-    <div className="border border-[#2a2a2a] p-5 hover:border-[#333] transition-colors">
+    <div className="border border-[#2a2a2a] p-7 hover:border-[#333] transition-colors">
       <div className="flex items-start justify-between gap-4 mb-3">
         <div>
-          <div className="text-base font-bold text-white tracking-wide mb-1.5">
+          <div className="text-lg font-bold text-white tracking-wide mb-2">
             {title}
-            {testMode && <span className="ml-2 text-xs text-yellow-500 border border-yellow-500/40 px-1.5 py-0.5">TEST</span>}
+            {testMode && <span className="ml-3 text-sm text-yellow-500 border border-yellow-500/40 px-2 py-0.5">TEST</span>}
           </div>
-          <div className="text-sm text-[#666]">{description}</div>
+          <div className="text-base text-[#666]">{description}</div>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
           {run && <StatusBadge status={run.status} conclusion={run.conclusion} />}
@@ -148,13 +148,13 @@ export default function Dashboard() {
     <div className="space-y-8">
       {/* Date selector */}
       <div>
-        <div className="text-sm text-[#555] tracking-wider mb-2">TARGET DATE</div>
+        <div className="text-base text-[#555] tracking-wider mb-3">TARGET DATE</div>
         <div className="flex items-center gap-3">
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="bg-[#0d0d0d] border border-[#2a2a2a] text-[#e5e5e5] text-sm px-4 py-2.5 font-mono focus:outline-none focus:border-[#555]"
+            className="bg-[#0d0d0d] border border-[#2a2a2a] text-[#e5e5e5] text-base px-5 py-3 font-mono focus:outline-none focus:border-[#555]"
           />
           <button
             onClick={() => setDate(todayPlus1())}
@@ -167,7 +167,7 @@ export default function Dashboard() {
 
       {/* Section: Float */}
       <div>
-        <div className="text-xs text-[#444] tracking-widest mb-4 flex items-center gap-3">
+        <div className="text-sm text-[#444] tracking-widest mb-5 flex items-center gap-3">
           <span>── FLOAT CHECK</span>
           <span className="flex-1 border-t border-[#1a1a1a]" />
         </div>
@@ -190,7 +190,7 @@ export default function Dashboard() {
 
       {/* Section: Backlog Assembly */}
       <div>
-        <div className="text-xs text-[#444] tracking-widest mb-3 flex items-center gap-3">
+        <div className="text-sm text-[#444] tracking-widest mb-5 flex items-center gap-3">
           <span>── ASSEMBLE BACKLOG</span>
           <span className="flex-1 border-t border-[#1a1a1a]" />
         </div>
@@ -199,23 +199,23 @@ export default function Dashboard() {
             href={CODA_2D_URL}
             target="_blank"
             rel="noreferrer"
-            className="border border-[#2a2a2a] p-4 hover:border-[#444] transition-colors group"
+            className="border border-[#2a2a2a] p-7 hover:border-[#444] transition-colors group"
           >
-            <div className="text-base font-bold text-white tracking-wide mb-2 group-hover:text-[#ccc]">
+            <div className="text-lg font-bold text-white tracking-wide mb-2 group-hover:text-[#ccc]">
               Assemble Backlog 2D ↗
             </div>
-            <div className="text-sm text-[#666]">Відкриває Coda (кнопка 2D збірки). Make.com pipeline.</div>
+            <div className="text-base text-[#666]">Відкриває Coda (кнопка 2D збірки). Make.com pipeline.</div>
           </a>
           <a
             href={CODA_3D_URL}
             target="_blank"
             rel="noreferrer"
-            className="border border-[#2a2a2a] p-4 hover:border-[#444] transition-colors group"
+            className="border border-[#2a2a2a] p-7 hover:border-[#444] transition-colors group"
           >
-            <div className="text-base font-bold text-white tracking-wide mb-2 group-hover:text-[#ccc]">
+            <div className="text-lg font-bold text-white tracking-wide mb-2 group-hover:text-[#ccc]">
               Assemble Backlog 3D ↗
             </div>
-            <div className="text-sm text-[#666]">Відкриває Coda (кнопка 3D збірки). Make.com pipeline.</div>
+            <div className="text-base text-[#666]">Відкриває Coda (кнопка 3D збірки). Make.com pipeline.</div>
           </a>
         </div>
         <div className="text-xs text-[#333] mt-2 px-1">
@@ -225,7 +225,7 @@ export default function Dashboard() {
 
       {/* Section: Orders */}
       <div>
-        <div className="text-xs text-[#444] tracking-widest mb-3 flex items-center gap-3">
+        <div className="text-sm text-[#444] tracking-widest mb-5 flex items-center gap-3">
           <span>── ORDER SYNC</span>
           <span className="flex-1 border-t border-[#1a1a1a]" />
         </div>

@@ -1,10 +1,10 @@
 function Section({ title, children }) {
   return (
-    <div className="space-y-3">
-      <h2 className="text-sm font-bold tracking-widest text-white border-b border-[#2a2a2a] pb-2">
+    <div className="space-y-4">
+      <h2 className="text-base font-bold tracking-widest text-white border-b border-[#2a2a2a] pb-2">
         {title}
       </h2>
-      <div className="space-y-2 text-[#999] text-xs leading-relaxed">{children}</div>
+      <div className="space-y-3 text-[#999] text-base leading-relaxed">{children}</div>
     </div>
   )
 }
@@ -12,7 +12,7 @@ function Section({ title, children }) {
 function Step({ n, children }) {
   return (
     <div className="flex gap-3">
-      <span className="text-[#444] font-bold flex-shrink-0 w-5">{n}.</span>
+      <span className="text-[#444] font-bold flex-shrink-0 w-6">{n}.</span>
       <span>{children}</span>
     </div>
   )
@@ -20,7 +20,7 @@ function Step({ n, children }) {
 
 function Code({ children }) {
   return (
-    <code className="bg-[#1a1a1a] border border-[#2a2a2a] px-2 py-0.5 text-[#ccc] text-[11px] font-mono">
+    <code className="bg-[#1a1a1a] border border-[#2a2a2a] px-2 py-0.5 text-[#ccc] text-sm font-mono">
       {children}
     </code>
   )
@@ -89,32 +89,32 @@ export default function Guides() {
 
       <Section title="FAQ — ТИПОВІ ПРОБЛЕМИ">
         <div className="space-y-3">
-          <div className="border border-[#1e1e1e] p-3">
-            <div className="text-[#ccc] font-bold mb-1">Float Check падає з помилкою 401</div>
+          <div className="border border-[#1e1e1e] p-4">
+            <div className="text-[#ccc] font-bold mb-2">Float Check падає з помилкою 401</div>
             <div>Токен протух. Оновити по гайду вище.</div>
           </div>
-          <div className="border border-[#1e1e1e] p-3">
-            <div className="text-[#ccc] font-bold mb-1">Художник не матчиться (NO MATCH в логах)</div>
+          <div className="border border-[#1e1e1e] p-4">
+            <div className="text-[#ccc] font-bold mb-2">Художник не матчиться (NO MATCH в логах)</div>
             <div>
               Ім'я у Float і Monday відрізняється. Додай виключення у{' '}
               <Code>Exceptions → Name Exceptions</Code>:
               колонка Float name → Monday search name.
             </div>
           </div>
-          <div className="border border-[#1e1e1e] p-3">
-            <div className="text-[#ccc] font-bold mb-1">Задача не отримує Order</div>
+          <div className="border border-[#1e1e1e] p-4">
+            <div className="text-[#ccc] font-bold mb-2">Задача не отримує Order</div>
             <div>
               Або задача є в <Code>Skip Tasks</Code>, або назва не матчиться.
               Для назв: додай у <Code>Skip Tasks (exact)</Code> або{' '}
               <Code>Skip Tasks (contains)</Code>. Для матчингу назви: секція TBD.
             </div>
           </div>
-          <div className="border border-[#1e1e1e] p-3">
-            <div className="text-[#ccc] font-bold mb-1">Кнопка RUN не реагує</div>
+          <div className="border border-[#1e1e1e] p-4">
+            <div className="text-[#ccc] font-bold mb-2">Кнопка RUN не реагує</div>
             <div>Перевір GitHub PAT у Settings. Якщо PAT не вставлений — workflow не задиспетчеться.</div>
           </div>
-          <div className="border border-[#1e1e1e] p-3">
-            <div className="text-[#ccc] font-bold mb-1">Float CHECK READ ONLY?</div>
+          <div className="border border-[#1e1e1e] p-4">
+            <div className="text-[#ccc] font-bold mb-2">Float CHECK READ ONLY?</div>
             <div>
               Так. Float — тільки читання. Назавжди. Скрипти НІКОЛИ не записують у Float.
             </div>

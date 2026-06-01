@@ -127,7 +127,7 @@ function TableEditor({ config }) {
           <thead>
             <tr className="border-b border-[#2a2a2a]">
               {config.columns.map(col => (
-                <th key={col} className="text-left text-[#555] tracking-wider py-3 pr-4 font-normal text-sm">
+                <th key={col} className="text-left text-[#555] tracking-wider py-4 pr-6 font-normal text-base">
                   {col.toUpperCase().replace(/_/g, ' ')}
                 </th>
               ))}
@@ -150,7 +150,7 @@ function TableEditor({ config }) {
                       type="text"
                       value={row[col] || ''}
                       onChange={e => updateCell(i, col, e.target.value)}
-                      className="w-full bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#e5e5e5] px-2 py-1.5 text-sm font-mono focus:outline-none focus:bg-[#0d0d0d] min-w-[160px]"
+                      className="w-full bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#e5e5e5] px-3 py-2 text-base font-mono focus:outline-none focus:bg-[#0d0d0d] min-w-[180px]"
                     />
                   </td>
                 ))}
