@@ -49,11 +49,12 @@ function ActionButton({ label, onClick, disabled, variant = 'primary', className
   )
 }
 
-function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode = false }) {
+function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode = false, showDryRun = false }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [run, setRun] = useState(null)
   const [polling, setPolling] = useState(false)
+  const [dryRun, setDryRun] = useState(false)
 
   const fetchRun = useCallback(async () => {
     try {
@@ -85,7 +86,7 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
     setLoading(true)
     setError(null)
     try {
-      await dispatchWorkflow(workflowFile, { ...inputs, test_mode: testMode ? 'true' : 'false' })
+      await dispatchWorkflow(workflowFile, { ...inputs, test_mode: testMode ? 'true' : 'false', dry_run: dryRun ? 'true' : 'false' })
       // Wait a moment then start polling
       setTimeout(() => {
         fetchRun()
@@ -108,7 +109,20 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
           </div>
           <div className="text-base text-[#666]">{description}</div>
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-4 flex-shrink-0">
+          {showDryRun && (
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <div
+                onClick={() => setDryRun(v => !v)}
+                className={`w-10 h-5 rounded-full transition-colors relative ${dryRun ? 'bg-yellow-600' : 'bg-[#2a2a2a]'}`}
+              >
+                <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-[#e5e5e5] transition-transform ${dryRun ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              </div>
+              <span className={`text-xs tracking-wider ${dryRun ? 'text-yellow-400' : 'text-[#444]'}`}>
+                DRY RUN
+              </span>
+            </label>
+          )}
           {run && <StatusBadge status={run.status} conclusion={run.conclusion} />}
           <ActionButton
             label={loading ? '...' : 'RUN'}
@@ -231,9 +245,10 @@ export default function Dashboard() {
         </div>
         <WorkflowCard
           title="Sync Orders"
-          description="Проставляє Order в Monday відповідно до пріоритетів у Float. Без dry-run — одразу записує."
+          description="Проставляє Order в Monday відповідно до пріоритетів у Float."
           workflowFile={WORKFLOWS.orderSync}
           inputs={{ date }}
+          showDryRun={true}
         />
       </div>
     </div>
