@@ -86,7 +86,9 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
     setLoading(true)
     setError(null)
     try {
-      await dispatchWorkflow(workflowFile, { ...inputs, test_mode: testMode ? 'true' : 'false', dry_run: dryRun ? 'true' : 'false' })
+      const extraInputs = { test_mode: testMode ? 'true' : 'false' }
+      if (showDryRun) extraInputs.dry_run = dryRun ? 'true' : 'false'
+      await dispatchWorkflow(workflowFile, { ...inputs, ...extraInputs })
       // Wait a moment then start polling
       setTimeout(() => {
         fetchRun()
