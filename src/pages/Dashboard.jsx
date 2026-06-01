@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { dispatchWorkflow, getLatestRun } from '../lib/github'
 
-const CODA_2D_URL = 'https://coda.io'  // TODO: fill in actual URL
-const CODA_3D_URL = 'https://coda.io'  // TODO: fill in actual URL
+const CODA_2D_URL = 'https://coda.io/d/RSG-2D-Team_d6SntNSj1Co/AutoOverview-Monday_suz0ScO-#_lupvs87t'
+const CODA_3D_URL = 'https://coda.io/d/RSG-3D-Team_dwKVAnig23m/AutoOverview-Monday_suOd-2bZ#_lugrhTam'
 
 const WORKFLOWS = {
   floatCheck: 'float-check.yml',

@@ -27,6 +27,7 @@ export default function Layout() {
           <span className="text-white font-bold text-xl tracking-widest select-none">
             BACKLOG-COLLECTOR-9000
           </span>
+          <span className="text-[#444] text-xs tracking-wider select-none">v1.0</span>
         </div>
 
         <div className="flex items-center gap-6">
