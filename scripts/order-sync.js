@@ -80,7 +80,12 @@ async function mondayPost(query) {
     body: JSON.stringify({ query }),
   })
   if (!res.ok) throw new Error(`Monday API → ${res.status} ${res.statusText}`)
-  return res.json()
+  const json = await res.json()
+  // Monday always returns HTTP 200 — errors come inside the response body
+  if (json.errors?.length) {
+    throw new Error(`Monday GraphQL error: ${json.errors.map(e => e.message).join('; ')}`)
+  }
+  return json
 }
 
 // Paginated fetch of all board items
@@ -258,8 +263,13 @@ async function main() {
           const tag = matchHow !== 'exact' ? `~${orderNum} (${matchHow})` : `${orderNum}`
           console.log(`  [${tag}] ${taskName} → item ${itemId}`)
           if (!DRY_RUN) {
-            const mutation = `mutation { change_column_value(board_id: ${boardId}, item_id: ${itemId}, column_id: "${orderColId}", value: "${orderNum}") { id } }`
-            await mondayPost(mutation)
+            const numValue = JSON.stringify(JSON.stringify({ number: orderNum }))
+            const mutation = `mutation { change_column_value(board_id: ${boardId}, item_id: ${itemId}, column_id: "${orderColId}", value: ${numValue}) { id } }`
+            try {
+              await mondayPost(mutation)
+            } catch (err) {
+              console.error(`  ❌ Monday write failed for item ${itemId}: ${err.message}`)
+            }
           }
           assignedItems.add(itemId)
           totalUpdated++
