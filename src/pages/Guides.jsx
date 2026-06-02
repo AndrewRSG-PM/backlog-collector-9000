@@ -26,7 +26,7 @@ function Lightbox({ src, alt }) {
   )
 }
 
-const TEAM_PAT = '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'
+const TEAM_PAT = '' // see team channel for token
 
 function Section({ title, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen)
@@ -129,9 +129,9 @@ export default function Guides() {
         </Section>
 
         <Section title="GITHUB PAT — КОМАНДНИЙ ТОКЕН">
-          <p>Командний токен вже створений. Просто скопіюй і встав у Settings.</p>
-          <CopyPat />
-          <Step n="1">Натисни кнопку вище — токен скопіюється в буфер</Step>
+          <p>Командний токен вже створений — поки що звертайтесь до Андрія, він надішле в особистих повідомленнях. Незабаром зробимо зручніше.</p>
+          {TEAM_PAT && <CopyPat />}
+          <Step n="1">Отримай токен від Андрія</Step>
           <Step n="2">Відкрий <Code>Settings</Code> (іконка ⚙ вгорі праворуч)</Step>
           <Step n="3">Встав у поле <Code>GitHub PAT</Code> → <Code>Save</Code></Step>
           <p className="text-[#888]">
