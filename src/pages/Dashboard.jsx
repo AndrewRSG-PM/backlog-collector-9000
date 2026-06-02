@@ -65,11 +65,7 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
     }
   }, [workflowFile])
 
-  useEffect(() => {
-    fetchRun()
-  }, [fetchRun])
-
-  // Poll while running
+  // Poll while running (no initial fetch — status clears on page refresh)
   useEffect(() => {
     if (!polling) return
     const interval = setInterval(async () => {
