@@ -1,5 +1,31 @@
 import { useState } from 'react'
 
+function Lightbox({ src, alt }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <img
+        src={src}
+        alt={alt}
+        onClick={() => setOpen(true)}
+        className="border border-[#2a2a2a] w-full cursor-zoom-in hover:opacity-90 transition-opacity"
+      />
+      {open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
+          onClick={() => setOpen(false)}
+        >
+          <img
+            src={src}
+            alt={alt}
+            className="max-w-full max-h-full object-contain shadow-2xl"
+          />
+        </div>
+      )}
+    </>
+  )
+}
+
 const TEAM_PAT = atob('Z2l0aHViX3BhdF8xMUNCTUFKSVEwNzJDRTNRcDdoSVVRXzVDbDhvMG9FRU53VjZqU2dsQlFlZHhuaDlQTHpBVFBsb3NYaW90OFRJVlg2RlpKQkZCV1BTWGd4M21R')
 
 function Section({ title, children, defaultOpen = false }) {
@@ -87,10 +113,9 @@ export default function Guides() {
           <Step n="5">Перезавантаж сторінку — у списку з'являться запити до Float</Step>
           <Step n="6">Клікни на будь-який запит → вкладка <Code>Headers</Code></Step>
           <Step n="7">В розділі <Code>Request Headers</Code> знайди заголовок <Code>Authorization</Code></Step>
-          <img
+          <Lightbox
             src={`${import.meta.env.BASE_URL}Float_token_2.png`}
             alt="Float JWT token — Authorization header в DevTools"
-            className="border border-[#2a2a2a] w-full"
           />
           <Step n="8">
             Скопіюй значення — воно починається з <Code>Bearer eyJ...</Code>.
