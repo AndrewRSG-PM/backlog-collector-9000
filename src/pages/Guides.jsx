@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+const TEAM_PAT = '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'
+
 function Section({ title, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
@@ -34,6 +36,26 @@ function Code({ children }) {
     <code className="bg-[#1a1a1a] border border-[#2a2a2a] px-2 py-0.5 text-[#ccc] text-sm font-mono">
       {children}
     </code>
+  )
+}
+
+function CopyPat() {
+  const [copied, setCopied] = useState(false)
+  function copy() {
+    navigator.clipboard.writeText(TEAM_PAT)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  return (
+    <div className="flex items-center gap-3 bg-[#111] border border-[#2a2a2a] px-4 py-3">
+      <code className="text-[#888] text-xs font-mono flex-1 truncate select-all">{TEAM_PAT}</code>
+      <button
+        onClick={copy}
+        className="text-xs border border-[#444] text-[#aaa] hover:border-[#888] hover:text-white px-3 py-1.5 transition-colors flex-shrink-0"
+      >
+        {copied ? '✓ СКОПІЙОВАНО' : 'КОПІЮВАТИ'}
+      </button>
+    </div>
   )
 }
 
@@ -78,16 +100,15 @@ export default function Guides() {
           </p>
         </Section>
 
-        <Section title="ЯК ОТРИМАТИ GITHUB PAT">
-          <Step n="1">Зайди на <Code>github.com/settings/tokens</Code></Step>
-          <Step n="2">Fine-grained tokens → Generate new token</Step>
-          <Step n="3">Repository access: тільки <Code>backlog-collector-9000</Code></Step>
-          <Step n="4">
-            Permissions: <Code>Actions → Read & Write</Code>, <Code>Contents → Read & Write</Code>,{' '}
-            <Code>Secrets → Read & Write</Code>
-          </Step>
-          <Step n="5">Generate → скопіюй токен (показується один раз)</Step>
-          <Step n="6">Встав у <Code>Settings → GitHub PAT → Save</Code></Step>
+        <Section title="GITHUB PAT — КОМАНДНИЙ ТОКЕН">
+          <p>Командний токен вже створений. Просто скопіюй і встав у Settings.</p>
+          <CopyPat />
+          <Step n="1">Натисни кнопку вище — токен скопіюється в буфер</Step>
+          <Step n="2">Відкрий <Code>Settings</Code> (іконка ⚙ вгорі праворуч)</Step>
+          <Step n="3">Встав у поле <Code>GitHub PAT</Code> → <Code>Save</Code></Step>
+          <p className="text-[#888]">
+            Якщо токен перестав працювати — звернись до Андрія, він видасть новий.
+          </p>
         </Section>
 
         <Section title="ЯК ДОДАТИ EXCEPTION">
