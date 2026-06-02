@@ -88,7 +88,7 @@ export default function Guides() {
           <Step n="6">Клікни на будь-який запит → вкладка <Code>Headers</Code></Step>
           <Step n="7">В розділі <Code>Request Headers</Code> знайди заголовок <Code>Authorization</Code></Step>
           <img
-            src="/Float_token_2.png"
+            src={`${import.meta.env.BASE_URL}Float_token_2.png`}
             alt="Float JWT token — Authorization header в DevTools"
             className="border border-[#2a2a2a] w-full"
           />
