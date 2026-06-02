@@ -263,8 +263,7 @@ async function main() {
           const tag = matchHow !== 'exact' ? `~${orderNum} (${matchHow})` : `${orderNum}`
           console.log(`  [${tag}] ${taskName} → item ${itemId}`)
           if (!DRY_RUN) {
-            const numValue = JSON.stringify(JSON.stringify({ number: orderNum }))
-            const mutation = `mutation { change_column_value(board_id: ${boardId}, item_id: ${itemId}, column_id: "${orderColId}", value: ${numValue}) { id } }`
+            const mutation = `mutation { change_simple_column_value(board_id: ${boardId}, item_id: ${itemId}, column_id: "${orderColId}", value: "${orderNum}") { id } }`
             try {
               await mondayPost(mutation)
             } catch (err) {
