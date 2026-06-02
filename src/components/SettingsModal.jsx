@@ -70,6 +70,7 @@ export default function SettingsModal({ onClose }) {
   function savePat() {
     if (pat.trim()) {
       localStorage.setItem(STORAGE_KEY, pat.trim())
+      document.dispatchEvent(new CustomEvent('pat-saved'))
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     }

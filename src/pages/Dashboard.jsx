@@ -154,6 +154,43 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
   )
 }
 
+function NoPATBanner() {
+  const [noPAT, setNoPAT] = useState(!localStorage.getItem('bc9000_github_pat'))
+
+  useEffect(() => {
+    const check = () => setNoPAT(!localStorage.getItem('bc9000_github_pat'))
+    window.addEventListener('focus', check)
+    document.addEventListener('pat-saved', check)
+    return () => {
+      window.removeEventListener('focus', check)
+      document.removeEventListener('pat-saved', check)
+    }
+  }, [])
+
+  if (!noPAT) return null
+
+  return (
+    <div className="border border-orange-900/50 bg-orange-950/20 px-5 py-3 flex items-center justify-between gap-4">
+      <div className="text-orange-400 text-sm">
+        ⚠ GitHub PAT не встановлено — кнопки RUN і SAVE не працюватимуть.{' '}
+        <a
+          href="#"
+          onClick={e => { e.preventDefault(); document.dispatchEvent(new CustomEvent('open-settings')) }}
+          className="underline hover:text-orange-300"
+        >
+          Як отримати PAT →
+        </a>
+      </div>
+      <button
+        onClick={() => document.dispatchEvent(new CustomEvent('open-settings'))}
+        className="text-xs border border-orange-800 text-orange-400 hover:border-orange-500 hover:text-orange-300 px-3 py-1.5 transition-colors flex-shrink-0"
+      >
+        ВСТАНОВИТИ PAT
+      </button>
+    </div>
+  )
+}
+
 function FloatFailBanner() {
   const [failed, setFailed] = useState(false)
 
@@ -185,6 +222,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
+      <NoPATBanner />
       <FloatFailBanner />
 
       {/* Date selector */}
