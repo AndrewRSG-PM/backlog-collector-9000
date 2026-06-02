@@ -26,7 +26,7 @@ function Lightbox({ src, alt }) {
   )
 }
 
-const TEAM_PAT = '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'
+const TEAM_PAT = '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'
 
 function Section({ title, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen)
