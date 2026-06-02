@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { updateGitHubSecret } from '../lib/github'
 
 const STORAGE_KEY = 'bc9000_github_pat'
@@ -32,7 +32,7 @@ function SecretField({ label, hint, placeholder, secretName }) {
     <div>
       <label className="block text-xs text-[#888] tracking-wider mb-2">
         {label}
-        {hint && <span className="text-[#555] ml-2 normal-case">{hint}</span>}
+        {hint && <span className="text-[#888] ml-2 normal-case">{hint}</span>}
       </label>
       <div className="flex gap-2">
         <input
@@ -40,7 +40,7 @@ function SecretField({ label, hint, placeholder, secretName }) {
           value={value}
           onChange={e => setValue(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 bg-[#0d0d0d] border border-[#2a2a2a] text-[#e5e5e5] text-xs px-3 py-2 font-mono focus:outline-none focus:border-[#555] placeholder-[#444]"
+          className="flex-1 bg-[#0d0d0d] border border-[#2a2a2a] text-[#e5e5e5] text-xs px-3 py-2 font-mono focus:outline-none focus:border-[#555] placeholder-[#666]"
         />
         <button
           onClick={handleUpdate}
@@ -84,7 +84,7 @@ export default function SettingsModal({ onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#2a2a2a]">
           <span className="text-xs tracking-widest text-white font-bold">⚙ SETTINGS</span>
-          <button onClick={onClose} className="text-[#666] hover:text-white text-lg leading-none">✕</button>
+          <button onClick={onClose} className="text-[#999] hover:text-white text-lg leading-none">✕</button>
         </div>
 
         <div className="px-5 py-5 space-y-6">
@@ -92,7 +92,7 @@ export default function SettingsModal({ onClose }) {
           <div>
             <label className="block text-xs text-[#888] tracking-wider mb-2">
               GITHUB PAT
-              <span className="text-[#555] ml-2 normal-case">(actions:write + contents:write + secrets:write)</span>
+              <span className="text-[#888] ml-2 normal-case">(actions:write + contents:write + secrets:write)</span>
             </label>
             <div className="flex gap-2">
               <input
@@ -100,11 +100,11 @@ export default function SettingsModal({ onClose }) {
                 value={pat}
                 onChange={e => setPat(e.target.value)}
                 placeholder="github_pat_..."
-                className="flex-1 bg-[#0d0d0d] border border-[#2a2a2a] text-[#e5e5e5] text-xs px-3 py-2 font-mono focus:outline-none focus:border-[#555] placeholder-[#444]"
+                className="flex-1 bg-[#0d0d0d] border border-[#2a2a2a] text-[#e5e5e5] text-xs px-3 py-2 font-mono focus:outline-none focus:border-[#555] placeholder-[#666]"
               />
               <button
                 onClick={() => setPatVisible(!patVisible)}
-                className="px-3 py-2 border border-[#2a2a2a] text-[#666] hover:text-[#aaa] text-xs"
+                className="px-3 py-2 border border-[#2a2a2a] text-[#999] hover:text-[#aaa] text-xs"
               >
                 {patVisible ? 'HIDE' : 'SHOW'}
               </button>
@@ -115,7 +115,7 @@ export default function SettingsModal({ onClose }) {
                 {saved ? '✓ SAVED' : 'SAVE'}
               </button>
             </div>
-            <p className="text-[#444] text-xs mt-1.5">
+            <p className="text-[#777] text-xs mt-1.5">
               Stored in localStorage. Never sent to any server other than GitHub.
             </p>
           </div>
@@ -140,7 +140,7 @@ export default function SettingsModal({ onClose }) {
             <a
               href="guides"
               onClick={onClose}
-              className="text-xs text-[#555] hover:text-[#888] underline tracking-wider"
+              className="text-xs text-[#888] hover:text-[#888] underline tracking-wider"
             >
               → HOW TO GET TOKENS (GUIDES)
             </a>

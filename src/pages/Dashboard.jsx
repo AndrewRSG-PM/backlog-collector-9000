@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 import { dispatchWorkflow, getLatestRun } from '../lib/github'
 
 const CODA_2D_URL = 'https://coda.io/d/RSG-2D-Team_d6SntNSj1Co/AutoOverview-Monday_suz0ScO-#_lupvs87t'
@@ -106,7 +106,7 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
             {title}
             {testMode && <span className="ml-3 text-sm text-yellow-500 border border-yellow-500/40 px-2 py-0.5">TEST</span>}
           </div>
-          <div className="text-base text-[#666]">{description}</div>
+          <div className="text-base text-[#999]">{description}</div>
         </div>
         <div className="flex items-center gap-4 flex-shrink-0">
           {showDryRun && (
@@ -117,7 +117,7 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
               >
                 <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-[#e5e5e5] transition-transform ${dryRun ? 'translate-x-5' : 'translate-x-0.5'}`} />
               </div>
-              <span className={`text-xs tracking-wider ${dryRun ? 'text-yellow-400' : 'text-[#444]'}`}>
+              <span className={`text-xs tracking-wider ${dryRun ? 'text-yellow-400' : 'text-[#777]'}`}>
                 DRY RUN
               </span>
             </label>
@@ -140,7 +140,7 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
         </div>
       )}
       {run && (
-        <div className="mt-2 text-[10px] text-[#444] flex items-center gap-3">
+        <div className="mt-2 text-[10px] text-[#777] flex items-center gap-3">
           <span>Run #{run.run_number}</span>
           <span>{new Date(run.created_at).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' })}</span>
           {run.html_url && (
@@ -189,7 +189,7 @@ export default function Dashboard() {
 
       {/* Date selector */}
       <div>
-        <div className="text-base text-[#555] tracking-wider mb-3">TARGET DATE</div>
+        <div className="text-base text-[#888] tracking-wider mb-3">TARGET DATE</div>
         <div className="flex items-center gap-3">
           <input
             type="date"
@@ -199,7 +199,7 @@ export default function Dashboard() {
           />
           <button
             onClick={() => setDate(todayPlus1())}
-            className="text-xs text-[#444] hover:text-[#888] underline"
+            className="text-xs text-[#777] hover:text-[#888] underline"
           >
             reset to tomorrow
           </button>
@@ -208,7 +208,7 @@ export default function Dashboard() {
 
       {/* Section: Float */}
       <div>
-        <div className="text-sm text-[#444] tracking-widest mb-5 flex items-center gap-3">
+        <div className="text-sm text-[#777] tracking-widest mb-5 flex items-center gap-3">
           <span>── FLOAT CHECK</span>
           <span className="flex-1 border-t border-[#1a1a1a]" />
         </div>
@@ -231,7 +231,7 @@ export default function Dashboard() {
 
       {/* Section: Backlog Assembly */}
       <div>
-        <div className="text-sm text-[#444] tracking-widest mb-5 flex items-center gap-3">
+        <div className="text-sm text-[#777] tracking-widest mb-5 flex items-center gap-3">
           <span>── ASSEMBLE BACKLOG</span>
           <span className="flex-1 border-t border-[#1a1a1a]" />
         </div>
@@ -245,7 +245,7 @@ export default function Dashboard() {
             <div className="text-lg font-bold text-white tracking-wide mb-2 group-hover:text-[#ccc]">
               Assemble Backlog 2D ↗
             </div>
-            <div className="text-base text-[#666]">Відкриває Coda (кнопка 2D збірки). Make.com pipeline.</div>
+            <div className="text-base text-[#999]">Відкриває Coda (кнопка 2D збірки). Make.com pipeline.</div>
           </a>
           <a
             href={CODA_3D_URL}
@@ -256,17 +256,17 @@ export default function Dashboard() {
             <div className="text-lg font-bold text-white tracking-wide mb-2 group-hover:text-[#ccc]">
               Assemble Backlog 3D ↗
             </div>
-            <div className="text-base text-[#666]">Відкриває Coda (кнопка 3D збірки). Make.com pipeline.</div>
+            <div className="text-base text-[#999]">Відкриває Coda (кнопка 3D збірки). Make.com pipeline.</div>
           </a>
         </div>
-        <div className="text-xs text-[#333] mt-2 px-1">
+        <div className="text-xs text-[#666] mt-2 px-1">
           Coda automation via Make.com — sync with tech PM for full integration.
         </div>
       </div>
 
       {/* Section: Orders */}
       <div>
-        <div className="text-sm text-[#444] tracking-widest mb-5 flex items-center gap-3">
+        <div className="text-sm text-[#777] tracking-widest mb-5 flex items-center gap-3">
           <span>── ORDER SYNC</span>
           <span className="flex-1 border-t border-[#1a1a1a]" />
         </div>

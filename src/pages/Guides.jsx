@@ -1,4 +1,4 @@
-function Section({ title, children }) {
+﻿function Section({ title, children }) {
   return (
     <div className="space-y-4">
       <h2 className="text-base font-bold tracking-widest text-white border-b border-[#2a2a2a] pb-2">
@@ -12,7 +12,7 @@ function Section({ title, children }) {
 function Step({ n, children }) {
   return (
     <div className="flex gap-3">
-      <span className="text-[#444] font-bold flex-shrink-0 w-6">{n}.</span>
+      <span className="text-[#777] font-bold flex-shrink-0 w-6">{n}.</span>
       <span>{children}</span>
     </div>
   )
@@ -30,7 +30,7 @@ export default function Guides() {
   return (
     <div className="space-y-10 max-w-2xl">
       <div>
-        <div className="text-xs text-[#444] tracking-widest mb-1">DOCUMENTATION</div>
+        <div className="text-xs text-[#777] tracking-widest mb-1">DOCUMENTATION</div>
         <h1 className="text-lg font-bold text-white tracking-wide">Гайди по BACKLOG-COLLECTOR-9000</h1>
       </div>
 
@@ -61,7 +61,7 @@ export default function Guides() {
         <Step n="8">
           Встав токен у <Code>Settings → Float JWT Token → Update</Code>
         </Step>
-        <p className="text-[#555]">
+        <p className="text-[#888]">
           ⏱ Токен живе ~2 тижні. Коли Float Check починає падати — оновлюй за цією інструкцією.
         </p>
       </Section>

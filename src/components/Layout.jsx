@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+﻿import { NavLink, Outlet } from 'react-router-dom'
 import RobotLogo from './RobotLogo'
 import { useState, useEffect } from 'react'
 import SettingsModal from './SettingsModal'
@@ -27,7 +27,7 @@ export default function Layout() {
           <span className="text-white font-bold text-xl tracking-widest select-none">
             BACKLOG-COLLECTOR-9000
           </span>
-          <span className="text-[#444] text-xs tracking-wider select-none">v1.0</span>
+          <span className="text-[#777] text-xs tracking-wider select-none">v1.0</span>
         </div>
 
         <div className="flex items-center gap-6">
@@ -41,7 +41,7 @@ export default function Layout() {
                   `px-5 py-2.5 text-base tracking-wider border transition-colors ${
                     isActive
                       ? 'border-[#e5e5e5] text-white bg-[#1a1a1a]'
-                      : 'border-transparent text-[#666] hover:text-[#aaa] hover:border-[#333]'
+                      : 'border-transparent text-[#999] hover:text-[#aaa] hover:border-[#333]'
                   }`
                 }
               >
@@ -52,7 +52,7 @@ export default function Layout() {
 
           <button
             onClick={() => setSettingsOpen(true)}
-            className="px-5 py-2.5 text-base tracking-wider border border-[#2a2a2a] text-[#666] hover:text-[#aaa] hover:border-[#444] transition-colors"
+            className="px-5 py-2.5 text-base tracking-wider border border-[#2a2a2a] text-[#999] hover:text-[#aaa] hover:border-[#444] transition-colors"
           >
             ⚙ SETTINGS
           </button>
@@ -65,7 +65,7 @@ export default function Layout() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#1a1a1a] px-6 py-4 text-center text-[#333] text-sm tracking-wider">
+      <footer className="border-t border-[#1a1a1a] px-6 py-4 text-center text-[#666] text-sm tracking-wider">
         BACKLOG-COLLECTOR-9000 &nbsp;·&nbsp; AndrewRSG-PM &nbsp;·&nbsp; READ FLOAT, WRITE ORDERS
       </footer>
 

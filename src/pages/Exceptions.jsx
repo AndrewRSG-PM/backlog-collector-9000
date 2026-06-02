@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { readConfigFile, writeConfigFile } from '../lib/github'
 
 // ─── Float Check ─────────────────────────────────────────────────────────────
@@ -48,13 +48,13 @@ function FloatCheckGuide() {
     <div className="border border-[#1a1a1a]">
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 text-[#555] hover:text-[#888] transition-colors text-left"
+        className="w-full flex items-center justify-between px-4 py-3 text-[#888] hover:text-[#888] transition-colors text-left"
       >
         <span className="tracking-wider text-xs">ЯК ЦЕ ПРАЦЮЄ</span>
         <span className="text-xs">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
-        <div className="px-4 pb-4 pt-3 border-t border-[#1a1a1a] space-y-3 text-xs text-[#666]">
+        <div className="px-4 pb-4 pt-3 border-t border-[#1a1a1a] space-y-3 text-xs text-[#999]">
           <p>Float Check щодня перевіряє завантаження художників і надсилає звіт у Discord. Помічає:</p>
           <ul className="space-y-1 ml-2">
             <li>• <span className="text-[#999]">&lt; 8h</span> — художник недозавантажений</li>
@@ -140,7 +140,7 @@ function FloatCheckEditor({ file }) {
     }
   }
 
-  if (loading) return <div className="text-[#444] text-xs py-4">Завантаження...</div>
+  if (loading) return <div className="text-[#777] text-xs py-4">Завантаження...</div>
 
   return (
     <div className="space-y-4">
@@ -152,16 +152,16 @@ function FloatCheckEditor({ file }) {
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-[#2a2a2a]">
-              <th className="text-left text-[#555] tracking-wider py-3 pr-4 font-normal text-xs">ЗНАЧЕННЯ</th>
-              <th className="text-left text-[#555] tracking-wider py-3 pr-4 font-normal text-xs">ТИП ВИКЛЮЧЕННЯ</th>
-              <th className="text-left text-[#555] tracking-wider py-3 pr-4 font-normal text-xs">ЕФЕКТ</th>
-              <th className="text-left text-[#555] tracking-wider py-3 pr-4 font-normal text-xs">ПРИМІТКА</th>
+              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">ЗНАЧЕННЯ</th>
+              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">ТИП ВИКЛЮЧЕННЯ</th>
+              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">ЕФЕКТ</th>
+              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">ПРИМІТКА</th>
               <th className="w-8" />
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && (
-              <tr><td colSpan={5} className="text-[#444] py-6 text-center text-sm">— порожньо —</td></tr>
+              <tr><td colSpan={5} className="text-[#777] py-6 text-center text-sm">— порожньо —</td></tr>
             )}
             {rows.map((row, i) => {
               const opt = FLOAT_TYPE_OPTIONS.find(o => o.value === row.type) || FLOAT_TYPE_OPTIONS[0]
@@ -199,10 +199,10 @@ function FloatCheckEditor({ file }) {
                           onChange={e => updateRow(i, 'value', e.target.value)}
                           className="w-16 bg-transparent border border-[#2a2a2a] focus:border-[#444] text-[#e5e5e5] px-3 py-2 text-sm font-mono focus:outline-none focus:bg-[#0d0d0d] text-center"
                         />
-                        <span className="text-[#555] text-xs">год/день</span>
+                        <span className="text-[#888] text-xs">год/день</span>
                       </div>
                     ) : (
-                      <span className="text-[#444] text-xs italic px-1">{opt.effectLabel}</span>
+                      <span className="text-[#777] text-xs italic px-1">{opt.effectLabel}</span>
                     )}
                   </td>
                   {/* Note */}
@@ -212,13 +212,13 @@ function FloatCheckEditor({ file }) {
                       value={row.note || ''}
                       onChange={e => updateRow(i, 'note', e.target.value)}
                       placeholder="необов'язково"
-                      className="bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#555] px-3 py-2 text-xs font-mono focus:outline-none focus:bg-[#0d0d0d] w-40"
+                      className="bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#888] px-3 py-2 text-xs font-mono focus:outline-none focus:bg-[#0d0d0d] w-40"
                     />
                   </td>
                   <td className="py-2">
                     <button
                       onClick={() => deleteRow(i)}
-                      className="text-[#333] hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity px-2"
+                      className="text-[#666] hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity px-2"
                     >✕</button>
                   </td>
                 </tr>
@@ -228,12 +228,12 @@ function FloatCheckEditor({ file }) {
         </table>
       </div>
       <div className="flex items-center gap-3 pt-1">
-        <button onClick={addRow} className="text-sm text-[#666] hover:text-[#aaa] border border-[#2a2a2a] hover:border-[#444] px-4 py-2 transition-colors">+ ADD ROW</button>
+        <button onClick={addRow} className="text-sm text-[#999] hover:text-[#aaa] border border-[#2a2a2a] hover:border-[#444] px-4 py-2 transition-colors">+ ADD ROW</button>
         <button onClick={save} disabled={saving} className="text-sm tracking-wider border border-[#444] text-[#aaa] hover:border-[#888] hover:text-white px-5 py-2 transition-colors disabled:opacity-40">
           {saving ? '...' : saved ? '✓ ЗБЕРЕЖЕНО' : 'SAVE'}
         </button>
-        <button onClick={load} className="text-xs text-[#444] hover:text-[#777] underline">reload</button>
-        <span className="text-[#333] text-[10px] ml-auto">{file}</span>
+        <button onClick={load} className="text-xs text-[#777] hover:text-[#777] underline">reload</button>
+        <span className="text-[#666] text-[10px] ml-auto">{file}</span>
       </div>
     </div>
   )
@@ -311,14 +311,14 @@ function SkipTasksEditor() {
     }
   }
 
-  if (loading) return <div className="text-[#444] text-xs py-4">Завантаження...</div>
+  if (loading) return <div className="text-[#777] text-xs py-4">Завантаження...</div>
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-[#555]">
+      <p className="text-xs text-[#888]">
         Задачі в цьому списку не отримують Order в Monday.{' '}
-        <span className="text-[#666]">Точний збіг</span> — повна назва задачі.{' '}
-        <span className="text-[#666]">Містить</span> — будь-яка задача, де є цей підрядок (напр. "QA" пропустить і "QA", і "QA pass").
+        <span className="text-[#999]">Точний збіг</span> — повна назва задачі.{' '}
+        <span className="text-[#999]">Містить</span> — будь-яка задача, де є цей підрядок (напр. "QA" пропустить і "QA", і "QA pass").
       </p>
       {error && (
         <div className="text-red-400 text-xs border border-red-900/40 px-3 py-2 bg-red-950/20">✕ {error}</div>
@@ -327,15 +327,15 @@ function SkipTasksEditor() {
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-[#2a2a2a]">
-              <th className="text-left text-[#555] tracking-wider py-3 pr-4 font-normal text-xs">НАЗВА ЗАДАЧІ</th>
-              <th className="text-left text-[#555] tracking-wider py-3 pr-4 font-normal text-xs">ЗБІГ</th>
-              <th className="text-left text-[#555] tracking-wider py-3 pr-4 font-normal text-xs">ПРИМІТКА</th>
+              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">НАЗВА ЗАДАЧІ</th>
+              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">ЗБІГ</th>
+              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">ПРИМІТКА</th>
               <th className="w-8" />
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && (
-              <tr><td colSpan={4} className="text-[#444] py-6 text-center text-sm">— порожньо —</td></tr>
+              <tr><td colSpan={4} className="text-[#777] py-6 text-center text-sm">— порожньо —</td></tr>
             )}
             {rows.map((row, i) => (
               <tr key={i} className="border-b border-[#1a1a1a] hover:bg-[#111] group">
@@ -363,11 +363,11 @@ function SkipTasksEditor() {
                     value={row.note}
                     onChange={e => updateRow(i, 'note', e.target.value)}
                     placeholder="необов'язково"
-                    className="bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#555] px-3 py-2 text-xs font-mono focus:outline-none focus:bg-[#0d0d0d] w-40"
+                    className="bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#888] px-3 py-2 text-xs font-mono focus:outline-none focus:bg-[#0d0d0d] w-40"
                   />
                 </td>
                 <td className="py-2">
-                  <button onClick={() => deleteRow(i)} className="text-[#333] hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity px-2">✕</button>
+                  <button onClick={() => deleteRow(i)} className="text-[#666] hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity px-2">✕</button>
                 </td>
               </tr>
             ))}
@@ -375,11 +375,11 @@ function SkipTasksEditor() {
         </table>
       </div>
       <div className="flex items-center gap-3 pt-1">
-        <button onClick={addRow} className="text-sm text-[#666] hover:text-[#aaa] border border-[#2a2a2a] hover:border-[#444] px-4 py-2 transition-colors">+ ADD ROW</button>
+        <button onClick={addRow} className="text-sm text-[#999] hover:text-[#aaa] border border-[#2a2a2a] hover:border-[#444] px-4 py-2 transition-colors">+ ADD ROW</button>
         <button onClick={save} disabled={saving} className="text-sm tracking-wider border border-[#444] text-[#aaa] hover:border-[#888] hover:text-white px-5 py-2 transition-colors disabled:opacity-40">
           {saving ? '...' : saved ? '✓ ЗБЕРЕЖЕНО' : 'SAVE'}
         </button>
-        <button onClick={load} className="text-xs text-[#444] hover:text-[#777] underline">reload</button>
+        <button onClick={load} className="text-xs text-[#777] hover:text-[#777] underline">reload</button>
       </div>
     </div>
   )
@@ -448,7 +448,7 @@ function TableEditor({ config }) {
     }
   }
 
-  if (loading) return <div className="text-[#444] text-xs py-4">Завантаження {config.file}...</div>
+  if (loading) return <div className="text-[#777] text-xs py-4">Завантаження {config.file}...</div>
 
   return (
     <div className="space-y-3">
@@ -460,7 +460,7 @@ function TableEditor({ config }) {
           <thead>
             <tr className="border-b border-[#2a2a2a]">
               {config.columns.map(col => (
-                <th key={col} className="text-left text-[#555] tracking-wider py-3 pr-4 font-normal text-xs">
+                <th key={col} className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">
                   {(COLUMN_LABELS[col] || col.replace(/_/g, ' ')).toUpperCase()}
                 </th>
               ))}
@@ -470,7 +470,7 @@ function TableEditor({ config }) {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={config.columns.length + 1} className="text-[#444] py-6 text-center text-sm">— порожньо —</td>
+                <td colSpan={config.columns.length + 1} className="text-[#777] py-6 text-center text-sm">— порожньо —</td>
               </tr>
             )}
             {rows.map((row, i) => (
@@ -488,7 +488,7 @@ function TableEditor({ config }) {
                 <td className="py-1.5">
                   <button
                     onClick={() => deleteRow(i)}
-                    className="text-[#333] hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity px-2"
+                    className="text-[#666] hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity px-2"
                   >✕</button>
                 </td>
               </tr>
@@ -497,12 +497,12 @@ function TableEditor({ config }) {
         </table>
       </div>
       <div className="flex items-center gap-3 pt-1">
-        <button onClick={addRow} className="text-sm text-[#666] hover:text-[#aaa] border border-[#2a2a2a] hover:border-[#444] px-4 py-2 transition-colors">+ ADD ROW</button>
+        <button onClick={addRow} className="text-sm text-[#999] hover:text-[#aaa] border border-[#2a2a2a] hover:border-[#444] px-4 py-2 transition-colors">+ ADD ROW</button>
         <button onClick={save} disabled={saving} className="text-sm tracking-wider border border-[#444] text-[#aaa] hover:border-[#888] hover:text-white px-5 py-2 transition-colors disabled:opacity-40">
           {saving ? '...' : saved ? '✓ ЗБЕРЕЖЕНО' : 'SAVE'}
         </button>
-        <button onClick={load} className="text-xs text-[#444] hover:text-[#777] underline">reload</button>
-        <span className="text-[#333] text-[10px] ml-auto">{config.file}</span>
+        <button onClick={load} className="text-xs text-[#777] hover:text-[#777] underline">reload</button>
+        <span className="text-[#666] text-[10px] ml-auto">{config.file}</span>
       </div>
     </div>
   )
@@ -569,9 +569,9 @@ export default function Exceptions() {
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-xs text-[#444] tracking-widest mb-1">CONFIG MANAGEMENT</div>
+        <div className="text-xs text-[#777] tracking-widest mb-1">CONFIG MANAGEMENT</div>
         <h1 className="text-lg font-bold text-white tracking-wide">Exceptions</h1>
-        <p className="text-xs text-[#555] mt-1">
+        <p className="text-xs text-[#888] mt-1">
           Зміни комітяться в репо і підхоплюються наступним workflow run.
         </p>
       </div>
@@ -585,7 +585,7 @@ export default function Exceptions() {
             className={`text-sm tracking-wider px-4 py-2 border transition-colors ${
               active === t.key
                 ? 'border-[#e5e5e5] text-white bg-[#1a1a1a]'
-                : 'border-transparent text-[#555] hover:text-[#888] hover:border-[#333]'
+                : 'border-transparent text-[#888] hover:text-[#888] hover:border-[#333]'
             }`}
           >
             {t.title}
@@ -596,7 +596,7 @@ export default function Exceptions() {
       {/* Active tab content */}
       {tab && (
         <div>
-          <div className="text-sm text-[#555] mb-4">{tab.description}</div>
+          <div className="text-sm text-[#888] mb-4">{tab.description}</div>
           {renderContent()}
         </div>
       )}
