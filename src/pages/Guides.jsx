@@ -82,19 +82,22 @@ export default function Guides() {
         <Section title="ЯК ОТРИМАТИ FLOAT JWT ТОКЕН">
           <Step n="1">Відкрий браузер і зайди на <Code>rsg.float.com</Code></Step>
           <Step n="2">Натисни <Code>F12</Code> → вкладка <Code>Network</Code></Step>
-          <Step n="3">В фільтрі вибери <Code>Fetch/XHR</Code></Step>
-          <Step n="4">Перезавантаж сторінку або зроби будь-яку дію у Float</Step>
-          <Step n="5">Знайди будь-який запит до <Code>rsg.float.com</Code> (наприклад <Code>/svc/api3/v3/people</Code>)</Step>
-          <Step n="6">
-            В розділі <Code>Request Headers</Code> знайди заголовок <Code>authorization</Code>
-          </Step>
-          <Step n="7">
+          <Step n="3">Постав галочку <Code>Disable cache</Code></Step>
+          <Step n="4">В фільтрі вибери <Code>Fetch/XHR</Code> і введи <Code>/svc/api3</Code></Step>
+          <Step n="5">Перезавантаж сторінку — у списку з'являться запити до Float</Step>
+          <Step n="6">Клікни на будь-який запит → вкладка <Code>Headers</Code></Step>
+          <Step n="7">В розділі <Code>Request Headers</Code> знайди заголовок <Code>Authorization</Code></Step>
+          <img
+            src="/Float_token_2.png"
+            alt="Float JWT token — Authorization header в DevTools"
+            className="border border-[#2a2a2a] w-full"
+          />
+          <Step n="8">
             Скопіюй значення — воно починається з <Code>Bearer eyJ...</Code>.
             Потрібна тільки частина після "Bearer " (тобто сам <Code>eyJ...</Code>)
           </Step>
-          <Step n="8">
-            Встав токен у <Code>Settings → Float JWT Token → Update</Code>
-          </Step>
+          <Step n="9">Встав токен у <Code>Settings → Float JWT Token → Update</Code></Step>
+          <Step n="10">Зніми галочку <Code>Disable cache</Code></Step>
           <p className="text-[#888]">
             ⏱ Токен живе ~2 тижні. Коли Float Check починає падати — оновлюй за цією інструкцією.
           </p>
