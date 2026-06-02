@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect, useRef } from 'react'
 import { readConfigFile, writeConfigFile } from '../lib/github'
 
 // ─── Float Check ─────────────────────────────────────────────────────────────
@@ -389,12 +389,22 @@ function SkipTasksEditor() {
 
 function PmMultiSelect({ value, onChange, availablePms }) {
   const [open, setOpen] = useState(false)
+  const [dropPos, setDropPos] = useState({ top: 0, left: 0 })
+  const btnRef = useRef(null)
 
   const selected = value
     ? value.split(',').map(s => s.trim()).filter(Boolean)
     : []
 
   const remaining = availablePms.filter(pm => !selected.includes(pm))
+
+  function toggleOpen() {
+    if (!open && btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect()
+      setDropPos({ top: r.bottom + window.scrollY + 4, left: r.left + window.scrollX })
+    }
+    setOpen(o => !o)
+  }
 
   function addPm(pm) {
     onChange([...selected, pm].join(', '))
@@ -417,28 +427,74 @@ function PmMultiSelect({ value, onChange, availablePms }) {
         </span>
       ))}
       {remaining.length > 0 && (
-        <div className="relative">
+        <>
           <button
-            onClick={() => setOpen(o => !o)}
+            ref={btnRef}
+            onClick={toggleOpen}
             className="text-xs border border-dashed border-[#444] text-[#777] hover:text-[#aaa] hover:border-[#666] px-2 py-1 transition-colors"
           >+ PM</button>
           {open && (
-            <div className="absolute z-10 top-full left-0 mt-1 bg-[#141414] border border-[#2a2a2a] shadow-xl min-w-[180px]">
-              {remaining.map(pm => (
-                <button
-                  key={pm}
-                  onClick={() => addPm(pm)}
-                  className="block w-full text-left text-sm text-[#ccc] hover:bg-[#1e1e1e] hover:text-white px-3 py-2 transition-colors"
-                >
-                  {pm}
-                </button>
-              ))}
-            </div>
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+              <div
+                className="fixed z-50 bg-[#141414] border border-[#2a2a2a] shadow-xl min-w-[180px]"
+                style={{ top: dropPos.top, left: dropPos.left }}
+              >
+                {remaining.map(pm => (
+                  <button
+                    key={pm}
+                    onClick={() => addPm(pm)}
+                    className="block w-full text-left text-sm text-[#ccc] hover:bg-[#1e1e1e] hover:text-white px-3 py-2 transition-colors"
+                  >
+                    {pm}
+                  </button>
+                ))}
+              </div>
+            </>
           )}
-        </div>
+        </>
       )}
       {selected.length === 0 && remaining.length === 0 && (
         <span className="text-[#555] text-xs italic">— немає PM —</span>
+      )}
+    </div>
+  )
+}
+
+// ─── Project Exceptions Guide ────────────────────────────────────────────────
+
+function ProjectExceptionsGuide() {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="border border-[#1a1a1a]">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between px-4 py-3 text-[#888] hover:text-[#888] transition-colors text-left"
+      >
+        <span className="tracking-wider text-xs">ЯК ЦЕ ПРАЦЮЄ</span>
+        <span className="text-xs">{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <div className="px-4 pb-4 text-xs text-[#888] space-y-3 border-t border-[#1a1a1a] pt-3">
+          <p>
+            Таблиця вирішує дві задачі: знаходить правильний Monday-проект для Float-проекту
+            і/або призначає PM-овераїд для тегів у Float Check.
+          </p>
+          <ul className="space-y-2 ml-2">
+            <li>
+              • <span className="text-[#999]">Проект у Float</span> — частина або повна назва проекту у Float (регістр не важливий).
+            </li>
+            <li>
+              • <span className="text-[#999]">Проект у Monday</span> — якщо назва у Float і Monday відрізняються, вкажи тут Monday-назву.
+              Залиш порожнім якщо назви збігаються або потрібен тільки PM-овераїд.
+            </li>
+            <li>
+              • <span className="text-[#999]">PM (override)</span> — один або кілька ПМів, яких буде тегнуто в Discord
+              для цього проекту замість автоматичного пошуку в Monday.
+              Потрібно якщо проекту немає в Monday, або якщо проект веде кілька ПМів.
+            </li>
+          </ul>
+        </div>
       )}
     </div>
   )
@@ -511,6 +567,7 @@ function TableEditor({ config, availablePms = [] }) {
 
   return (
     <div className="space-y-3">
+      {config.key === 'project_exceptions' && <ProjectExceptionsGuide />}
       {error && (
         <div className="text-red-400 text-xs border border-red-900/40 px-3 py-2 bg-red-950/20">✕ {error}</div>
       )}
