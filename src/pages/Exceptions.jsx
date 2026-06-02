@@ -385,6 +385,65 @@ function SkipTasksEditor() {
   )
 }
 
+// ─── PM Multi-Select ─────────────────────────────────────────────────────────
+
+function PmMultiSelect({ value, onChange, availablePms }) {
+  const [open, setOpen] = useState(false)
+
+  const selected = value
+    ? value.split(',').map(s => s.trim()).filter(Boolean)
+    : []
+
+  const remaining = availablePms.filter(pm => !selected.includes(pm))
+
+  function addPm(pm) {
+    onChange([...selected, pm].join(', '))
+    setOpen(false)
+  }
+
+  function removePm(pm) {
+    onChange(selected.filter(s => s !== pm).join(', '))
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 min-w-[200px] py-1">
+      {selected.map(pm => (
+        <span key={pm} className="inline-flex items-center gap-1 bg-[#1e1e1e] border border-[#333] text-[#ccc] text-xs px-2 py-1">
+          {pm}
+          <button
+            onClick={() => removePm(pm)}
+            className="text-[#666] hover:text-red-400 leading-none ml-0.5"
+          >✕</button>
+        </span>
+      ))}
+      {remaining.length > 0 && (
+        <div className="relative">
+          <button
+            onClick={() => setOpen(o => !o)}
+            className="text-xs border border-dashed border-[#444] text-[#777] hover:text-[#aaa] hover:border-[#666] px-2 py-1 transition-colors"
+          >+ PM</button>
+          {open && (
+            <div className="absolute z-10 top-full left-0 mt-1 bg-[#141414] border border-[#2a2a2a] shadow-xl min-w-[180px]">
+              {remaining.map(pm => (
+                <button
+                  key={pm}
+                  onClick={() => addPm(pm)}
+                  className="block w-full text-left text-sm text-[#ccc] hover:bg-[#1e1e1e] hover:text-white px-3 py-2 transition-colors"
+                >
+                  {pm}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      {selected.length === 0 && remaining.length === 0 && (
+        <span className="text-[#555] text-xs italic">— немає PM —</span>
+      )}
+    </div>
+  )
+}
+
 // ─── Generic table editor (for other tabs) ───────────────────────────────────
 
 const COLUMN_LABELS = {
@@ -398,7 +457,7 @@ const COLUMN_LABELS = {
   note: 'Примітка',
 }
 
-function TableEditor({ config }) {
+function TableEditor({ config, availablePms = [] }) {
   const [rows, setRows] = useState(null)
   const [sha, setSha] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -477,12 +536,19 @@ function TableEditor({ config }) {
               <tr key={i} className="border-b border-[#1a1a1a] hover:bg-[#111] group">
                 {config.columns.map(col => (
                   <td key={col} className="py-1.5 pr-3">
-                    <input
-                      type="text"
-                      value={row[col] || ''}
-                      onChange={e => updateCell(i, col, e.target.value)}
-                      className="w-full bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#e5e5e5] px-3 py-2 text-sm font-mono focus:outline-none focus:bg-[#0d0d0d] min-w-[160px]"
-                    />
+                    {col === 'pm_override' && config.columnTypes?.pm_override === 'pm_multi'
+                      ? <PmMultiSelect
+                          value={row[col] || ''}
+                          onChange={val => updateCell(i, col, val)}
+                          availablePms={availablePms}
+                        />
+                      : <input
+                          type="text"
+                          value={row[col] || ''}
+                          onChange={e => updateCell(i, col, e.target.value)}
+                          className="w-full bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#e5e5e5] px-3 py-2 text-sm font-mono focus:outline-none focus:bg-[#0d0d0d] min-w-[160px]"
+                        />
+                    }
                   </td>
                 ))}
                 <td className="py-1.5">
@@ -540,7 +606,8 @@ const TABS = [
     renderer: 'table',
     file: 'config/project_exceptions.json',
     columns: ['float_project', 'monday_project', 'pm_override', 'note'],
-    placeholder: { float_project: 'SpacePlay', monday_project: '', pm_override: 'Andrew Holovko', note: '' },
+    columnTypes: { pm_override: 'pm_multi' },
+    placeholder: { float_project: 'SpacePlay', monday_project: '', pm_override: '', note: '' },
   },
   {
     key: 'pm_discord',
@@ -557,13 +624,20 @@ const TABS = [
 
 export default function Exceptions() {
   const [active, setActive] = useState(TABS[0].key)
+  const [pmNames, setPmNames] = useState([])
   const tab = TABS.find(t => t.key === active)
+
+  useEffect(() => {
+    readConfigFile('config/pm_discord.json')
+      .then(({ data }) => setPmNames((data || []).map(r => r.pm_name).filter(Boolean)))
+      .catch(() => {})
+  }, [])
 
   function renderContent() {
     if (!tab) return null
     if (tab.renderer === 'float_check') return <FloatCheckEditor file={tab.file} />
     if (tab.renderer === 'skip_tasks') return <SkipTasksEditor key="skip_tasks" />
-    return <TableEditor key={tab.key} config={tab} />
+    return <TableEditor key={tab.key} config={tab} availablePms={pmNames} />
   }
 
   return (
