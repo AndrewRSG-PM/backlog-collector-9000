@@ -137,6 +137,20 @@ export default function SettingsModal({ onClose }) {
             secretName="MONDAY_TOKEN"
           />
 
+          {/* Discord Webhooks */}
+          <SecretField
+            label="DISCORD WEBHOOK — PROD"
+            hint="(основний беклог-канал)"
+            placeholder="https://discord.com/api/webhooks/..."
+            secretName="DISCORD_WEBHOOK_PROD"
+          />
+          <SecretField
+            label="DISCORD WEBHOOK — TEST"
+            hint="(тестовий канал)"
+            placeholder="https://discord.com/api/webhooks/..."
+            secretName="DISCORD_WEBHOOK_TEST"
+          />
+
           <div className="pt-2 border-t border-[#1a1a1a]">
             <a
               href="guides"
