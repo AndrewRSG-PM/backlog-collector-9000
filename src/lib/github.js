@@ -57,7 +57,8 @@ export async function readConfigFile(path) {
   )
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const data = await res.json()
-  const content = atob(data.content.replace(/\n/g, ''))
+  const raw = atob(data.content.replace(/\n/g, ''))
+  const content = decodeURIComponent(escape(raw))
   return { data: JSON.parse(content), sha: data.sha }
 }
 
