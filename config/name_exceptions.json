@@ -18,5 +18,20 @@
     "float_name": "Roman Tanych",
     "monday_search": "VanHazy",
     "note": "Nickname in Monday"
+  },
+  {
+    "float_name": "Vladyslav Kaminsky",
+    "monday_search": "Kaminskiy",
+    "note": "Different spelling in Monday"
+  },
+  {
+    "float_name": "Anahit Erkayan",
+    "monday_search": "Erkoyan",
+    "note": "Different spelling in Monday"
+  },
+  {
+    "float_name": "Max Zhaivoronok",
+    "monday_search": "Жайворонок",
+    "note": "Cyrillic spelling in Monday"
   }
 ]
