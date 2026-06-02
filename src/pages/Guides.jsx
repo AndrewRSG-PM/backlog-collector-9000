@@ -26,7 +26,7 @@ function Lightbox({ src, alt }) {
   )
 }
 
-const TEAM_PAT = atob('Z2l0aHViX3BhdF8xMUNCTUFKSVEwNzJDRTNRcDdoSVVRXzVDbDhvMG9FRU53VjZqU2dsQlFlZHhuaDlQTHpBVFBsb3NYaW90OFRJVlg2RlpKQkZCV1BTWGd4M21R')
+const TEAM_PAT = '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'
 
 function Section({ title, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen)
