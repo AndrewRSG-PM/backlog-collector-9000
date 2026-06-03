@@ -22,7 +22,7 @@ jobs:
           node-version: 22
       - name: Run Order Sync
         env:
-          FLOAT_JWT: ${{ secrets.FLOAT_JWT }}
+          FLOAT_API_KEY: ${{ secrets.FLOAT_API_KEY }}
           MONDAY_TOKEN: ${{ secrets.MONDAY_TOKEN }}
           TARGET_DATE: ${{ inputs.date }}
           DRY_RUN: ${{ inputs.dry_run }}

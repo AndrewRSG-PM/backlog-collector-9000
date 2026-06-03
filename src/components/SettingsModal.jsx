@@ -121,12 +121,12 @@ export default function SettingsModal({ onClose }) {
             </p>
           </div>
 
-          {/* Float JWT */}
+          {/* Float API Key */}
           <SecretField
-            label="FLOAT JWT TOKEN"
-            hint="(expires ~2 weeks — get from DevTools → Network → rsg.float.com → authorization header)"
-            placeholder="eyJ..."
-            secretName="FLOAT_JWT"
+            label="FLOAT API KEY"
+            hint="(Float → Settings → Integrations → API — безстроковий)"
+            placeholder="41a601c2..."
+            secretName="FLOAT_API_KEY"
           />
 
           {/* Monday Token */}

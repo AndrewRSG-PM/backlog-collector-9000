@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // order-sync.js — Node.js port of backlog-order-sync.ps1
 // Reads config from config/*.json (repo)
-// Env: FLOAT_JWT, MONDAY_TOKEN, TARGET_DATE, DRY_RUN
+// Env: FLOAT_API_KEY, MONDAY_TOKEN, TARGET_DATE, DRY_RUN
 
 import { readFileSync } from 'fs'
 import { fileURLToPath } from 'url'
@@ -19,12 +19,12 @@ function smartTomorrow() {
   return d.toISOString().slice(0, 10)
 }
 
-const DATE         = process.env.TARGET_DATE || smartTomorrow()
-const DRY_RUN      = process.env.DRY_RUN === 'true'
-const FLOAT_JWT    = process.env.FLOAT_JWT || ''
-const MONDAY_TOKEN = process.env.MONDAY_TOKEN || ''
+const DATE          = process.env.TARGET_DATE  || smartTomorrow()
+const DRY_RUN       = process.env.DRY_RUN      === 'true'
+const FLOAT_API_KEY = process.env.FLOAT_API_KEY || ''
+const MONDAY_TOKEN  = process.env.MONDAY_TOKEN  || ''
 
-if (!FLOAT_JWT)    { console.error('❌ FLOAT_JWT not set');    process.exit(1) }
+if (!FLOAT_API_KEY) { console.error('❌ FLOAT_API_KEY not set'); process.exit(1) }
 if (!MONDAY_TOKEN) { console.error('❌ MONDAY_TOKEN not set'); process.exit(1) }
 
 console.log(`Order Sync — date: ${DATE} | dryRun: ${DRY_RUN}`)
@@ -58,16 +58,24 @@ console.log(`Config: ${Object.keys(nameExceptions).length} name exceptions | ${s
 
 // ─── Float API ───────────────────────────────────────────────────────────────
 const FLOAT_HEADERS = {
-  'authorization': `Bearer ${FLOAT_JWT}`,
-  'x-token-type':  'JWT',
-  'Referer':        'https://rsg.float.com/public/1.0.705/assets/api.worker-BeZTJ4ff.js',
-  'User-Agent':     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Authorization': `Bearer ${FLOAT_API_KEY}`,
 }
 
-async function floatGet(path) {
-  const res = await fetch(`https://rsg.float.com/svc/api3/v3${path}`, { headers: FLOAT_HEADERS })
-  if (!res.ok) throw new Error(`Float API ${path} → ${res.status} ${res.statusText}`)
-  return res.json()
+async function floatGetAll(path) {
+  const results = []
+  let page = 1
+  while (true) {
+    const sep = path.includes('?') ? '&' : '?'
+    const url = `https://api.float.com/v3${path}${sep}per-page=200&page=${page}`
+    const res = await fetch(url, { headers: FLOAT_HEADERS })
+    if (!res.ok) throw new Error(`Float API ${path} → ${res.status} ${res.statusText}`)
+    const data = await res.json()
+    if (!Array.isArray(data) || data.length === 0) break
+    results.push(...data)
+    if (data.length < 200) break
+    page++
+  }
+  return results
 }
 
 // ─── Monday API ───────────────────────────────────────────────────────────────
@@ -130,9 +138,9 @@ function shouldSkip(taskName) {
 async function main() {
   console.log('Fetching Float data...')
   const [allPeople, allTasks, floatProjects] = await Promise.all([
-    floatGet('/people/all?lean=1'),
-    floatGet(`/tasks/all?lean=1&start_date=${DATE}&end_date=${DATE}`),
-    floatGet('/projects/all?lean=1'),
+    floatGetAll('/people'),
+    floatGetAll(`/tasks?start_date=${DATE}&end_date=${DATE}`),
+    floatGetAll('/projects'),
   ])
 
   const floatProjectNames = {}

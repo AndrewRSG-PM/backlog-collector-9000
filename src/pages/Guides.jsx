@@ -105,26 +105,15 @@ export default function Guides() {
           </p>
         </Section>
 
-        <Section title="ЯК ОТРИМАТИ FLOAT JWT ТОКЕН">
-          <Step n="1">Відкрий браузер і зайди на <Code>rsg.float.com</Code></Step>
-          <Step n="2">Натисни <Code>F12</Code> → вкладка <Code>Network</Code></Step>
-          <Step n="3">Постав галочку <Code>Disable cache</Code></Step>
-          <Step n="4">В фільтрі вибери <Code>Fetch/XHR</Code> і введи <Code>/svc/api3</Code></Step>
-          <Step n="5">Перезавантаж сторінку — у списку з'являться запити до Float</Step>
-          <Step n="6">Клікни на будь-який запит → вкладка <Code>Headers</Code></Step>
-          <Step n="7">В розділі <Code>Request Headers</Code> знайди заголовок <Code>Authorization</Code></Step>
-          <Lightbox
-            src={`${import.meta.env.BASE_URL}Float_token_2.png`}
-            alt="Float JWT token — Authorization header в DevTools"
-          />
-          <Step n="8">
-            Скопіюй значення — воно починається з <Code>Bearer eyJ...</Code>.
-            Потрібна тільки частина після "Bearer " (тобто сам <Code>eyJ...</Code>)
-          </Step>
-          <Step n="9">Встав токен у <Code>Settings → Float JWT Token → Update</Code></Step>
-          <Step n="10">Зніми галочку <Code>Disable cache</Code></Step>
+        <Section title="ЯК ОТРИМАТИ FLOAT API KEY">
+          <p>Офіційний API ключ — <strong className="text-white">безстроковий</strong>. Генерується один раз, не протухає.</p>
+          <Step n="1">Зайди на <Code>rsg.float.com</Code></Step>
+          <Step n="2">Клікни на своє ім'я/аватар у лівому нижньому куті → <Code>Settings</Code></Step>
+          <Step n="3">В меню зліва знайди <Code>Integrations</Code> → секція <Code>API</Code></Step>
+          <Step n="4">Клікни <Code>Generate token</Code> (або скопіюй вже існуючий)</Step>
+          <Step n="5">Встав токен у <Code>Settings → Float API Key → Update</Code></Step>
           <p className="text-[#888]">
-            ⏱ Токен живе ~2 тижні. Коли Float Check починає падати — оновлюй за цією інструкцією.
+            ✅ Цей токен не протухає — оновлювати треба тільки якщо ти його вручну скинеш у Float.
           </p>
         </Section>
 
@@ -152,7 +141,7 @@ export default function Guides() {
           <div className="space-y-2">
             <div className="border border-[#1e1e1e] p-4">
               <div className="text-[#ccc] font-bold mb-2">Float Check падає з помилкою 401</div>
-              <div>Токен протух. Оновити по гайду вище.</div>
+              <div>API ключ не вставлений або невірний. Перевір <Code>Settings → Float API Key</Code> і переконайся що токен збережено через UPDATE.</div>
             </div>
             <div className="border border-[#1e1e1e] p-4">
               <div className="text-[#ccc] font-bold mb-2">Художник не матчиться (NO MATCH в логах)</div>
