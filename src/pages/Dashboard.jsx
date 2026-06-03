@@ -7,6 +7,8 @@ const CODA_3D_URL = 'https://coda.io/d/RSG-3D-Team_dwKVAnig23m/AutoOverview-Mond
 const MAKE_2D_URL = 'https://hook.eu1.make.com/0r2v6scul53iv537kxfl3fh1pht0nxh9'
 const MAKE_3D_URL = 'https://hook.eu1.make.com/0cx7d1wpl2ouudadg7d61u742mqgiy6w'
 
+const DISCORD_PROD_WEBHOOK = 'https://discord.com/api/webhooks/1507033836356374649/kHgfZvLpJNHnmJ4bAuRKmcK7Igbj7_97TwPSeGNW91GLAwRwqvUxWUYqUV3gc1O-gLfI'
+
 const WORKFLOWS = {
   floatCheck: 'float-check.yml',
   orderSync: 'order-sync.yml',
@@ -58,7 +60,7 @@ function toMakeDate(isoDate) {
   return `${parseInt(month)}/${parseInt(day)}/${year}`
 }
 
-function BacklogTriggerCard({ title, description, webhookUrl, codaUrl, date }) {
+function BacklogTriggerCard({ title, description, webhookUrl, codaUrl, date, discordMessage }) {
   const [status, setStatus] = useState(null) // null | 'sending' | 'ok' | 'error'
   const [error, setError] = useState('')
 
@@ -66,6 +68,14 @@ function BacklogTriggerCard({ title, description, webhookUrl, codaUrl, date }) {
     setStatus('sending')
     setError('')
     try {
+      // Notify Discord first
+      if (discordMessage) {
+        await fetch(DISCORD_PROD_WEBHOOK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: discordMessage }),
+        }).catch(() => {}) // non-blocking — don't fail if Discord is down
+      }
       const url = `${webhookUrl}?Date=${toMakeDate(date)}&user=AndrewHolovko`
       // no-cors: Make.com receives the request, we just can't read the response body
       await fetch(url, { mode: 'no-cors' })
@@ -340,6 +350,7 @@ export default function Dashboard() {
             webhookUrl={MAKE_2D_URL}
             codaUrl={CODA_2D_URL}
             date={date}
+            discordMessage="🤖 **ЗАПУСКАЮ 2D БЕКЛОГ**"
           />
           <BacklogTriggerCard
             title="Assemble Backlog 3D"
@@ -347,6 +358,7 @@ export default function Dashboard() {
             webhookUrl={MAKE_3D_URL}
             codaUrl={CODA_3D_URL}
             date={date}
+            discordMessage="🤖 **ЗАПУСКАЮ 3D БЕКЛОГ**"
           />
         </div>
       </div>
