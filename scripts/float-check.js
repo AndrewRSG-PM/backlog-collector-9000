@@ -271,6 +271,14 @@ async function main() {
     }
   }
 
+  // 3-day task lookup for PM attribution: personId → all tasks across dayBefore + target + dayAfter
+  const threeDayTasksByPerson = {}
+  for (const t of [...tasks, ...tasksBefore, ...tasksAfter]) {
+    const pid = t.people_id
+    if (!threeDayTasksByPerson[pid]) threeDayTasksByPerson[pid] = []
+    threeDayTasksByPerson[pid].push(t)
+  }
+
   // Monday project → PM
   const projectPmMap = await loadMondayProjects()
 
@@ -329,11 +337,20 @@ async function main() {
     const hrs  = info.hours
     const tent = info.hasTentative
 
-    // Resolve PM mentions
+    // Resolve PM mentions — 3-day window: tag the PM with the most hours across dayBefore + target + dayAfter
+    const pmHours = {}
+    for (const t of (threeDayTasksByPerson[pid] || [])) {
+      if (!t.project_id || isSkipTask(t.name || '')) continue
+      const m = getPmMention(projectNames[t.project_id], projectPmMap)
+      if (!m) continue
+      pmHours[m] = (pmHours[m] || 0) + parseFloat(t.hours || 0)
+    }
     const mentions = []
-    for (const projId of info.projectIds) {
-      const m = getPmMention(projectNames[projId], projectPmMap)
-      if (m && !mentions.includes(m)) mentions.push(m)
+    if (Object.keys(pmHours).length > 0) {
+      const maxH = Math.max(...Object.values(pmHours))
+      for (const [pm, h] of Object.entries(pmHours)) {
+        if (h === maxH) mentions.push(pm)
+      }
     }
 
     // Adjacent lines builder
