@@ -259,24 +259,31 @@ async function main() {
   ])
   console.log(`Adjacent days: ${dateBefore} ← ${DATE} → ${dateAfter}`)
 
+  // Helper: Float returns people_id=null for multi-person tasks, use people_ids array instead
+  function getPersonIds(t) {
+    return t.people_id ? [t.people_id] : (t.people_ids || [])
+  }
+
   // Build adjacent tasks lookup: personId → { before: [], after: [] }
   const adjByPerson = {}
   for (const [dir, src] of [['before', tasksBefore], ['after', tasksAfter]]) {
     for (const t of src) {
       if (!t.hours || parseFloat(t.hours) < 2) continue
       if (isSkipTask(t.name || '')) continue
-      const pid = t.people_id
-      if (!adjByPerson[pid]) adjByPerson[pid] = { before: [], after: [] }
-      adjByPerson[pid][dir].push({ hours: parseFloat(t.hours), projectId: t.project_id, taskName: t.name })
+      for (const pid of getPersonIds(t)) {
+        if (!adjByPerson[pid]) adjByPerson[pid] = { before: [], after: [] }
+        adjByPerson[pid][dir].push({ hours: parseFloat(t.hours), projectId: t.project_id, taskName: t.name })
+      }
     }
   }
 
   // 3-day task lookup for PM attribution: personId → all tasks across dayBefore + target + dayAfter
   const threeDayTasksByPerson = {}
   for (const t of [...tasks, ...tasksBefore, ...tasksAfter]) {
-    const pid = t.people_id
-    if (!threeDayTasksByPerson[pid]) threeDayTasksByPerson[pid] = []
-    threeDayTasksByPerson[pid].push(t)
+    for (const pid of getPersonIds(t)) {
+      if (!threeDayTasksByPerson[pid]) threeDayTasksByPerson[pid] = []
+      threeDayTasksByPerson[pid].push(t)
+    }
   }
 
   // Monday project → PM
@@ -304,11 +311,12 @@ async function main() {
   // Aggregate tasks per person
   const byPerson = {}
   for (const t of tasks) {
-    const pid = t.people_id
-    if (!byPerson[pid]) byPerson[pid] = { hours: 0, hasTentative: false, projectIds: new Set() }
-    byPerson[pid].hours += parseFloat(t.hours || 0)
-    if (t.status === 1) byPerson[pid].hasTentative = true
-    if (t.project_id && !isSkipTask(t.name || '')) byPerson[pid].projectIds.add(t.project_id)
+    for (const pid of getPersonIds(t)) {
+      if (!byPerson[pid]) byPerson[pid] = { hours: 0, hasTentative: false, projectIds: new Set() }
+      byPerson[pid].hours += parseFloat(t.hours || 0)
+      if (t.status === 1) byPerson[pid].hasTentative = true
+      if (t.project_id && !isSkipTask(t.name || '')) byPerson[pid].projectIds.add(t.project_id)
+    }
   }
 
   // Build section data
