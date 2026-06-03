@@ -250,13 +250,6 @@ async function main() {
   const projectNames = {}
   for (const p of floatProjects) projectNames[p.project_id] = p.name
 
-  // Debug: show first person record to verify API field structure
-  if (allPeople.length > 0) {
-    console.log(`DEBUG first person: ${JSON.stringify(allPeople[0])}`)
-  } else {
-    console.log('DEBUG: allPeople is empty!')
-  }
-
   // Adjacent days
   const dateBefore = prevWorkDay(DATE)
   const dateAfter  = nextWorkDay(DATE)
@@ -284,7 +277,7 @@ async function main() {
   // Filter artists
   const allDeptIds = new Set([...DEPT_2D, ...DEPT_3D])
   const artists = allPeople.filter(p => {
-    if (!allDeptIds.has(p.department_id)) return false
+    if (!allDeptIds.has(p.department?.department_id)) return false
     if (p.active !== 1) return false
     if (/^⌛/.test(p.name || '')) return false
     // skip tags
@@ -318,16 +311,16 @@ async function main() {
 
   // Sort artists by dept name then name
   artists.sort((a, b) => {
-    const da = DEPT_NAMES[a.department_id] || ''
-    const db = DEPT_NAMES[b.department_id] || ''
+    const da = DEPT_NAMES[a.department?.department_id] || ''
+    const db = DEPT_NAMES[b.department?.department_id] || ''
     return da.localeCompare(db) || (a.name || '').localeCompare(b.name || '')
   })
 
   for (const a of artists) {
     const pid       = a.people_id
     const cleanName = (a.name || '').replace(/^[⏳⌛🔄⚡]\s*/, '').trim()
-    const dept      = DEPT_NAMES[a.department_id] || ''
-    const grp       = DEPT_2D.has(a.department_id) ? '2D' : '3D'
+    const dept      = DEPT_NAMES[a.department?.department_id] || ''
+    const grp       = DEPT_2D.has(a.department?.department_id) ? '2D' : '3D'
     const sec       = sections[grp]
 
     if (offSet.has(pid)) { sec.off++; continue }

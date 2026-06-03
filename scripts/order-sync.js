@@ -150,7 +150,7 @@ async function main() {
   // NOTE: Fix Price tag NOT filtered (unlike float-check) — they're in Monday backlog
   // NOTE: ⌛ prefix NOT filtered — they're in Monday backlog too
   const allDeptIds = new Set([...DEPT_2D, ...DEPT_3D])
-  const artists = allPeople.filter(p => allDeptIds.has(p.department_id) && p.active === 1)
+  const artists = allPeople.filter(p => allDeptIds.has(p.department?.department_id) && p.active === 1)
   console.log(`Artists: ${artists.length}`)
 
   // Fetch Monday boards
@@ -168,7 +168,7 @@ async function main() {
   for (const a of artists) {
     const personId  = a.people_id
     const cleanName = (a.name || '').replace(/^[⏳⌛🔄⚡]\s*/, '').trim()
-    const is3D      = DEPT_3D.has(a.department_id)
+    const is3D      = DEPT_3D.has(a.department?.department_id)
     const boardName = is3D ? '3D' : '2D'
     const boardId   = BOARD_IDS[boardName]
     const mondayPool   = is3D ? mondayItems3D : mondayItems2D
