@@ -94,6 +94,57 @@ export default function Guides() {
       </div>
 
       <div className="space-y-2">
+        <Section title="CHANGELOG">
+          <div className="space-y-5">
+
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-white font-bold tracking-wider">v1.2</span>
+                <span className="text-[#555] text-xs">03.06.2026</span>
+              </div>
+              <ul className="space-y-1 text-[#999]">
+                <li>— Float API Key замість JWT-токена: безстроковий, не протухає кожні 2 тижні</li>
+                <li>— Make.com кнопки збірки беклогу 2D/3D прямо в Dashboard (замість посилань на Coda)</li>
+                <li>— Fix: логіка тегування ПМів — 3-денне вікно замість одного дня (dominant PM)</li>
+                <li>— Guides оновлені під нову реальність</li>
+              </ul>
+            </div>
+
+            <div className="border-t border-[#1a1a1a] pt-4">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-[#aaa] font-bold tracking-wider">v1.1</span>
+                <span className="text-[#555] text-xs">02.06.2026</span>
+              </div>
+              <ul className="space-y-1 text-[#666]">
+                <li>— PM Override: chips + dropdown замість текстового поля (Project Exceptions)</li>
+                <li>— Collapsible guide "ЯК ЦЕ ПРАЦЮЄ" в Project Exceptions</li>
+                <li>— Fix: dropdown не обрізається таблицею (position: fixed)</li>
+                <li>— Fix: 404 при прямому переході за посиланням (SPA routing)</li>
+                <li>— Fix: кирилиця в JSON конфігах (UTF-8 decode)</li>
+                <li>— Fix: Order Sync Monday API (change_simple_column_value)</li>
+                <li>— Settings: поля Discord Webhook PROD + TEST</li>
+                <li>— Guides: інструкція Float JWT з lightbox-скріншотом</li>
+              </ul>
+            </div>
+
+            <div className="border-t border-[#1a1a1a] pt-4">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-[#666] font-bold tracking-wider">v1.0</span>
+                <span className="text-[#555] text-xs">02.06.2026</span>
+              </div>
+              <ul className="space-y-1 text-[#555]">
+                <li>— Initial launch: Float Check + Order Sync (GitHub Actions)</li>
+                <li>— Exceptions UI: Float Check, Name, Skip Tasks, Project exceptions</li>
+                <li>— Settings: GitHub PAT, Float JWT, Monday Token</li>
+                <li>— Guides page</li>
+                <li>— NoPATBanner, FloatFailBanner</li>
+                <li>— Dashboard з date picker і Coda посиланнями</li>
+              </ul>
+            </div>
+
+          </div>
+        </Section>
+
         <Section title="ЩО ТАКЕ БЕКЛОГ І НАВІЩО ВІН" defaultOpen={true}>
           <p>
             Беклог — список задач для художників на наступний день. Збирається щовечора:
