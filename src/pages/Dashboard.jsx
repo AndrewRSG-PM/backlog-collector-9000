@@ -4,6 +4,9 @@ import { dispatchWorkflow, getLatestRun } from '../lib/github'
 const CODA_2D_URL = 'https://coda.io/d/RSG-2D-Team_d6SntNSj1Co/AutoOverview-Monday_suz0ScO-#_lupvs87t'
 const CODA_3D_URL = 'https://coda.io/d/RSG-3D-Team_dwKVAnig23m/AutoOverview-Monday_suOd-2bZ#_lugrhTam'
 
+const MAKE_2D_URL = 'https://hook.eu1.make.com/0r2v6scul53iv537kxfl3fh1pht0nxh9'
+const MAKE_3D_URL = 'https://hook.eu1.make.com/0cx7d1wpl2ouudadg7d61u742mqgiy6w'
+
 const WORKFLOWS = {
   floatCheck: 'float-check.yml',
   orderSync: 'order-sync.yml',
@@ -46,6 +49,63 @@ function ActionButton({ label, onClick, disabled, variant = 'primary', className
     >
       {label}
     </button>
+  )
+}
+
+// Convert YYYY-MM-DD → M/D/YYYY (Make.com format)
+function toMakeDate(isoDate) {
+  const [year, month, day] = isoDate.split('-')
+  return `${parseInt(month)}/${parseInt(day)}/${year}`
+}
+
+function BacklogTriggerCard({ title, description, webhookUrl, codaUrl, date }) {
+  const [status, setStatus] = useState(null) // null | 'sending' | 'ok' | 'error'
+  const [error, setError] = useState('')
+
+  async function trigger() {
+    setStatus('sending')
+    setError('')
+    try {
+      const url = `${webhookUrl}?Date=${toMakeDate(date)}&user=AndrewHolovko`
+      // no-cors: Make.com receives the request, we just can't read the response body
+      await fetch(url, { mode: 'no-cors' })
+      setStatus('ok')
+      setTimeout(() => setStatus(null), 6000)
+    } catch (e) {
+      setError(e.message)
+      setStatus('error')
+    }
+  }
+
+  return (
+    <div className="border border-[#2a2a2a] p-7 hover:border-[#333] transition-colors">
+      <div className="flex items-start justify-between gap-4 mb-3">
+        <div>
+          <div className="text-lg font-bold text-white tracking-wide mb-2">{title}</div>
+          <div className="text-base text-[#999]">{description}</div>
+        </div>
+        <div className="flex items-center gap-4 flex-shrink-0">
+          {status === 'ok'      && <span className="text-green-400 text-xs">● TRIGGERED</span>}
+          {status === 'sending' && <span className="text-yellow-400 text-xs animate-pulse">● SENDING...</span>}
+          <ActionButton
+            label={status === 'sending' ? '...' : 'RUN'}
+            onClick={trigger}
+            disabled={status === 'sending'}
+          />
+        </div>
+      </div>
+      {status === 'error' && (
+        <div className="text-red-400 text-xs mt-2 border border-red-900/40 px-3 py-2 bg-red-950/20">
+          ✕ {error}
+        </div>
+      )}
+      <div className="mt-2">
+        <a href={codaUrl} target="_blank" rel="noreferrer"
+          className="text-xs text-[#555] hover:text-[#888] underline">
+          → відкрити Coda ↗
+        </a>
+      </div>
+    </div>
   )
 }
 
@@ -205,7 +265,7 @@ function FloatFailBanner() {
   return (
     <div className="border border-red-900/50 bg-red-950/20 px-5 py-3 flex items-center justify-between gap-4">
       <span className="text-red-400 text-sm">
-        ⚠ Останній Float Check завершився з помилкою. Можливо, протух JWT токен.
+        ⚠ Останній Float Check завершився з помилкою. Зверніться до Андрія або Діми для оновлення Float API Key.
       </span>
       <button
         onClick={() => document.dispatchEvent(new CustomEvent('open-settings'))}
@@ -273,32 +333,21 @@ export default function Dashboard() {
           <span>── ASSEMBLE BACKLOG</span>
           <span className="flex-1 border-t border-[#1a1a1a]" />
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <a
-            href={CODA_2D_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="border border-[#2a2a2a] p-7 hover:border-[#444] transition-colors group"
-          >
-            <div className="text-lg font-bold text-white tracking-wide mb-2 group-hover:text-[#ccc]">
-              Assemble Backlog 2D ↗
-            </div>
-            <div className="text-base text-[#999]">Відкриває Coda (кнопка 2D збірки). Make.com pipeline.</div>
-          </a>
-          <a
-            href={CODA_3D_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="border border-[#2a2a2a] p-7 hover:border-[#444] transition-colors group"
-          >
-            <div className="text-lg font-bold text-white tracking-wide mb-2 group-hover:text-[#ccc]">
-              Assemble Backlog 3D ↗
-            </div>
-            <div className="text-base text-[#999]">Відкриває Coda (кнопка 3D збірки). Make.com pipeline.</div>
-          </a>
-        </div>
-        <div className="text-xs text-[#666] mt-2 px-1">
-          Coda automation via Make.com — sync with tech PM for full integration.
+        <div className="space-y-2">
+          <BacklogTriggerCard
+            title="Assemble Backlog 2D"
+            description="Тригерить Make.com сценарій збірки беклогу для 2D художників."
+            webhookUrl={MAKE_2D_URL}
+            codaUrl={CODA_2D_URL}
+            date={date}
+          />
+          <BacklogTriggerCard
+            title="Assemble Backlog 3D"
+            description="Тригерить Make.com сценарій збірки беклогу для 3D художників."
+            webhookUrl={MAKE_3D_URL}
+            codaUrl={CODA_3D_URL}
+            date={date}
+          />
         </div>
       </div>
 

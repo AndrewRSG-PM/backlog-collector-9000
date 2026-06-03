@@ -96,8 +96,8 @@ export default function Guides() {
       <div className="space-y-2">
         <Section title="ЩО ТАКЕ БЕКЛОГ І НАВІЩО ВІН" defaultOpen={true}>
           <p>
-            Беклог — список задач для художників на завтра. Збирається щоранку: Float Check перевіряє
-            завантаженість → Coda збирає беклог → Orders простягають пріоритет у Monday.
+            Беклог — список задач для художників на наступний день. Збирається щовечора:
+            Float Check перевіряє завантаженість → Coda збирає беклог → Orders простягають пріоритет у Monday.
           </p>
           <p>
             Цей інтерфейс замінює ручні запуски скриптів через Claude Code — все в одному місці,
@@ -105,15 +105,14 @@ export default function Guides() {
           </p>
         </Section>
 
-        <Section title="ЯК ОТРИМАТИ FLOAT API KEY">
-          <p>Офіційний API ключ — <strong className="text-white">безстроковий</strong>. Генерується один раз, не протухає.</p>
-          <Step n="1">Зайди на <Code>rsg.float.com</Code></Step>
-          <Step n="2">Клікни на своє ім'я/аватар у лівому нижньому куті → <Code>Settings</Code></Step>
-          <Step n="3">В меню зліва знайди <Code>Integrations</Code> → секція <Code>API</Code></Step>
-          <Step n="4">Клікни <Code>Generate token</Code> (або скопіюй вже існуючий)</Step>
-          <Step n="5">Встав токен у <Code>Settings → Float API Key → Update</Code></Step>
+        <Section title="FLOAT API KEY — ДЛЯ АДМІНІВ">
+          <p>
+            Float API ключ вже налаштований у GitHub Secrets — <strong className="text-white">нічого робити не потрібно</strong>.
+            Він автоматично використовується при кожному запуску Float Check і Order Sync.
+          </p>
           <p className="text-[#888]">
-            ✅ Цей токен не протухає — оновлювати треба тільки якщо ти його вручну скинеш у Float.
+            Якщо Float Check починає падати з помилкою 401 — зверніться до <strong className="text-white">Андрія або Діми</strong>:
+            тільки вони можуть оновити цей токен через GitHub Settings → Secrets.
           </p>
         </Section>
 
@@ -141,7 +140,7 @@ export default function Guides() {
           <div className="space-y-2">
             <div className="border border-[#1e1e1e] p-4">
               <div className="text-[#ccc] font-bold mb-2">Float Check падає з помилкою 401</div>
-              <div>API ключ не вставлений або невірний. Перевір <Code>Settings → Float API Key</Code> і переконайся що токен збережено через UPDATE.</div>
+              <div>Float API ключ протух або скинутий. Зверніться до Андрія або Діми — вони оновлять токен у GitHub Secrets.</div>
             </div>
             <div className="border border-[#1e1e1e] p-4">
               <div className="text-[#ccc] font-bold mb-2">Художник не матчиться (NO MATCH в логах)</div>
