@@ -250,6 +250,13 @@ async function main() {
   const projectNames = {}
   for (const p of floatProjects) projectNames[p.project_id] = p.name
 
+  // Debug: show first person record to verify API field structure
+  if (allPeople.length > 0) {
+    console.log(`DEBUG first person: ${JSON.stringify(allPeople[0])}`)
+  } else {
+    console.log('DEBUG: allPeople is empty!')
+  }
+
   // Adjacent days
   const dateBefore = prevWorkDay(DATE)
   const dateAfter  = nextWorkDay(DATE)
