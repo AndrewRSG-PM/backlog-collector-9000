@@ -151,6 +151,20 @@ export default function SettingsModal({ onClose }) {
             secretName="DISCORD_WEBHOOK_TEST"
           />
 
+          {/* Make.com Webhooks */}
+          <SecretField
+            label="MAKE WEBHOOK — 2D"
+            hint="(hook.eu1.make.com — сценарій збірки 2D беклогу)"
+            placeholder="https://hook.eu1.make.com/..."
+            secretName="MAKE_2D_URL"
+          />
+          <SecretField
+            label="MAKE WEBHOOK — 3D"
+            hint="(hook.eu1.make.com — сценарій збірки 3D беклогу)"
+            placeholder="https://hook.eu1.make.com/..."
+            secretName="MAKE_3D_URL"
+          />
+
           <div className="pt-2 border-t border-[#1a1a1a]">
             <a
               href="guides"

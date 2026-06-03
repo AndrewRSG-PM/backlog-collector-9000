@@ -1,0 +1,45 @@
+name: Assemble Backlog
+
+on:
+  workflow_dispatch:
+    inputs:
+      dept:
+        description: '2D or 3D'
+        required: true
+        default: '2D'
+      date:
+        description: 'Target date (YYYY-MM-DD). Default: tomorrow.'
+        required: false
+        default: ''
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare vars
+        id: vars
+        run: |
+          DATE="${{ inputs.date }}"
+          if [ -z "$DATE" ]; then
+            DATE=$(node -e "const d=new Date();d.setDate(d.getDate()+1);if(d.getDay()===6)d.setDate(d.getDate()+2);if(d.getDay()===0)d.setDate(d.getDate()+1);process.stdout.write(d.toISOString().slice(0,10))")
+          fi
+          echo "date=$DATE" >> $GITHUB_OUTPUT
+          MONTH=$(echo $DATE | cut -d'-' -f2 | sed 's/^0//')
+          DAY=$(echo $DATE | cut -d'-' -f3 | sed 's/^0//')
+          YEAR=$(echo $DATE | cut -d'-' -f1)
+          echo "make_date=${MONTH}/${DAY}/${YEAR}" >> $GITHUB_OUTPUT
+          if [ "${{ inputs.dept }}" = "2D" ]; then
+            echo "make_url=${{ secrets.MAKE_2D_URL }}" >> $GITHUB_OUTPUT
+          else
+            echo "make_url=${{ secrets.MAKE_3D_URL }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify Discord
+        run: |
+          curl -s -X POST "${{ secrets.DISCORD_WEBHOOK_PROD }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\":\"🤖 **ЗАПУСКАЮ ${{ inputs.dept }} БЕКЛОГ** — ${{ steps.vars.outputs.date }}\"}"
+
+      - name: Trigger Make.com
+        run: |
+          curl -s "${{ steps.vars.outputs.make_url }}?Date=${{ steps.vars.outputs.make_date }}&user=AndrewHolovko"
