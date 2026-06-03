@@ -29,9 +29,9 @@ jobs:
           YEAR=$(echo $DATE | cut -d'-' -f1)
           echo "make_date=${MONTH}/${DAY}/${YEAR}" >> $GITHUB_OUTPUT
           if [ "${{ inputs.dept }}" = "2D" ]; then
-            echo "make_url=${{ secrets.MAKE_2D_URL }}" >> $GITHUB_OUTPUT
+            echo "make_url=https://hook.eu1.make.com/0r2v6scul53iv537kxfl3fh1pht0nxh9" >> $GITHUB_OUTPUT
           else
-            echo "make_url=${{ secrets.MAKE_3D_URL }}" >> $GITHUB_OUTPUT
+            echo "make_url=https://hook.eu1.make.com/0cx7d1wpl2ouudadg7d61u742mqgiy6w" >> $GITHUB_OUTPUT
           fi
 
       - name: Notify Discord
