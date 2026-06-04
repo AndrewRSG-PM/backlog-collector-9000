@@ -24,8 +24,7 @@ const DATE           = process.env.TARGET_DATE    || smartTomorrow()
 const DRY_RUN        = process.env.DRY_RUN        === 'true'
 const FLOAT_API_KEY  = process.env.FLOAT_API_KEY  || ''
 const MONDAY_TOKEN   = process.env.MONDAY_TOKEN   || ''
-const FLOAT_EMAIL    = process.env.FLOAT_EMAIL    || ''
-const FLOAT_PASSWORD = process.env.FLOAT_PASSWORD || ''
+const FLOAT_SESSION_COOKIE = process.env.FLOAT_SESSION_COOKIE || ''
 
 if (!FLOAT_API_KEY) { console.error('❌ FLOAT_API_KEY not set'); process.exit(1) }
 if (!MONDAY_TOKEN) { console.error('❌ MONDAY_TOKEN not set'); process.exit(1) }
@@ -97,43 +96,23 @@ function cookieStr(obj) {
 }
 
 async function getFloatSessionJWT() {
-  if (!FLOAT_EMAIL || !FLOAT_PASSWORD) return null
+  if (!FLOAT_SESSION_COOKIE) return null
   const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-  let cookies = {}
 
-  // 1. GET login page → CSRF token
-  const pageRes = await fetch('https://rsg.float.com/login', { headers: { 'User-Agent': UA } })
-  Object.assign(cookies, parseCookieHeaders(pageRes.headers.get('set-cookie')))
-  const html = await pageRes.text()
-  const csrf = (html.match(/name="_csrf"\s+value="([^"]+)"/) || [])[1]
-  if (!csrf) throw new Error('CSRF token not found on Float login page')
-
-  // 2. POST login form
-  const form = new URLSearchParams({ '_csrf': csrf, 'LoginForm[email]': FLOAT_EMAIL, 'LoginForm[password]': FLOAT_PASSWORD })
-  const loginRes = await fetch('https://rsg.float.com/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': cookieStr(cookies), 'User-Agent': UA, 'Referer': 'https://rsg.float.com/login' },
-    body: form.toString(),
-    redirect: 'manual',
-  })
-  Object.assign(cookies, parseCookieHeaders(loginRes.headers.get('set-cookie')))
-  console.log(`DEBUG login response: status=${loginRes.status} location=${loginRes.headers.get('location')}`)
-  const loginBody = await loginRes.text()
-  console.log(`DEBUG login body (first 300): ${loginBody.slice(0, 300)}`)
-  const location = loginRes.headers.get('location')
-  if (!location) throw new Error(`Float login failed (status ${loginRes.status}) — reCAPTCHA or wrong credentials`)
-
-  // 3. Follow redirect → extract JWT from page HTML
-  const appRes = await fetch(`https://rsg.float.com${location}`, {
-    headers: { 'Cookie': cookieStr(cookies), 'User-Agent': UA },
+  // Use existing session cookie to load Float app → extract fresh JWT from HTML
+  const res = await fetch('https://rsg.float.com/', {
+    headers: {
+      'Cookie': `float2sessprd=${FLOAT_SESSION_COOKIE}`,
+      'User-Agent': UA,
+    },
     redirect: 'follow',
   })
-  Object.assign(cookies, parseCookieHeaders(appRes.headers.get('set-cookie')))
-  const appHtml = await appRes.text()
-  const jwtMatch = appHtml.match(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/)
-  if (!jwtMatch) throw new Error('JWT not found in Float app HTML after login')
 
-  console.log('✅ Float session JWT obtained')
+  const html = await res.text()
+  const jwtMatch = html.match(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/)
+  if (!jwtMatch) throw new Error('JWT not found in Float app — session cookie may have expired (update FLOAT_SESSION_COOKIE)')
+
+  console.log('✅ Float session JWT obtained via session cookie')
   return jwtMatch[0]
 }
 
@@ -219,14 +198,14 @@ function shouldSkip(taskName) {
 async function main() {
   // Try to get Float session JWT for priority-aware sorting (svc/api3)
   let sessionJwt = null
-  if (FLOAT_EMAIL && FLOAT_PASSWORD) {
+  if (FLOAT_SESSION_COOKIE) {
     try {
       sessionJwt = await getFloatSessionJWT()
     } catch (e) {
-      console.warn(`⚠️ Float login failed: ${e.message} — falling back to official API (approximate sort order)`)
+      console.warn(`⚠️ Float session JWT failed: ${e.message} — falling back to official API (approximate sort order)`)
     }
   } else {
-    console.log('ℹ️ FLOAT_EMAIL/FLOAT_PASSWORD not set — using official API (approximate sort order)')
+    console.log('ℹ️ FLOAT_SESSION_COOKIE not set — using official API (approximate sort order)')
   }
 
   console.log('Fetching Float data...')

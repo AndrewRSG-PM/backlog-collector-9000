@@ -24,8 +24,7 @@ jobs:
         env:
           FLOAT_API_KEY: ${{ secrets.FLOAT_API_KEY }}
           MONDAY_TOKEN: ${{ secrets.MONDAY_TOKEN }}
-          FLOAT_EMAIL: ${{ secrets.FLOAT_EMAIL }}
-          FLOAT_PASSWORD: ${{ secrets.FLOAT_PASSWORD }}
+          FLOAT_SESSION_COOKIE: ${{ secrets.FLOAT_SESSION_COOKIE }}
           TARGET_DATE: ${{ inputs.date }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: node scripts/order-sync.js
