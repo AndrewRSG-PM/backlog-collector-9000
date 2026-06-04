@@ -250,6 +250,10 @@ async function main() {
   const projectNames = {}
   for (const p of floatProjects) projectNames[p.project_id] = p.name
 
+  // DEBUG: show Float project structure to find owner field
+  const sampleProject = floatProjects.find(p => p.name === 'Super Pebble') || floatProjects[0]
+  if (sampleProject) console.log('DEBUG project fields:', JSON.stringify(sampleProject))
+
   // Adjacent days
   const dateBefore = prevWorkDay(DATE)
   const dateAfter  = nextWorkDay(DATE)
