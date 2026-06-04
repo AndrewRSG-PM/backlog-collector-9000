@@ -139,7 +139,7 @@ async function main() {
   console.log('Fetching Float data...')
   const [allPeople, allTasks, floatProjects] = await Promise.all([
     floatGetAll('/people'),
-    floatGetAll(`/tasks?start_date=${DATE}&end_date=${DATE}`),
+    floatGetAll(`/tasks?start_date=${DATE}&end_date=${DATE}&sort=sort_order`),
     floatGetAll('/projects'),
   ])
 
@@ -177,17 +177,10 @@ async function main() {
     const artistColIds = cols.artistCols
     const fpColId      = cols.floatProjectCol
 
-    // Float tasks for this person today, sorted by priority (lower = higher)
+    // Float tasks for this person today — using API response order
+    // (Float doesn't expose a visual sort field; API order is the best available approximation)
     const floatTasks = allTasks
       .filter(t => t.people_id === personId)
-      .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999))
-
-    // DEBUG: dump all fields for Kostiantyn Bohdanov only
-    if (cleanName === 'Kostiantyn Bohdanov') {
-      for (const ft of floatTasks) {
-        console.log(`  DEBUG FULL TASK: ${JSON.stringify(ft)}`)
-      }
-    }
 
     if (floatTasks.length === 0) continue
 
