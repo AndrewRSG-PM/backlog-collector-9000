@@ -117,8 +117,11 @@ async function getFloatSessionJWT() {
     redirect: 'manual',
   })
   Object.assign(cookies, parseCookieHeaders(loginRes.headers.get('set-cookie')))
+  console.log(`DEBUG login response: status=${loginRes.status} location=${loginRes.headers.get('location')}`)
+  const loginBody = await loginRes.text()
+  console.log(`DEBUG login body (first 300): ${loginBody.slice(0, 300)}`)
   const location = loginRes.headers.get('location')
-  if (!location) throw new Error('Float login failed — check FLOAT_EMAIL / FLOAT_PASSWORD')
+  if (!location) throw new Error(`Float login failed (status ${loginRes.status}) — reCAPTCHA or wrong credentials`)
 
   // 3. Follow redirect → extract JWT from page HTML
   const appRes = await fetch(`https://rsg.float.com${location}`, {
