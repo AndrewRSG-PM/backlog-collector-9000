@@ -145,6 +145,9 @@ function isSkipTask(name) {
 // ─── PM mention resolution ───────────────────────────────────────────────────
 // Priority 1: project_exceptions → pm_override (manual)
 // Priority 2: Float project_manager → pm_discord (by exact name)
+// Populated in main() after Float data is loaded
+const projectManagerMap = {}
+
 function getPmMention(projectId, floatProjectName) {
   // 1. project_exceptions → pm_override
   if (floatProjectName) {
@@ -219,7 +222,6 @@ async function main() {
   for (const p of allPeople) peopleById[p.people_id] = p
 
   // Build project → PM mention map from Float project_manager field
-  const projectManagerMap = {}
   for (const proj of floatProjects) {
     if (!proj.project_manager) continue
     const manager = peopleById[proj.project_manager]
