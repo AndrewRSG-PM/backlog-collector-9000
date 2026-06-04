@@ -103,21 +103,25 @@ for (const row of projectExceptions) {
   if (fp) projExcMap[fp] = { monday_project: row.monday_project || '', pm_override: row.pm_override || '' }
 }
 
-// PM Discord lookup: pm_name (Float account name) → "<@discord_id>"
-const pmDiscord = {}
+// PM Discord lookups
+// pmDiscordByFloat: float_name → "<@discord_id>"  (for Float project_manager matching)
+// pmDiscordByName:  pm_name   → "<@discord_id>"  (for pm_override matching)
+// discordToPm:      mention   → pm_name (real name, for noMentions display)
+const pmDiscordByFloat = {}
+const pmDiscordByName  = {}
+const discordToPm      = {}
 for (const row of pmDiscordRows) {
-  const name = (row.pm_name || '').trim()
-  const id   = (row.discord_id || '').trim()
-  if (name && id) pmDiscord[name] = `<@${id}>`
+  const floatName = (row.float_name || row.pm_name || '').trim()
+  const realName  = (row.pm_name || '').trim()
+  const id        = (row.discord_id || '').trim()
+  if (!id) continue
+  const mention = `<@${id}>`
+  if (floatName) pmDiscordByFloat[floatName] = mention
+  if (realName)  pmDiscordByName[realName]   = mention
+  if (realName)  discordToPm[mention]        = realName
 }
-// Reverse: mention → display name (use note=real name if present, else pm_name)
-const discordToPm = {}
-for (const row of pmDiscordRows) {
-  const name = (row.pm_name || '').trim()
-  const id   = (row.discord_id || '').trim()
-  const note = (row.note || '').trim()
-  if (name && id) discordToPm[`<@${id}>`] = note || name
-}
+// Keep pmDiscord as alias for pm_override lookups (backwards compat)
+const pmDiscord = pmDiscordByName
 
 console.log(`Config: ${Object.keys(maxHoursConfig).length} max_hours | ${skipTagsConfig.length} skip tags | ${offTimeoffConfig.length} off timeoffs`)
 console.log(`Project exceptions: ${Object.keys(projExcMap).length} | PM Discord: ${Object.keys(pmDiscord).length}`)
@@ -242,7 +246,7 @@ async function main() {
     if (!manager) continue
     const rawName = manager.name || `${manager.first_name || ''} ${manager.last_name || ''}`.trim()
     const cleanName = rawName.replace(/^[⏳⌛🔄⚡⭐]\s*/, '').trim()
-    const mention = pmDiscord[cleanName]
+    const mention = pmDiscordByFloat[cleanName]
     if (mention) projectManagerMap[proj.project_id] = mention
   }
 
