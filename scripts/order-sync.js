@@ -97,25 +97,36 @@ function cookieStr(obj) {
 
 async function getFloatSessionJWT() {
   if (!FLOAT_SESSION_COOKIE) return null
-  const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
 
-  // Use existing session cookie to load Float app → extract fresh JWT from HTML
-  const res = await fetch('https://rsg.float.com/', {
-    headers: {
-      'Cookie': `float2sessprd=${FLOAT_SESSION_COOKIE}`,
-      'User-Agent': UA,
-    },
-    redirect: 'follow',
+  // Use Playwright headless Chrome: load Float with session cookie,
+  // intercept network requests to capture the Bearer JWT
+  const { chromium } = await import('playwright')
+  const browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] })
+  const context = await browser.newContext()
+
+  await context.addCookies([{
+    name: 'float2sessprd', value: FLOAT_SESSION_COOKIE,
+    domain: 'rsg.float.com', path: '/', secure: true, httpOnly: true, sameSite: 'Lax',
+  }])
+
+  let capturedJwt = null
+  const page = await context.newPage()
+
+  page.on('request', req => {
+    if (capturedJwt) return
+    const auth = req.headers()['authorization']
+    if (auth && auth.startsWith('Bearer eyJ')) capturedJwt = auth.slice(7)
   })
 
-  const html = await res.text()
-  console.log(`DEBUG session page: status=${res.status} url=${res.url} html_len=${html.length}`)
-  console.log(`DEBUG html snippet: ${html.slice(0, 300)}`)
-  const jwtMatch = html.match(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/)
-  if (!jwtMatch) throw new Error('JWT not found in Float app — session cookie may have expired (update FLOAT_SESSION_COOKIE)')
+  try {
+    await page.goto('https://rsg.float.com/', { waitUntil: 'networkidle', timeout: 25000 })
+  } catch (_) { /* networkidle may timeout on polling apps — ok if JWT captured */ }
 
-  console.log('✅ Float session JWT obtained via session cookie')
-  return jwtMatch[0]
+  await browser.close()
+
+  if (!capturedJwt) throw new Error('JWT not captured — session cookie may have expired (update FLOAT_SESSION_COOKIE in Settings)')
+  console.log('✅ Float JWT captured via Playwright')
+  return capturedJwt
 }
 
 // Fetch from old svc/api3 (returns priority field for visual sort order)
