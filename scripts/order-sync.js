@@ -182,10 +182,10 @@ async function main() {
       .filter(t => t.people_id === personId)
       .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999))
 
-    // DEBUG: show raw priority values
-    if (floatTasks.length > 0) {
+    // DEBUG: dump all fields for Kostiantyn Bohdanov only
+    if (cleanName === 'Kostiantyn Bohdanov') {
       for (const ft of floatTasks) {
-        console.log(`  DEBUG task="${ft.name}" priority=${ft.priority} sort_order=${ft.sort_order} start_time=${ft.start_time}`)
+        console.log(`  DEBUG FULL TASK: ${JSON.stringify(ft)}`)
       }
     }
 
