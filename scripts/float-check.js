@@ -231,6 +231,20 @@ async function main() {
     if (mention) projectManagerMap[proj.project_id] = mention
   }
 
+  // DEBUG: show projectManagerMap size and sample
+  console.log(`DEBUG projectManagerMap: ${Object.keys(projectManagerMap).length} projects mapped`)
+  const pmSample = Object.entries(projectManagerMap).slice(0, 5)
+  for (const [pid, mention] of pmSample) {
+    console.log(`  DEBUG proj ${pid} → ${mention}`)
+  }
+  // DEBUG: show Float project_manager field presence
+  const withPM = floatProjects.filter(p => p.project_manager)
+  console.log(`DEBUG Float projects with project_manager: ${withPM.length}/${floatProjects.length}`)
+  for (const p of withPM.slice(0, 5)) {
+    const mgr = peopleById[p.project_manager]
+    console.log(`  DEBUG proj "${p.name}" → manager people_id=${p.project_manager} → name="${mgr?.name}"`)
+  }
+
   // Adjacent days
   const dateBefore = prevWorkDay(DATE)
   const dateAfter  = nextWorkDay(DATE)
