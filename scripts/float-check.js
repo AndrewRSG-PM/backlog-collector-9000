@@ -103,16 +103,21 @@ for (const row of projectExceptions) {
   if (fp) projExcMap[fp] = { monday_project: row.monday_project || '', pm_override: row.pm_override || '' }
 }
 
-// PM Discord lookup: pm_name → "<@discord_id>"
+// PM Discord lookup: pm_name (Float account name) → "<@discord_id>"
 const pmDiscord = {}
 for (const row of pmDiscordRows) {
   const name = (row.pm_name || '').trim()
   const id   = (row.discord_id || '').trim()
   if (name && id) pmDiscord[name] = `<@${id}>`
 }
-// Reverse: mention → pm_name
+// Reverse: mention → display name (use note=real name if present, else pm_name)
 const discordToPm = {}
-for (const [k, v] of Object.entries(pmDiscord)) discordToPm[v] = k
+for (const row of pmDiscordRows) {
+  const name = (row.pm_name || '').trim()
+  const id   = (row.discord_id || '').trim()
+  const note = (row.note || '').trim()
+  if (name && id) discordToPm[`<@${id}>`] = note || name
+}
 
 console.log(`Config: ${Object.keys(maxHoursConfig).length} max_hours | ${skipTagsConfig.length} skip tags | ${offTimeoffConfig.length} off timeoffs`)
 console.log(`Project exceptions: ${Object.keys(projExcMap).length} | PM Discord: ${Object.keys(pmDiscord).length}`)
@@ -239,12 +244,6 @@ async function main() {
     const cleanName = rawName.replace(/^[⏳⌛🔄⚡⭐]\s*/, '').trim()
     const mention = pmDiscord[cleanName]
     if (mention) projectManagerMap[proj.project_id] = mention
-  }
-
-  // DEBUG: dump all account names
-  console.log(`DEBUG all ${allAccounts.length} accounts:`)
-  for (const a of allAccounts) {
-    console.log(`  id=${a.account_id || a.id} | name="${a.name}"`)
   }
 
   // Adjacent days
