@@ -52,8 +52,8 @@ export async function getLatestRun(workflowFile) {
 // Read a file from the repo (returns parsed JSON)
 export async function readConfigFile(path) {
   const res = await fetch(
-    `${BASE}/repos/${OWNER}/${REPO}/contents/${path}`,
-    { headers: headers() }
+    `${BASE}/repos/${OWNER}/${REPO}/contents/${path}?_=${Date.now()}`,
+    { headers: { ...headers(), 'Cache-Control': 'no-cache' } }
   )
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const data = await res.json()

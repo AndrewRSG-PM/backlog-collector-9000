@@ -182,6 +182,13 @@ async function main() {
       .filter(t => t.people_id === personId)
       .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999))
 
+    // DEBUG: show raw priority values
+    if (floatTasks.length > 0) {
+      for (const ft of floatTasks) {
+        console.log(`  DEBUG task="${ft.name}" priority=${ft.priority} sort_order=${ft.sort_order} start_time=${ft.start_time}`)
+      }
+    }
+
     if (floatTasks.length === 0) continue
 
     // Determine search name (last name, or exception override)
@@ -266,7 +273,8 @@ async function main() {
 
       if (itemId) {
         if (assignedItems.has(itemId)) {
-          console.log(`  [skip-dup] ${taskName} → item ${itemId} already assigned`)
+          // Duplicate — already assigned at an earlier (better) position, skip write but log with position
+          console.log(`  [${orderNum}] ${taskName} → item ${itemId} (dup, order kept from earlier position)`)
         } else {
           const tag = matchHow !== 'exact' ? `~${orderNum} (${matchHow})` : `${orderNum}`
           console.log(`  [${tag}] ${taskName} → item ${itemId}`)
