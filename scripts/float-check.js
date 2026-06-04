@@ -241,18 +241,10 @@ async function main() {
     if (mention) projectManagerMap[proj.project_id] = mention
   }
 
-  // DEBUG: show accounts sample + projectManagerMap
-  console.log(`DEBUG accounts: ${allAccounts.length} | accountsById keys: ${Object.keys(accountsById).length}`)
-  for (const a of allAccounts.slice(0, 3)) {
-    console.log(`  DEBUG account: id=${a.account_id || a.id} name="${a.name}" first="${a.first_name}" last="${a.last_name}"`)
-  }
-  console.log(`DEBUG projectManagerMap: ${Object.keys(projectManagerMap).length} projects mapped`)
-  const withPM = floatProjects.filter(p => p.project_manager)
-  console.log(`DEBUG Float projects with project_manager: ${withPM.length}/${floatProjects.length}`)
-  for (const p of withPM.slice(0, 3)) {
-    const mgr = accountsById[p.project_manager]
-    const rawName = mgr ? (mgr.name || `${mgr.first_name || ''} ${mgr.last_name || ''}`.trim()) : 'NOT FOUND'
-    console.log(`  DEBUG proj "${p.name}" → account_id=${p.project_manager} → name="${rawName}"`)
+  // DEBUG: dump all account names
+  console.log(`DEBUG all ${allAccounts.length} accounts:`)
+  for (const a of allAccounts) {
+    console.log(`  id=${a.account_id || a.id} | name="${a.name}"`)
   }
 
   // Adjacent days
