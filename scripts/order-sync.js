@@ -109,6 +109,8 @@ async function getFloatSessionJWT() {
   })
 
   const html = await res.text()
+  console.log(`DEBUG session page: status=${res.status} url=${res.url} html_len=${html.length}`)
+  console.log(`DEBUG html snippet: ${html.slice(0, 300)}`)
   const jwtMatch = html.match(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/)
   if (!jwtMatch) throw new Error('JWT not found in Float app — session cookie may have expired (update FLOAT_SESSION_COOKIE)')
 
