@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useCallback } from 'react'
-import { dispatchWorkflow, getLatestRun } from '../lib/github'
+import { dispatchWorkflow, getLatestRun, getRunAnnotations } from '../lib/github'
 
 const CODA_2D_URL = 'https://coda.io/d/RSG-2D-Team_d6SntNSj1Co/AutoOverview-Monday_suz0ScO-#_lupvs87t'
 const CODA_3D_URL = 'https://coda.io/d/RSG-3D-Team_dwKVAnig23m/AutoOverview-Monday_suOd-2bZ#_lugrhTam'
@@ -294,6 +294,32 @@ function FloatFailBanner() {
   )
 }
 
+function OrderSyncCookieBanner() {
+  const [expired, setExpired] = useState(false)
+
+  useEffect(() => {
+    getLatestRun(WORKFLOWS.orderSync).then(async run => {
+      if (run?.status === 'completed' && run?.id) {
+        const annotations = await getRunAnnotations(run.id)
+        if (annotations.some(a => a.message === 'FLOAT_SESSION_COOKIE_EXPIRED')) {
+          setExpired(true)
+        }
+      }
+    }).catch(() => {})
+  }, [])
+
+  if (!expired) return null
+
+  return (
+    <div className="border border-yellow-900/50 bg-yellow-950/20 px-5 py-3">
+      <div className="text-yellow-400 text-sm">
+        ⚠ Float session cookie протух — <strong>ОРДЕРИ МОЖУТЬ БУТИ ПРОСТАВЛЕНІ НЕПРАВИЛЬНО.</strong>{' '}
+        Зверніться до <strong>Андрія</strong> для оновлення FLOAT_SESSION_COOKIE в Settings.
+      </div>
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const [date, setDate] = useState(todayPlus1())
 
@@ -301,6 +327,7 @@ export default function Dashboard() {
     <div className="space-y-8">
       <NoPATBanner />
       <FloatFailBanner />
+      <OrderSyncCookieBanner />
 
       {/* Date selector */}
       <div>

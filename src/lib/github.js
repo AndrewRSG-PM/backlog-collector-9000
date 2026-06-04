@@ -97,6 +97,25 @@ export async function updateGitHubSecret(secretName, secretValue) {
   return true
 }
 
+// Get annotations for a workflow run (checks for warning flags)
+export async function getRunAnnotations(runId) {
+  try {
+    const jobsRes = await fetch(
+      `${BASE}/repos/${OWNER}/${REPO}/actions/runs/${runId}/jobs`,
+      { headers: { ...headers(), 'Cache-Control': 'no-cache' } }
+    )
+    if (!jobsRes.ok) return []
+    const { jobs } = await jobsRes.json()
+    if (!jobs?.length) return []
+    const annRes = await fetch(
+      `${BASE}/repos/${OWNER}/${REPO}/check-runs/${jobs[0].id}/annotations`,
+      { headers: { ...headers(), 'Cache-Control': 'no-cache' } }
+    )
+    if (!annRes.ok) return []
+    return await annRes.json()
+  } catch { return [] }
+}
+
 // Write/update a file in the repo (creates a commit)
 // Always fetches a fresh SHA before writing to avoid stale-cache conflicts
 export async function writeConfigFile(path, content, _sha, message) {

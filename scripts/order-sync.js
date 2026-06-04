@@ -216,9 +216,12 @@ async function main() {
       sessionJwt = await getFloatSessionJWT()
     } catch (e) {
       console.warn(`⚠️ Float session JWT failed: ${e.message} — falling back to official API (approximate sort order)`)
+      // GitHub Actions annotation — picked up by BK9K UI to show warning banner
+      console.log('::warning::FLOAT_SESSION_COOKIE_EXPIRED')
     }
   } else {
     console.log('ℹ️ FLOAT_SESSION_COOKIE not set — using official API (approximate sort order)')
+    console.log('::warning::FLOAT_SESSION_COOKIE_EXPIRED')
   }
 
   console.log('Fetching Float data...')
