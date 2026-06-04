@@ -151,6 +151,20 @@ export default function SettingsModal({ onClose }) {
             secretName="DISCORD_WEBHOOK_TEST"
           />
 
+          {/* Float Login для правильного порядку задач */}
+          <SecretField
+            label="FLOAT EMAIL"
+            hint="(для автологіну — точний порядок задач у Float)"
+            placeholder="email@retrostylegames.com"
+            secretName="FLOAT_EMAIL"
+          />
+          <SecretField
+            label="FLOAT PASSWORD"
+            hint="(пароль від Float акаунту)"
+            placeholder="••••••••"
+            secretName="FLOAT_PASSWORD"
+          />
+
           {/* Make.com Webhooks */}
           <SecretField
             label="MAKE WEBHOOK — 2D"

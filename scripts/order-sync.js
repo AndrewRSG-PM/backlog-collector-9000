@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 // order-sync.js — Node.js port of backlog-order-sync.ps1
 // Reads config from config/*.json (repo)
-// Env: FLOAT_API_KEY, MONDAY_TOKEN, TARGET_DATE, DRY_RUN
+// Env: FLOAT_API_KEY, MONDAY_TOKEN, TARGET_DATE, DRY_RUN, FLOAT_EMAIL, FLOAT_PASSWORD
 
 import { readFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
+import { randomUUID } from 'crypto'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
@@ -19,10 +20,12 @@ function smartTomorrow() {
   return d.toISOString().slice(0, 10)
 }
 
-const DATE          = process.env.TARGET_DATE  || smartTomorrow()
-const DRY_RUN       = process.env.DRY_RUN      === 'true'
-const FLOAT_API_KEY = process.env.FLOAT_API_KEY || ''
-const MONDAY_TOKEN  = process.env.MONDAY_TOKEN  || ''
+const DATE           = process.env.TARGET_DATE    || smartTomorrow()
+const DRY_RUN        = process.env.DRY_RUN        === 'true'
+const FLOAT_API_KEY  = process.env.FLOAT_API_KEY  || ''
+const MONDAY_TOKEN   = process.env.MONDAY_TOKEN   || ''
+const FLOAT_EMAIL    = process.env.FLOAT_EMAIL    || ''
+const FLOAT_PASSWORD = process.env.FLOAT_PASSWORD || ''
 
 if (!FLOAT_API_KEY) { console.error('❌ FLOAT_API_KEY not set'); process.exit(1) }
 if (!MONDAY_TOKEN) { console.error('❌ MONDAY_TOKEN not set'); process.exit(1) }
@@ -69,6 +72,81 @@ async function floatGetAll(path) {
     const url = `https://api.float.com/v3${path}${sep}per-page=200&page=${page}`
     const res = await fetch(url, { headers: FLOAT_HEADERS })
     if (!res.ok) throw new Error(`Float API ${path} → ${res.status} ${res.statusText}`)
+    const data = await res.json()
+    if (!Array.isArray(data) || data.length === 0) break
+    results.push(...data)
+    if (data.length < 200) break
+    page++
+  }
+  return results
+}
+
+// ─── Float session login (svc/api3 → priority field) ────────────────────────
+function parseCookieHeaders(raw) {
+  const cookies = {}
+  if (!raw) return cookies
+  for (const part of raw.split(/,(?=[^;]+=)/)) {
+    const nameVal = part.split(';')[0].trim()
+    const eq = nameVal.indexOf('=')
+    if (eq > 0) cookies[nameVal.slice(0, eq).trim()] = nameVal.slice(eq + 1).trim()
+  }
+  return cookies
+}
+function cookieStr(obj) {
+  return Object.entries(obj).map(([k, v]) => `${k}=${v}`).join('; ')
+}
+
+async function getFloatSessionJWT() {
+  if (!FLOAT_EMAIL || !FLOAT_PASSWORD) return null
+  const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+  let cookies = {}
+
+  // 1. GET login page → CSRF token
+  const pageRes = await fetch('https://rsg.float.com/login', { headers: { 'User-Agent': UA } })
+  Object.assign(cookies, parseCookieHeaders(pageRes.headers.get('set-cookie')))
+  const html = await pageRes.text()
+  const csrf = (html.match(/name="_csrf"\s+value="([^"]+)"/) || [])[1]
+  if (!csrf) throw new Error('CSRF token not found on Float login page')
+
+  // 2. POST login form
+  const form = new URLSearchParams({ '_csrf': csrf, 'LoginForm[email]': FLOAT_EMAIL, 'LoginForm[password]': FLOAT_PASSWORD })
+  const loginRes = await fetch('https://rsg.float.com/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': cookieStr(cookies), 'User-Agent': UA, 'Referer': 'https://rsg.float.com/login' },
+    body: form.toString(),
+    redirect: 'manual',
+  })
+  Object.assign(cookies, parseCookieHeaders(loginRes.headers.get('set-cookie')))
+  const location = loginRes.headers.get('location')
+  if (!location) throw new Error('Float login failed — check FLOAT_EMAIL / FLOAT_PASSWORD')
+
+  // 3. Follow redirect → extract JWT from page HTML
+  const appRes = await fetch(`https://rsg.float.com${location}`, {
+    headers: { 'Cookie': cookieStr(cookies), 'User-Agent': UA },
+    redirect: 'follow',
+  })
+  Object.assign(cookies, parseCookieHeaders(appRes.headers.get('set-cookie')))
+  const appHtml = await appRes.text()
+  const jwtMatch = appHtml.match(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/)
+  if (!jwtMatch) throw new Error('JWT not found in Float app HTML after login')
+
+  console.log('✅ Float session JWT obtained')
+  return jwtMatch[0]
+}
+
+// Fetch from old svc/api3 (returns priority field for visual sort order)
+async function floatGetAllOld(path, jwt) {
+  const payload = JSON.parse(Buffer.from(jwt.split('.')[1], 'base64url').toString())
+  const notifyUuid = `${payload.company?.id}-${payload.account?.id}-${randomUUID()}`
+  const results = []
+  let page = 1
+  while (true) {
+    const sep = path.includes('?') ? '&' : '?'
+    const url = `https://rsg.float.com/svc/api3/v3${path}${sep}per-page=200&page=${page}`
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${jwt}`, 'x-token-type': 'JWT', 'notify-uuid': notifyUuid },
+    })
+    if (!res.ok) throw new Error(`Float svc/api3 ${path} → ${res.status}`)
     const data = await res.json()
     if (!Array.isArray(data) || data.length === 0) break
     results.push(...data)
@@ -136,12 +214,27 @@ function shouldSkip(taskName) {
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 async function main() {
+  // Try to get Float session JWT for priority-aware sorting (svc/api3)
+  let sessionJwt = null
+  if (FLOAT_EMAIL && FLOAT_PASSWORD) {
+    try {
+      sessionJwt = await getFloatSessionJWT()
+    } catch (e) {
+      console.warn(`⚠️ Float login failed: ${e.message} — falling back to official API (approximate sort order)`)
+    }
+  } else {
+    console.log('ℹ️ FLOAT_EMAIL/FLOAT_PASSWORD not set — using official API (approximate sort order)')
+  }
+
   console.log('Fetching Float data...')
   const [allPeople, allTasks, floatProjects] = await Promise.all([
     floatGetAll('/people'),
-    floatGetAll(`/tasks?start_date=${DATE}&end_date=${DATE}&sort=sort_order`),
+    sessionJwt
+      ? floatGetAllOld(`/tasks/all?start_date=${DATE}&end_date=${DATE}`, sessionJwt)
+      : floatGetAll(`/tasks?start_date=${DATE}&end_date=${DATE}`),
     floatGetAll('/projects'),
   ])
+  console.log(`Tasks fetched via: ${sessionJwt ? 'svc/api3 (priority sort)' : 'official API (approximate sort)'}`)
 
   const floatProjectNames = {}
   for (const p of floatProjects) floatProjectNames[p.project_id] = p.name
@@ -177,10 +270,15 @@ async function main() {
     const artistColIds = cols.artistCols
     const fpColId      = cols.floatProjectCol
 
-    // Float tasks for this person today — using API response order
-    // (Float doesn't expose a visual sort field; API order is the best available approximation)
+    // Float tasks for this person today
+    // If svc/api3: sort by priority ascending (more negative = higher in Float calendar)
+    // If official API: use response order (best available approximation)
     const floatTasks = allTasks
       .filter(t => t.people_id === personId)
+      .sort((a, b) => {
+        if (a.priority != null && b.priority != null) return a.priority - b.priority
+        return 0 // preserve API response order
+      })
 
     if (floatTasks.length === 0) continue
 
