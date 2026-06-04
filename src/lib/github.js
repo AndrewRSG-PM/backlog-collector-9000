@@ -98,7 +98,12 @@ export async function updateGitHubSecret(secretName, secretValue) {
 }
 
 // Write/update a file in the repo (creates a commit)
-export async function writeConfigFile(path, content, sha, message) {
+// Always fetches a fresh SHA before writing to avoid stale-cache conflicts
+export async function writeConfigFile(path, content, _sha, message) {
+  // Re-fetch current SHA right before writing — ignores cached sha param
+  const current = await readConfigFile(path)
+  const sha = current.sha
+
   const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))))
   const res = await fetch(
     `${BASE}/repos/${OWNER}/${REPO}/contents/${path}`,
