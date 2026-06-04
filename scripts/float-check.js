@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // float-check.js — Node.js port of float-check.ps1
-// Reads config from config/*.json (repo), env: FLOAT_JWT, MONDAY_TOKEN,
+// Reads config from config/*.json (repo), env: FLOAT_API_KEY,
 // DISCORD_WEBHOOK_PROD, DISCORD_WEBHOOK_TEST
 // Inputs (via env from workflow): TARGET_DATE, NO_MENTIONS, TEST_MODE
 
@@ -24,7 +24,6 @@ const DATE          = process.env.TARGET_DATE  || smartTomorrow()
 const NO_MENTIONS   = process.env.NO_MENTIONS  === 'true'
 const TEST_MODE     = process.env.TEST_MODE    === 'true'
 const FLOAT_API_KEY = process.env.FLOAT_API_KEY || ''
-const MONDAY_TOKEN  = process.env.MONDAY_TOKEN  || ''
 const WEBHOOK_URL   = TEST_MODE
   ? (process.env.DISCORD_WEBHOOK_TEST  || '')
   : (process.env.DISCORD_WEBHOOK_PROD || '')
@@ -118,31 +117,6 @@ for (const [k, v] of Object.entries(pmDiscord)) discordToPm[v] = k
 console.log(`Config: ${Object.keys(maxHoursConfig).length} max_hours | ${skipTagsConfig.length} skip tags | ${offTimeoffConfig.length} off timeoffs`)
 console.log(`Project exceptions: ${Object.keys(projExcMap).length} | PM Discord: ${Object.keys(pmDiscord).length}`)
 
-// ─── Monday: project → PM mapping ───────────────────────────────────────────
-async function loadMondayProjects() {
-  if (!MONDAY_TOKEN) { console.warn('⚠️ MONDAY_TOKEN not set — no PM tags'); return {} }
-  const query = JSON.stringify({
-    query: `{ boards(ids: [2475547910]) { items_page(limit: 500) { items { name group { title } column_values(ids: ["people"]) { id text } } } } }`
-  })
-  const res = await fetch('https://api.monday.com/v2', {
-    method: 'POST',
-    headers: { 'Authorization': MONDAY_TOKEN, 'Content-Type': 'application/json' },
-    body: query,
-  })
-  if (!res.ok) { console.warn(`⚠️ Monday API → ${res.status}`); return {} }
-  const json = await res.json()
-  const map  = {}
-  for (const item of (json?.data?.boards?.[0]?.items_page?.items || [])) {
-    if (item.group?.title === 'Canceled') continue
-    const pmRaw = item.column_values?.find(c => c.id === 'people')?.text
-    if (pmRaw) {
-      const pmName = pmRaw.split(',')[0].trim().replace(/\s*PM\s*$/, '')
-      map[item.name.toLowerCase()] = pmName
-    }
-  }
-  console.log(`Monday: loaded ${Object.keys(map).length} projects`)
-  return map
-}
 
 // ─── Adjacent workday helpers ────────────────────────────────────────────────
 function prevWorkDay(dateStr) {
@@ -169,39 +143,29 @@ function isSkipTask(name) {
 }
 
 // ─── PM mention resolution ───────────────────────────────────────────────────
-function getPmMention(floatProjectName, projectPmMap) {
-  if (!floatProjectName) return null
-  const fpLower = floatProjectName.toLowerCase().trim()
-
-  // 1. project_exceptions
-  let exc = null
-  for (const [key, val] of Object.entries(projExcMap)) {
-    if (fpLower.includes(key) || key.includes(fpLower)) { exc = val; break }
-  }
-  if (exc) {
-    if (exc.pm_override) {
-      const tags = exc.pm_override.split(',').map(s => s.trim())
-        .map(n => pmDiscord[n]).filter(Boolean)
-      return tags.length ? tags.join(' ') : null
-    }
-    if (exc.monday_project) {
-      const alt = exc.monday_project.toLowerCase().trim()
-      const norm = alt.replace(/[^a-z0-9 ]/g, '').trim()
-      for (const [k, pmName] of Object.entries(projectPmMap)) {
-        const kn = k.replace(/[^a-z0-9 ]/g, '').trim()
-        if (norm.includes(kn) || kn.includes(norm)) return pmDiscord[pmName] || null
+// Priority 1: project_exceptions → pm_override (manual)
+// Priority 2: Float project_manager → pm_discord (by exact name)
+function getPmMention(projectId, floatProjectName) {
+  // 1. project_exceptions → pm_override
+  if (floatProjectName) {
+    const fpLower = floatProjectName.toLowerCase().trim()
+    for (const [key, val] of Object.entries(projExcMap)) {
+      if (fpLower.includes(key) || key.includes(fpLower)) {
+        if (val.pm_override) {
+          const tags = val.pm_override.split(',').map(s => s.trim())
+            .map(n => pmDiscord[n]).filter(Boolean)
+          return tags.length ? tags.join(' ') : null
+        }
+        break
       }
-      return null
     }
   }
 
-  // 2. Normal Monday lookup
-  if (!Object.keys(projectPmMap).length) return null
-  const norm = fpLower.replace(/[^a-z0-9 ]/g, '').trim()
-  for (const [k, pmName] of Object.entries(projectPmMap)) {
-    const kn = k.replace(/[^a-z0-9 ]/g, '').trim()
-    if (norm.includes(kn) || kn.includes(norm)) return pmDiscord[pmName] || null
+  // 2. Float project_manager
+  if (projectId && projectManagerMap[projectId]) {
+    return projectManagerMap[projectId]
   }
+
   return null
 }
 
@@ -250,9 +214,20 @@ async function main() {
   const projectNames = {}
   for (const p of floatProjects) projectNames[p.project_id] = p.name
 
-  // DEBUG: show Float project structure to find owner field
-  const sampleProject = floatProjects.find(p => p.name === 'Super Pebble') || floatProjects[0]
-  if (sampleProject) console.log('DEBUG project fields:', JSON.stringify(sampleProject))
+  // Build people lookup: people_id → person
+  const peopleById = {}
+  for (const p of allPeople) peopleById[p.people_id] = p
+
+  // Build project → PM mention map from Float project_manager field
+  const projectManagerMap = {}
+  for (const proj of floatProjects) {
+    if (!proj.project_manager) continue
+    const manager = peopleById[proj.project_manager]
+    if (!manager) continue
+    const cleanName = (manager.name || '').replace(/^[⏳⌛🔄⚡⭐]\s*/, '').trim()
+    const mention = pmDiscord[cleanName]
+    if (mention) projectManagerMap[proj.project_id] = mention
+  }
 
   // Adjacent days
   const dateBefore = prevWorkDay(DATE)
@@ -290,8 +265,6 @@ async function main() {
     }
   }
 
-  // Monday project → PM
-  const projectPmMap = await loadMondayProjects()
 
   // Filter artists
   const allDeptIds = new Set([...DEPT_2D, ...DEPT_3D])
@@ -353,7 +326,7 @@ async function main() {
     const pmHours = {}
     for (const t of (threeDayTasksByPerson[pid] || [])) {
       if (!t.project_id || isSkipTask(t.name || '')) continue
-      const m = getPmMention(projectNames[t.project_id], projectPmMap)
+      const m = getPmMention(t.project_id, projectNames[t.project_id])
       if (!m) continue
       pmHours[m] = (pmHours[m] || 0) + parseFloat(t.hours || 0)
     }
@@ -371,7 +344,7 @@ async function main() {
       if (!adjByPerson[personId]) return lines
       for (const [dir, dayLabel] of [['before', fmtDay(dateBefore)], ['after', fmtDay(dateAfter)]]) {
         for (const at of adjByPerson[personId][dir]) {
-          const pm    = getPmMention(projectNames[at.projectId], projectPmMap)
+          const pm    = getPmMention(at.projectId, projectNames[at.projectId])
           const pmStr = pm && !NO_MENTIONS ? ` | ${pm}` : ''
           lines.push(`  ↕ ${dayLabel}: ${at.taskName} (${at.hours}h)${pmStr} — можна поставити ${fmtDay(DATE)}?`)
         }
