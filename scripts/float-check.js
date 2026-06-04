@@ -207,8 +207,9 @@ async function sendDiscord(webhookUrl, message) {
 // ─── Main ────────────────────────────────────────────────────────────────────
 async function main() {
   console.log('Fetching Float data...')
-  const [allPeople, tasks, timeoffs, floatProjects] = await Promise.all([
+  const [allPeople, allAccounts, tasks, timeoffs, floatProjects] = await Promise.all([
     floatGetAll('/people'),
+    floatGetAll('/accounts'),
     floatGetAll(`/tasks?start_date=${DATE}&end_date=${DATE}`),
     floatGetAll(`/timeoffs?start_date=${DATE}&end_date=${DATE}`),
     floatGetAll('/projects'),
@@ -221,28 +222,37 @@ async function main() {
   const peopleById = {}
   for (const p of allPeople) peopleById[p.people_id] = p
 
+  // Build accounts lookup: account_id → account (PMs live here, not in /people)
+  const accountsById = {}
+  for (const a of allAccounts) {
+    const id = a.account_id || a.id
+    if (id) accountsById[id] = a
+  }
+
   // Build project → PM mention map from Float project_manager field
+  // project_manager references an account_id, not people_id
   for (const proj of floatProjects) {
     if (!proj.project_manager) continue
-    const manager = peopleById[proj.project_manager]
+    const manager = accountsById[proj.project_manager]
     if (!manager) continue
-    const cleanName = (manager.name || '').replace(/^[⏳⌛🔄⚡⭐]\s*/, '').trim()
+    const rawName = manager.name || `${manager.first_name || ''} ${manager.last_name || ''}`.trim()
+    const cleanName = rawName.replace(/^[⏳⌛🔄⚡⭐]\s*/, '').trim()
     const mention = pmDiscord[cleanName]
     if (mention) projectManagerMap[proj.project_id] = mention
   }
 
-  // DEBUG: show projectManagerMap size and sample
-  console.log(`DEBUG projectManagerMap: ${Object.keys(projectManagerMap).length} projects mapped`)
-  const pmSample = Object.entries(projectManagerMap).slice(0, 5)
-  for (const [pid, mention] of pmSample) {
-    console.log(`  DEBUG proj ${pid} → ${mention}`)
+  // DEBUG: show accounts sample + projectManagerMap
+  console.log(`DEBUG accounts: ${allAccounts.length} | accountsById keys: ${Object.keys(accountsById).length}`)
+  for (const a of allAccounts.slice(0, 3)) {
+    console.log(`  DEBUG account: id=${a.account_id || a.id} name="${a.name}" first="${a.first_name}" last="${a.last_name}"`)
   }
-  // DEBUG: show Float project_manager field presence
+  console.log(`DEBUG projectManagerMap: ${Object.keys(projectManagerMap).length} projects mapped`)
   const withPM = floatProjects.filter(p => p.project_manager)
   console.log(`DEBUG Float projects with project_manager: ${withPM.length}/${floatProjects.length}`)
-  for (const p of withPM.slice(0, 5)) {
-    const mgr = peopleById[p.project_manager]
-    console.log(`  DEBUG proj "${p.name}" → manager people_id=${p.project_manager} → name="${mgr?.name}"`)
+  for (const p of withPM.slice(0, 3)) {
+    const mgr = accountsById[p.project_manager]
+    const rawName = mgr ? (mgr.name || `${mgr.first_name || ''} ${mgr.last_name || ''}`.trim()) : 'NOT FOUND'
+    console.log(`  DEBUG proj "${p.name}" → account_id=${p.project_manager} → name="${rawName}"`)
   }
 
   // Adjacent days
