@@ -434,7 +434,9 @@ async function main() {
         .sort((a, b) => byPm[b].length - byPm[a].length)
 
       for (const pm of sortedPms) {
-        const pmLabel = NO_MENTIONS && discordToPm[pm] ? discordToPm[pm] : pm
+        const pmLabel = NO_MENTIONS
+          ? pm.split(/\s+/).map(m => discordToPm[m] || m).join(' ')
+          : pm
         msgLines.push(`**${pmLabel}**`)
         byPm[pm].forEach(l => msgLines.push(l))
         msgLines.push('')
