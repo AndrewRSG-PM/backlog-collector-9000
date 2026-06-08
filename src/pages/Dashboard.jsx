@@ -95,31 +95,22 @@ function BacklogTriggerCard({ title, description, dept, codaUrl, date }) {
         <div className="flex items-center gap-4 flex-shrink-0">
           {run && <StatusBadge status={run.status} conclusion={run.conclusion} />}
           <ActionButton
-            label={loading ? '...' : 'RUN'}
+            label="CODA ↗"
+            onClick={() => window.open(codaUrl, '_blank')}
+            variant="secondary"
+          />
+          <ActionButton
+            label="RUN"
             onClick={trigger}
-            disabled={loading}
+            disabled={true}
           />
         </div>
       </div>
-      {error && (
-        <div className="text-red-400 text-xs mt-2 border border-red-900/40 px-3 py-2 bg-red-950/20">
-          ✕ {error}
-          {error.includes('401') || error.includes('Bad credentials') ? (
-            <span className="ml-2">— <a href="/guides" className="underline hover:text-red-300">Set GitHub PAT in Settings</a></span>
-          ) : null}
-        </div>
-      )}
       {run && (
         <div className="mt-2 text-[10px] text-[#777] flex items-center gap-3">
           <span>Run #{run.run_number}</span>
           <span>{new Date(run.created_at).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' })}</span>
           {run.html_url && <a href={run.html_url} target="_blank" rel="noreferrer" className="underline hover:text-[#999]">→ view logs</a>}
-          <a href={codaUrl} target="_blank" rel="noreferrer" className="underline hover:text-[#999]">→ Coda ↗</a>
-        </div>
-      )}
-      {!run && (
-        <div className="mt-2">
-          <a href={codaUrl} target="_blank" rel="noreferrer" className="text-xs text-[#555] hover:text-[#888] underline">→ відкрити Coda ↗</a>
         </div>
       )}
     </div>
