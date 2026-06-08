@@ -1,33 +1,5 @@
 import { useState } from 'react'
 
-function Lightbox({ src, alt }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <>
-      <img
-        src={src}
-        alt={alt}
-        onClick={() => setOpen(true)}
-        className="border border-[#2a2a2a] w-full cursor-zoom-in hover:opacity-90 transition-opacity"
-      />
-      {open && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
-          onClick={() => setOpen(false)}
-        >
-          <img
-            src={src}
-            alt={alt}
-            className="max-w-full max-h-full object-contain shadow-2xl"
-          />
-        </div>
-      )}
-    </>
-  )
-}
-
-const TEAM_PAT = '' // see team channel for token
-
 function Section({ title, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
@@ -65,22 +37,11 @@ function Code({ children }) {
   )
 }
 
-function CopyPat() {
-  const [copied, setCopied] = useState(false)
-  function copy() {
-    navigator.clipboard.writeText(TEAM_PAT)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+function FaqItem({ q, children }) {
   return (
-    <div className="flex items-center gap-3 bg-[#111] border border-[#2a2a2a] px-4 py-3">
-      <code className="text-[#888] text-xs font-mono flex-1 truncate select-all">{TEAM_PAT}</code>
-      <button
-        onClick={copy}
-        className="text-xs border border-[#444] text-[#aaa] hover:border-[#888] hover:text-white px-3 py-1.5 transition-colors flex-shrink-0"
-      >
-        {copied ? '✓ СКОПІЙОВАНО' : 'КОПІЮВАТИ'}
-      </button>
+    <div className="border border-[#1e1e1e] p-4">
+      <div className="text-[#ccc] font-bold mb-2">{q}</div>
+      <div>{children}</div>
     </div>
   )
 }
@@ -90,136 +51,196 @@ export default function Guides() {
     <div className="space-y-6 max-w-2xl">
       <div>
         <div className="text-xs text-[#777] tracking-widest mb-1">DOCUMENTATION</div>
-        <h1 className="text-lg font-bold text-white tracking-wide">Гайди по BACKLOG-COLLECTOR-9000</h1>
+        <h1 className="text-lg font-bold text-white tracking-wide">Гайди — BK9K</h1>
       </div>
 
       <div className="space-y-2">
+
+        <Section title="ЩО ТАКЕ BK9K" defaultOpen={true}>
+          <p>
+            BK9K (Backlog Collector 9000) — інструмент для щоденного збору беклогу художників.
+            Замінює ручні запуски скриптів: все в одному місці, одна кнопка.
+          </p>
+          <p>Три функції:</p>
+          <div className="space-y-1">
+            <div>— <strong className="text-white">Float Check</strong> — перевіряє завантаження художників у Float, відправляє звіт в Discord</div>
+            <div>— <strong className="text-white">Order Sync</strong> — проставляє Order в Monday відповідно до порядку задач у Float</div>
+            <div>— <strong className="text-white">Assemble Backlog</strong> — збирає беклог через Coda</div>
+          </div>
+          <p className="text-[#666]">Float — тільки читання. Monday — тільки колонка Order. Назавжди.</p>
+        </Section>
+
+        <Section title="ПЕРШИЙ ЗАПУСК — GITHUB PAT">
+          <p>
+            Для роботи BK9K потрібен GitHub Personal Access Token.
+            Отримай його особисто від <strong className="text-white">Андрія Головка</strong>.
+          </p>
+          <Step n="1">Отримай токен від Андрія</Step>
+          <Step n="2">Відкрий BK9K → вгорі буде оранжевий банер</Step>
+          <Step n="3">Натисни <Code>ВСТАНОВИТИ PAT</Code> → відкриється Settings</Step>
+          <Step n="4">Встав токен у поле <Code>GitHub PAT</Code> → <Code>Save</Code></Step>
+          <p className="text-[#888]">Токен зберігається тільки в браузері. Після очищення кешу — треба вставити знову.</p>
+        </Section>
+
+        <Section title="FLOAT CHECK — ЯК ВИКОРИСТОВУВАТИ">
+          <Step n="1">Встанови <Code>Target Date</Code> вгорі (за замовчуванням — наступний робочий день)</Step>
+          <Step n="2">Натисни <Code>RUN</Code> у картці Float Check</Step>
+          <Step n="3">Статус зміниться на <Code>RUNNING</Code>, потім <Code>DONE</Code></Step>
+          <Step n="4">Звіт з'явиться в основному Discord-каналі беклогу з тегами PM</Step>
+          <p>Для тестового запуску (без тегів PM, в тестовий канал) — використовуй <Code>Float Check — Test</Code>.</p>
+          <p className="text-[#888]">
+            Що означають секції у звіті:<br />
+            — художник без помітки → все OK<br />
+            — <Code>{'< 8h'}</Code> / <Code>{'> Xh'}</Code> → недо- або перезавантажений<br />
+            — <Code>Tentative</Code> → задача не підтверджена<br />
+            — <Code>🚫 Не заплановані</Code> → художник без задач<br />
+            — <Code>⚠️ Conflicting</Code> → задачі двох різних PM в один день
+          </p>
+        </Section>
+
+        <Section title="ORDER SYNC — ЯК ВИКОРИСТОВУВАТИ">
+          <Step n="1">Встанови <Code>Target Date</Code></Step>
+          <Step n="2">Увімкни <Code>DRY RUN</Code> якщо хочеш перевірити без запису в Monday</Step>
+          <Step n="3">Натисни <Code>RUN</Code></Step>
+          <Step n="4">В логах GitHub Actions видно що і в якому порядку проставилось</Step>
+          <p className="text-[#888]">
+            Order Sync зчитує візуальний порядок задач у Float-календарі (порядок перетягуванням)
+            і переносить його в колонку Order у Monday. Тільки Order — більше нічого не змінюється.
+          </p>
+          <p className="text-[#888]">
+            Якщо з'явився жовтий банер — FLOAT_SESSION_COOKIE протух.
+            Дивись гайд нижче.
+          </p>
+        </Section>
+
+        <Section title="FLOAT SESSION COOKIE — ЯК ОНОВИТИ">
+          <p>
+            Потрібен для Order Sync щоб отримати правильний порядок задач з Float.
+            Живе ~2 тижні, після чого — жовтий банер на Dashboard.
+          </p>
+          <Step n="1">Відкрий <Code>rsg.float.com</Code> у браузері (переконайся що залогінений)</Step>
+          <Step n="2">F12 → вкладка <Code>Application</Code> → <Code>Cookies</Code> → <Code>rsg.float.com</Code></Step>
+          <Step n="3">Знайди куку <Code>float2sessprd</Code> → скопіюй <Code>Value</Code></Step>
+          <Step n="4">Відкрий BK9K → Settings → поле <Code>FLOAT SESSION COOKIE</Code> → вставити → <Code>UPDATE</Code></Step>
+          <p className="text-[#888]">Термін дії видно в колонці Expires у DevTools. Зазвичай ~2 тижні від останнього входу.</p>
+        </Section>
+
+        <Section title="ЯК ДОДАТИ EXCEPTION">
+          <p>Exceptions — налаштування виключень для Float Check і Order Sync. Зберігаються в репо як JSON.</p>
+          <Step n="1">Відкрий <Code>Settings → Exceptions</Code></Step>
+          <Step n="2">Вибери потрібну вкладку (Float Check / Name Exceptions / Skip Tasks / Project Exceptions)</Step>
+          <Step n="3">Натисни <Code>+ ADD ROW</Code> → заповни поля</Step>
+          <Step n="4">Натисни <Code>SAVE</Code> — зміни комітяться в репо, наступний run підхопить їх</Step>
+          <div className="space-y-2 mt-2">
+            <div className="border border-[#1e1e1e] p-3">
+              <div className="text-[#ccc] font-bold text-sm mb-1">Float Check</div>
+              <div className="text-sm space-y-0.5">
+                <div>— <Code>max_hours</Code>: нестандартний ліміт годин для художника</div>
+                <div>— <Code>skip_artist</Code>: повністю ігнорувати художника у звіті</div>
+                <div>— <Code>skip_tag</Code>: задачі з цим тегом не рахуються в годинах</div>
+              </div>
+            </div>
+            <div className="border border-[#1e1e1e] p-3">
+              <div className="text-[#ccc] font-bold text-sm mb-1">Skip Tasks</div>
+              <div className="text-sm">Назви задач у Float які ігноруються — точний збіг або підрядок. Такі задачі не впливають на статус художника.</div>
+            </div>
+            <div className="border border-[#1e1e1e] p-3">
+              <div className="text-[#ccc] font-bold text-sm mb-1">Project Exceptions</div>
+              <div className="text-sm">Ручний PM-override для проекту. Якщо PM визначається неправильно автоматично — вкажи тут вручну який PM відповідає за цей проект.</div>
+            </div>
+            <div className="border border-[#1e1e1e] p-3">
+              <div className="text-[#ccc] font-bold text-sm mb-1">Name Exceptions</div>
+              <div className="text-sm">Якщо ім'я художника у Float відрізняється від Monday — Order Sync не знайде збіг. Вкажи mapping: Float ім'я → Monday ім'я.</div>
+            </div>
+          </div>
+        </Section>
+
+        <Section title="FAQ — ТИПОВІ ПРОБЛЕМИ">
+          <div className="space-y-2">
+            <FaqItem q="Float Check падає з помилкою 401 / червоний банер">
+              Float API ключ протух або скинутий. Зверніться до <strong className="text-white">Андрія</strong> — він оновить <Code>FLOAT_API_KEY</Code> у GitHub Secrets.
+            </FaqItem>
+            <FaqItem q="Жовтий банер — ордери можуть бути неправильні">
+              FLOAT_SESSION_COOKIE протух. Оновити самостійно за гайдом вище або звернутись до Андрія.
+            </FaqItem>
+            <FaqItem q="Кнопка RUN не реагує">
+              Перевір GitHub PAT у Settings. Якщо оранжевий банер — PAT не вставлений або протух. Отримай новий від Андрія.
+            </FaqItem>
+            <FaqItem q="Художник не матчиться (NO MATCH в логах Order Sync)">
+              Ім'я у Float і Monday відрізняється. Додай у <Code>Exceptions → Name Exceptions</Code>: Float ім'я → Monday ім'я.
+            </FaqItem>
+            <FaqItem q="PM не тегається або тегається неправильний">
+              Або проект не має PM у Float, або PM не в списку pm_discord. Додай <Code>pm_override</Code> у <Code>Project Exceptions</Code> для цього проекту.
+            </FaqItem>
+            <FaqItem q="Задача не отримує Order">
+              Перевір <Code>Exceptions → Skip Tasks</Code> — задача може бути там. Або ім'я художника не матчиться (дивись Name Exceptions).
+            </FaqItem>
+            <FaqItem q="Exceptions не зберігаються">
+              Перевір що PAT має права <Code>Contents: R/W</Code>. Якщо помилка "SHA mismatch" — спробуй ще раз, зазвичай це разово.
+            </FaqItem>
+          </div>
+        </Section>
+
         <Section title="CHANGELOG">
           <div className="space-y-5">
 
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-white font-bold tracking-wider">v1.2</span>
-                <span className="text-[#555] text-xs">03.06.2026</span>
+                <span className="text-white font-bold tracking-wider">v1.3</span>
+                <span className="text-[#555] text-xs">08.06.2026</span>
               </div>
               <ul className="space-y-1 text-[#999]">
-                <li>— Float API Key замість JWT-токена: безстроковий, не протухає кожні 2 тижні</li>
-                <li>— Make.com кнопки збірки беклогу 2D/3D прямо в Dashboard (замість посилань на Coda)</li>
-                <li>— Fix: логіка тегування ПМів — 3-денне вікно замість одного дня (dominant PM)</li>
-                <li>— Guides оновлені під нову реальність</li>
+                <li>— Float visual sort order: Playwright + session cookie → правильний порядок задач</li>
+                <li>— OrderSyncCookieBanner: попередження коли FLOAT_SESSION_COOKIE протух</li>
+                <li>— Fix: NO_MENTIONS режим для кількох PM на одному проекті</li>
+                <li>— Fix: CORS помилка в Exceptions (прибрано Cache-Control header)</li>
+                <li>— Assemble Backlog: кнопка RUN вимкнена, Coda кнопка рівноправна</li>
+                <li>— Daily reminder: щоденне нагадування в Discord о 17:45 (Пн–Пт)</li>
+                <li>— README і гайди оновлені</li>
               </ul>
             </div>
 
             <div className="border-t border-[#1a1a1a] pt-4">
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-[#aaa] font-bold tracking-wider">v1.1</span>
-                <span className="text-[#555] text-xs">02.06.2026</span>
+                <span className="text-[#aaa] font-bold tracking-wider">v1.2</span>
+                <span className="text-[#555] text-xs">04.06.2026</span>
               </div>
-              <ul className="space-y-1 text-[#666]">
-                <li>— PM Override: chips + dropdown замість текстового поля (Project Exceptions)</li>
-                <li>— Collapsible guide "ЯК ЦЕ ПРАЦЮЄ" в Project Exceptions</li>
-                <li>— Fix: dropdown не обрізається таблицею (position: fixed)</li>
-                <li>— Fix: 404 при прямому переході за посиланням (SPA routing)</li>
-                <li>— Fix: кирилиця в JSON конфігах (UTF-8 decode)</li>
-                <li>— Fix: Order Sync Monday API (change_simple_column_value)</li>
-                <li>— Settings: поля Discord Webhook PROD + TEST</li>
-                <li>— Guides: інструкція Float JWT з lightbox-скріншотом</li>
+              <ul className="space-y-1 text-[#777]">
+                <li>— Float API Key замість JWT: безстроковий, не протухає</li>
+                <li>— PM attribution через Float project_manager (без Monday)</li>
+                <li>— 3-денне вікно для визначення домінантного PM</li>
+                <li>— Fix: multi-person tasks (people_ids)</li>
+                <li>— Fix: SHA stale caching при збереженні exceptions</li>
+                <li>— Backlog Assemble 2D/3D кнопки + Make.com інтеграція</li>
               </ul>
             </div>
 
             <div className="border-t border-[#1a1a1a] pt-4">
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-[#666] font-bold tracking-wider">v1.0</span>
+                <span className="text-[#666] font-bold tracking-wider">v1.1</span>
                 <span className="text-[#555] text-xs">02.06.2026</span>
               </div>
               <ul className="space-y-1 text-[#555]">
-                <li>— Initial launch: Float Check + Order Sync (GitHub Actions)</li>
-                <li>— Exceptions UI: Float Check, Name, Skip Tasks, Project exceptions</li>
-                <li>— Settings: GitHub PAT, Float JWT, Monday Token</li>
-                <li>— Guides page</li>
-                <li>— NoPATBanner, FloatFailBanner</li>
-                <li>— Dashboard з date picker і Coda посиланнями</li>
+                <li>— PM Override: chips + dropdown в Project Exceptions</li>
+                <li>— Fix: SPA routing 404, UTF-8 в JSON конфігах</li>
+                <li>— Settings: Discord Webhook поля</li>
+              </ul>
+            </div>
+
+            <div className="border-t border-[#1a1a1a] pt-4">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-[#444] font-bold tracking-wider">v1.0</span>
+                <span className="text-[#555] text-xs">02.06.2026</span>
+              </div>
+              <ul className="space-y-1 text-[#444]">
+                <li>— Початковий запуск: Float Check + Order Sync</li>
+                <li>— Exceptions UI, Settings, NoPATBanner</li>
               </ul>
             </div>
 
           </div>
         </Section>
 
-        <Section title="ЩО ТАКЕ БЕКЛОГ І НАВІЩО ВІН" defaultOpen={true}>
-          <p>
-            Беклог — список задач для художників на наступний день. Збирається щовечора:
-            Float Check перевіряє завантаженість → Coda збирає беклог → Orders простягають пріоритет у Monday.
-          </p>
-          <p>
-            Цей інтерфейс замінює ручні запуски скриптів через Claude Code — все в одному місці,
-            одна кнопка, без питань про дозволи.
-          </p>
-        </Section>
-
-        <Section title="FLOAT API KEY — ДЛЯ АДМІНІВ">
-          <p>
-            Float API ключ вже налаштований у GitHub Secrets — <strong className="text-white">нічого робити не потрібно</strong>.
-            Він автоматично використовується при кожному запуску Float Check і Order Sync.
-          </p>
-          <p className="text-[#888]">
-            Якщо Float Check починає падати з помилкою 401 — зверніться до <strong className="text-white">Андрія або Діми</strong>:
-            тільки вони можуть оновити цей токен через GitHub Settings → Secrets.
-          </p>
-        </Section>
-
-        <Section title="GITHUB PAT — КОМАНДНИЙ ТОКЕН">
-          <p>Командний токен вже створений — поки що звертайтесь до Андрія, він надішле в особистих повідомленнях. Незабаром зробимо зручніше.</p>
-          {TEAM_PAT && <CopyPat />}
-          <Step n="1">Отримай токен від Андрія</Step>
-          <Step n="2">Відкрий <Code>Settings</Code> (іконка ⚙ вгорі праворуч)</Step>
-          <Step n="3">Встав у поле <Code>GitHub PAT</Code> → <Code>Save</Code></Step>
-          <p className="text-[#888]">
-            Якщо токен перестав працювати — звернись до Андрія, він видасть новий.
-          </p>
-        </Section>
-
-        <Section title="ЯК ДОДАТИ EXCEPTION">
-          <p>Exceptions — таблиці конфігурації для скриптів. Зберігаються в репо як JSON.</p>
-          <Step n="1">Відкрий вкладку <Code>EXCEPTIONS</Code></Step>
-          <Step n="2">Вибери потрібну таблицю (наприклад <Code>Name Exceptions</Code>)</Step>
-          <Step n="3">Натисни <Code>+ ADD ROW</Code></Step>
-          <Step n="4">Введи значення у відповідні колонки</Step>
-          <Step n="5">Натисни <Code>SAVE</Code> — зміни комітяться в репо, наступний run підхопить нові дані</Step>
-        </Section>
-
-        <Section title="FAQ — ТИПОВІ ПРОБЛЕМИ">
-          <div className="space-y-2">
-            <div className="border border-[#1e1e1e] p-4">
-              <div className="text-[#ccc] font-bold mb-2">Float Check падає з помилкою 401</div>
-              <div>Float API ключ протух або скинутий. Зверніться до Андрія або Діми — вони оновлять токен у GitHub Secrets.</div>
-            </div>
-            <div className="border border-[#1e1e1e] p-4">
-              <div className="text-[#ccc] font-bold mb-2">Художник не матчиться (NO MATCH в логах)</div>
-              <div>
-                Ім'я у Float і Monday відрізняється. Додай виключення у{' '}
-                <Code>Exceptions → Name Exceptions</Code>:
-                колонка Float name → Monday search name.
-              </div>
-            </div>
-            <div className="border border-[#1e1e1e] p-4">
-              <div className="text-[#ccc] font-bold mb-2">Задача не отримує Order</div>
-              <div>
-                Або задача є в <Code>Skip Tasks</Code>, або назва не матчиться.
-                Перевір <Code>Exceptions → Skip Tasks</Code>.
-              </div>
-            </div>
-            <div className="border border-[#1e1e1e] p-4">
-              <div className="text-[#ccc] font-bold mb-2">Кнопка RUN не реагує</div>
-              <div>Перевір GitHub PAT у Settings. Якщо PAT не вставлений — workflow не задиспетчеться.</div>
-            </div>
-            <div className="border border-[#1e1e1e] p-4">
-              <div className="text-[#ccc] font-bold mb-2">Float — READ ONLY?</div>
-              <div>
-                Так. Float — тільки читання. Назавжди. Скрипти НІКОЛИ не записують у Float.
-              </div>
-            </div>
-          </div>
-        </Section>
       </div>
     </div>
   )
