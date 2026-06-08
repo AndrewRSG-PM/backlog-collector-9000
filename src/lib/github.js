@@ -53,7 +53,7 @@ export async function getLatestRun(workflowFile) {
 export async function readConfigFile(path) {
   const res = await fetch(
     `${BASE}/repos/${OWNER}/${REPO}/contents/${path}?_=${Date.now()}`,
-    { headers: { ...headers(), 'Cache-Control': 'no-cache' } }
+    { headers: headers() }
   )
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const data = await res.json()
@@ -102,14 +102,14 @@ export async function getRunAnnotations(runId) {
   try {
     const jobsRes = await fetch(
       `${BASE}/repos/${OWNER}/${REPO}/actions/runs/${runId}/jobs`,
-      { headers: { ...headers(), 'Cache-Control': 'no-cache' } }
+      { headers: headers() }
     )
     if (!jobsRes.ok) return []
     const { jobs } = await jobsRes.json()
     if (!jobs?.length) return []
     const annRes = await fetch(
       `${BASE}/repos/${OWNER}/${REPO}/check-runs/${jobs[0].id}/annotations`,
-      { headers: { ...headers(), 'Cache-Control': 'no-cache' } }
+      { headers: headers() }
     )
     if (!annRes.ok) return []
     return await annRes.json()

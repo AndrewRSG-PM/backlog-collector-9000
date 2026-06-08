@@ -1,16 +1,82 @@
-# React + Vite
+# BK9K — Backlog Collector 9000
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Веб-інструмент для щоденного збору беклогу: Float Check, Order Sync, Assemble Backlog.
 
-Currently, two official plugins are available:
+**URL:** https://andrewrsg-pm.github.io/backlog-collector-9000
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+<details>
+<summary>Інструкція →</summary>
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Перший запуск (одноразово)
 
-## Expanding the ESLint configuration
+### 1. Отримай GitHub PAT від Андрія
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 2. Встав PAT в BK9K
+
+Відкрий сайт → вгорі буде оранжевий банер "GitHub PAT не встановлено" → натисни **ВСТАНОВИТИ PAT** → відкриється вікно Settings → встав токен у поле **GitHub PAT** → натисни **Save**.
+
+Банер зникне — все готово.
+
+---
+
+## Щоденна робота
+
+### Target Date
+
+Вгорі — поле з датою. За замовчуванням стоїть **наступний робочий день**. Змінюй якщо потрібно.
+
+---
+
+### Float Check
+
+Перевіряє завантаження художників у Float і відправляє звіт в Discord з тегами PM.
+
+| Кнопка | Що робить |
+|--------|-----------|
+| **Float Check → RUN** | Звіт в основний канал, з тегами PM |
+| **Float Check — Test → RUN** | Звіт в тестовий канал, без тегів PM |
+
+---
+
+### Order Sync
+
+Проставляє Order в Monday відповідно до пріоритетів задач у Float.
+
+Перед запуском можна увімкнути **DRY RUN** — тоді в Monday нічого не запишеться, тільки лог у GitHub Actions.
+
+---
+
+## Банери-попередження
+
+| Банер | Що означає | Що робити |
+|-------|------------|-----------|
+| Оранжевий | PAT не встановлено | Встав PAT в Settings |
+| Червоний | Останній Float Check завершився з помилкою | Звернись до Андрія |
+| Жовтий | Float session cookie протух | Звернись до Андрія — він оновить `FLOAT_SESSION_COOKIE` |
+
+---
+
+## Exceptions (налаштування)
+
+Вкладка **Settings → Exceptions** — тут налаштовуються виключення для Float Check і Order Sync.
+
+- **Max Hours** — художники з нестандартним лімітом годин (наприклад, арт-директор на 4h замість 8h)
+- **Skip Artists** — художники у Float, яких не потрібно включати у звіт Float Check
+- **Skip Tags** — теги задач у Float; задачі з такими тегами не враховуються при підрахунку годин художника
+- **Skip Tasks** — назви задач у Float, які виключаються з підрахунку (точний збіг або підрядок); не впливають на статус художника у звіті
+- **Project Exceptions** — якщо PM проекту у Float визначається неправильно, тут можна вказати вручну: який PM відповідає за цей проект. Саме він буде тегнутий у Float Check і отримає Order Sync для своїх художників
+- **Name Exceptions** — якщо ім'я художника у Float відрізняється від імені в Monday (наприклад `Vladislav Kaminskiy` у Float vs `Kaminsky` у Monday) — Order Sync не зможе знайти відповідність. Тут вказується mapping: Float ім'я → Monday ім'я
+
+Зміни зберігаються кнопкою **SAVE** — вони комітяться напряму в репо.
+
+---
+
+## Важливо
+
+- **Float — тільки читання.** BK9K нічого не змінює у Float.
+- **Monday — тільки колонка Order.** Нічого більше не пишеться.
+- **FLOAT_SESSION_COOKIE** оновлюється вручну раз на ~2 тижні — це робить Андрій.
+
+</details>
