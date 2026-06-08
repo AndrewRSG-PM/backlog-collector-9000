@@ -127,7 +127,7 @@ export default function Guides() {
 
         <Section title="ЯК ДОДАТИ EXCEPTION">
           <p>Exceptions — налаштування виключень для Float Check і Order Sync. Зберігаються в репо як JSON.</p>
-          <Step n="1">Відкрий <Code>Settings → Exceptions</Code></Step>
+          <Step n="1">Відкрий вкладку <Code>Exceptions</Code> у навігації</Step>
           <Step n="2">Вибери потрібну вкладку (Float Check / Name Exceptions / Skip Tasks / Project Exceptions)</Step>
           <Step n="3">Натисни <Code>+ ADD ROW</Code> → заповни поля</Step>
           <Step n="4">Натисни <Code>SAVE</Code> — зміни комітяться в репо, наступний run підхопить їх</Step>
@@ -142,7 +142,10 @@ export default function Guides() {
             </div>
             <div className="border border-[#1e1e1e] p-3">
               <div className="text-[#ccc] font-bold text-sm mb-1">Skip Tasks</div>
-              <div className="text-sm">Назви задач у Float які ігноруються — точний збіг або підрядок. Такі задачі не впливають на статус художника.</div>
+              <div className="text-sm space-y-1">
+                <div>Адміністративні задачі які не є проектним навантаженням: QA, Art Direction, Syncs, Tech Support тощо.</div>
+                <div className="text-[#777]">Їх години <strong className="text-[#aaa]">рахуються</strong> в загальне завантаження — художник з 7.5h проекту + 0.5h QA = 8h і не буде зафлаговано. Але якщо у художника <em>тільки</em> такі задачі без проектних — він потрапить у секцію "Не заплановані".</div>
+              </div>
             </div>
             <div className="border border-[#1e1e1e] p-3">
               <div className="text-[#ccc] font-bold text-sm mb-1">Project Exceptions</div>
