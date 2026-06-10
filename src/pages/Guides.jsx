@@ -3,16 +3,16 @@ import { useState } from 'react'
 function Section({ title, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div className="border border-[#1a1a1a]">
+    <div className="border border-[#1a2336]">
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#111] transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#131a2b] transition-colors"
       >
         <span className="text-base font-bold tracking-widest text-white">{title}</span>
-        <span className="text-[#777] text-sm flex-shrink-0 ml-4">{open ? '▲' : '▼'}</span>
+        <span className="text-[#6f81ab] text-sm flex-shrink-0 ml-4">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
-        <div className="px-5 pb-5 pt-2 border-t border-[#1a1a1a] space-y-3 text-[#999] text-base leading-relaxed">
+        <div className="px-5 pb-5 pt-2 border-t border-[#1a2336] space-y-3 text-[#93a2c2] text-base leading-relaxed">
           {children}
         </div>
       )}
@@ -23,7 +23,7 @@ function Section({ title, children, defaultOpen = false }) {
 function Step({ n, children }) {
   return (
     <div className="flex gap-3">
-      <span className="text-[#777] font-bold flex-shrink-0 w-6">{n}.</span>
+      <span className="text-[#6f81ab] font-bold flex-shrink-0 w-6">{n}.</span>
       <span>{children}</span>
     </div>
   )
@@ -31,7 +31,7 @@ function Step({ n, children }) {
 
 function Code({ children }) {
   return (
-    <code className="bg-[#1a1a1a] border border-[#2a2a2a] px-2 py-0.5 text-[#ccc] text-sm font-mono">
+    <code className="bg-[#1a2336] border border-[#2b3a5e] px-2 py-0.5 text-[#c9d3e6] text-sm font-mono">
       {children}
     </code>
   )
@@ -40,7 +40,7 @@ function Code({ children }) {
 function FaqItem({ q, children }) {
   return (
     <div className="border border-[#1e1e1e] p-4">
-      <div className="text-[#ccc] font-bold mb-2">{q}</div>
+      <div className="text-[#c9d3e6] font-bold mb-2">{q}</div>
       <div>{children}</div>
     </div>
   )
@@ -50,7 +50,7 @@ export default function Guides() {
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <div className="text-xs text-[#777] tracking-widest mb-1">DOCUMENTATION</div>
+        <div className="text-xs text-[#6f81ab] tracking-widest mb-1">DOCUMENTATION</div>
         <h1 className="text-lg font-bold text-white tracking-wide">Гайди — BK9K</h1>
       </div>
 
@@ -67,7 +67,7 @@ export default function Guides() {
             <div>— <strong className="text-white">Order Sync</strong> — проставляє Order в Monday відповідно до порядку задач у Float</div>
             <div>— <strong className="text-white">Assemble Backlog</strong> — збирає беклог через Coda</div>
           </div>
-          <p className="text-[#666]">Float — тільки читання. Monday — тільки колонка Order. Назавжди.</p>
+          <p className="text-[#6173a0]">Float — тільки читання. Monday — тільки колонка Order. Назавжди.</p>
         </Section>
 
         <Section title="ПЕРШИЙ ЗАПУСК — GITHUB PAT">
@@ -79,7 +79,7 @@ export default function Guides() {
           <Step n="2">Відкрий BK9K → вгорі буде оранжевий банер</Step>
           <Step n="3">Натисни <Code>ВСТАНОВИТИ PAT</Code> → відкриється Settings</Step>
           <Step n="4">Встав токен у поле <Code>GitHub PAT</Code> → <Code>Save</Code></Step>
-          <p className="text-[#888]">Токен зберігається тільки в браузері. Після очищення кешу — треба вставити знову.</p>
+          <p className="text-[#8191b6]">Токен зберігається тільки в браузері. Після очищення кешу — треба вставити знову.</p>
         </Section>
 
         <Section title="FLOAT CHECK — ЯК ВИКОРИСТОВУВАТИ">
@@ -88,7 +88,7 @@ export default function Guides() {
           <Step n="3">Статус зміниться на <Code>RUNNING</Code>, потім <Code>DONE</Code></Step>
           <Step n="4">Звіт з'явиться в основному Discord-каналі беклогу з тегами PM</Step>
           <p>Для тестового запуску (без тегів PM, в тестовий канал) — використовуй <Code>Float Check — Test</Code>.</p>
-          <p className="text-[#888]">
+          <p className="text-[#8191b6]">
             Що означають секції у звіті:<br />
             — художник без помітки → все OK<br />
             — <Code>{'< 8h'}</Code> / <Code>{'> Xh'}</Code> → недо- або перезавантажений<br />
@@ -103,11 +103,11 @@ export default function Guides() {
           <Step n="2">Увімкни <Code>DRY RUN</Code> якщо хочеш перевірити без запису в Monday</Step>
           <Step n="3">Натисни <Code>RUN</Code></Step>
           <Step n="4">В логах GitHub Actions видно що і в якому порядку проставилось</Step>
-          <p className="text-[#888]">
+          <p className="text-[#8191b6]">
             Order Sync зчитує візуальний порядок задач у Float-календарі (порядок перетягуванням)
             і переносить його в колонку Order у Monday. Тільки Order — більше нічого не змінюється.
           </p>
-          <p className="text-[#888]">
+          <p className="text-[#8191b6]">
             Якщо з'явився жовтий банер — FLOAT_SESSION_COOKIE протух.
             Дивись гайд нижче.
           </p>
@@ -122,7 +122,7 @@ export default function Guides() {
           <Step n="2">F12 → вкладка <Code>Application</Code> → <Code>Cookies</Code> → <Code>rsg.float.com</Code></Step>
           <Step n="3">Знайди куку <Code>float2sessprd</Code> → скопіюй <Code>Value</Code></Step>
           <Step n="4">Відкрий BK9K → Settings → поле <Code>FLOAT SESSION COOKIE</Code> → вставити → <Code>UPDATE</Code></Step>
-          <p className="text-[#888]">Термін дії видно в колонці Expires у DevTools. Зазвичай ~2 тижні від останнього входу.</p>
+          <p className="text-[#8191b6]">Термін дії видно в колонці Expires у DevTools. Зазвичай ~2 тижні від останнього входу.</p>
         </Section>
 
         <Section title="ЯК ДОДАТИ EXCEPTION">
@@ -133,7 +133,7 @@ export default function Guides() {
           <Step n="4">Натисни <Code>SAVE</Code> — зміни комітяться в репо, наступний run підхопить їх</Step>
           <div className="space-y-2 mt-2">
             <div className="border border-[#1e1e1e] p-3">
-              <div className="text-[#ccc] font-bold text-sm mb-1">Float Check</div>
+              <div className="text-[#c9d3e6] font-bold text-sm mb-1">Float Check</div>
               <div className="text-sm space-y-0.5">
                 <div>— <Code>max_hours</Code>: нестандартний ліміт годин для художника</div>
                 <div>— <Code>skip_artist</Code>: повністю ігнорувати художника у звіті</div>
@@ -141,18 +141,18 @@ export default function Guides() {
               </div>
             </div>
             <div className="border border-[#1e1e1e] p-3">
-              <div className="text-[#ccc] font-bold text-sm mb-1">Skip Tasks</div>
+              <div className="text-[#c9d3e6] font-bold text-sm mb-1">Skip Tasks</div>
               <div className="text-sm space-y-1">
                 <div>Адміністративні задачі які не є проектним навантаженням: QA, Art Direction, Syncs, Tech Support тощо.</div>
-                <div className="text-[#777]">Їх години <strong className="text-[#aaa]">рахуються</strong> в загальне завантаження — художник з 7.5h проекту + 0.5h QA = 8h і не буде зафлаговано. Але якщо у художника <em>тільки</em> такі задачі без проектних — він потрапить у секцію "Не заплановані".</div>
+                <div className="text-[#6f81ab]">Їх години <strong className="text-[#a6b3cd]">рахуються</strong> в загальне завантаження — художник з 7.5h проекту + 0.5h QA = 8h і не буде зафлаговано. Але якщо у художника <em>тільки</em> такі задачі без проектних — він потрапить у секцію "Не заплановані".</div>
               </div>
             </div>
             <div className="border border-[#1e1e1e] p-3">
-              <div className="text-[#ccc] font-bold text-sm mb-1">Project Exceptions</div>
+              <div className="text-[#c9d3e6] font-bold text-sm mb-1">Project Exceptions</div>
               <div className="text-sm">Ручний PM-override для проекту. Якщо PM визначається неправильно автоматично — вкажи тут вручну який PM відповідає за цей проект.</div>
             </div>
             <div className="border border-[#1e1e1e] p-3">
-              <div className="text-[#ccc] font-bold text-sm mb-1">Name Exceptions</div>
+              <div className="text-[#c9d3e6] font-bold text-sm mb-1">Name Exceptions</div>
               <div className="text-sm">Якщо ім'я художника у Float відрізняється від Monday — Order Sync не знайде збіг. Вкажи mapping: Float ім'я → Monday ім'я.</div>
             </div>
           </div>
@@ -190,9 +190,9 @@ export default function Guides() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-white font-bold tracking-wider">v1.3</span>
-                <span className="text-[#555] text-xs">08.06.2026</span>
+                <span className="text-[#51679c] text-xs">08.06.2026</span>
               </div>
-              <ul className="space-y-1 text-[#999]">
+              <ul className="space-y-1 text-[#93a2c2]">
                 <li>— Float visual sort order: Playwright + session cookie → правильний порядок задач</li>
                 <li>— OrderSyncCookieBanner: попередження коли FLOAT_SESSION_COOKIE протух</li>
                 <li>— Fix: NO_MENTIONS режим для кількох PM на одному проекті</li>
@@ -203,12 +203,12 @@ export default function Guides() {
               </ul>
             </div>
 
-            <div className="border-t border-[#1a1a1a] pt-4">
+            <div className="border-t border-[#1a2336] pt-4">
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-[#aaa] font-bold tracking-wider">v1.2</span>
-                <span className="text-[#555] text-xs">04.06.2026</span>
+                <span className="text-[#a6b3cd] font-bold tracking-wider">v1.2</span>
+                <span className="text-[#51679c] text-xs">04.06.2026</span>
               </div>
-              <ul className="space-y-1 text-[#777]">
+              <ul className="space-y-1 text-[#6f81ab]">
                 <li>— Float API Key замість JWT: безстроковий, не протухає</li>
                 <li>— PM attribution через Float project_manager (без Monday)</li>
                 <li>— 3-денне вікно для визначення домінантного PM</li>
@@ -218,24 +218,24 @@ export default function Guides() {
               </ul>
             </div>
 
-            <div className="border-t border-[#1a1a1a] pt-4">
+            <div className="border-t border-[#1a2336] pt-4">
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-[#666] font-bold tracking-wider">v1.1</span>
-                <span className="text-[#555] text-xs">02.06.2026</span>
+                <span className="text-[#6173a0] font-bold tracking-wider">v1.1</span>
+                <span className="text-[#51679c] text-xs">02.06.2026</span>
               </div>
-              <ul className="space-y-1 text-[#555]">
+              <ul className="space-y-1 text-[#51679c]">
                 <li>— PM Override: chips + dropdown в Project Exceptions</li>
                 <li>— Fix: SPA routing 404, UTF-8 в JSON конфігах</li>
                 <li>— Settings: Discord Webhook поля</li>
               </ul>
             </div>
 
-            <div className="border-t border-[#1a1a1a] pt-4">
+            <div className="border-t border-[#1a2336] pt-4">
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-[#444] font-bold tracking-wider">v1.0</span>
-                <span className="text-[#555] text-xs">02.06.2026</span>
+                <span className="text-[#44598c] font-bold tracking-wider">v1.0</span>
+                <span className="text-[#51679c] text-xs">02.06.2026</span>
               </div>
-              <ul className="space-y-1 text-[#444]">
+              <ul className="space-y-1 text-[#44598c]">
                 <li>— Початковий запуск: Float Check + Order Sync</li>
                 <li>— Exceptions UI, Settings, NoPATBanner</li>
               </ul>

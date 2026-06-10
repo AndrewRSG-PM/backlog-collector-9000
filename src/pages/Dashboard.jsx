@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useCallback } from 'react'
-import { dispatchWorkflow, getLatestRun, getRunAnnotations } from '../lib/github'
+import { dispatchWorkflow, getLatestRun, getRunAnnotations, getSecretInfo } from '../lib/github'
 
 const CODA_2D_URL = 'https://coda.io/d/RSG-2D-Team_d6SntNSj1Co/AutoOverview-Monday_suz0ScO-#_lupvs87t'
 const CODA_3D_URL = 'https://coda.io/d/RSG-3D-Team_dwKVAnig23m/AutoOverview-Monday_suOd-2bZ#_lugrhTam'
@@ -39,8 +39,8 @@ function ActionButton({ label, onClick, disabled, variant = 'primary', className
       className={`
         px-7 py-3 text-base tracking-wider font-bold rounded-lg transition-all
         ${variant === 'primary'
-          ? 'bg-[#e5e5e5] text-[#111] hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed'
-          : 'border border-[#3a3a3a] text-[#999] hover:border-[#666] hover:text-[#ddd] disabled:opacity-30 disabled:cursor-not-allowed'
+          ? 'bg-[#dde6f5] text-[#131a2b] hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed'
+          : 'border border-[#3b4f7c] text-[#93a2c2] hover:border-[#6173a0] hover:text-[#d6deee] disabled:opacity-30 disabled:cursor-not-allowed'
         }
         ${className}
       `}
@@ -86,11 +86,11 @@ function BacklogTriggerCard({ title, description, dept, codaUrl, date }) {
   }
 
   return (
-    <div className="rounded-2xl border border-[#222] bg-[#111] p-7 hover:border-[#333] transition-colors">
+    <div className="rounded-2xl border border-[#2b3a5e] bg-[#131a2b] p-7 hover:border-[#34466e] transition-colors">
       <div className="flex items-start justify-between gap-4 mb-3">
         <div>
           <div className="text-lg font-bold text-white tracking-wide mb-2">{title}</div>
-          <div className="text-base text-[#999]">{description}</div>
+          <div className="text-base text-[#93a2c2]">{description}</div>
         </div>
         <div className="flex items-center gap-4 flex-shrink-0">
           {run && <StatusBadge status={run.status} conclusion={run.conclusion} />}
@@ -107,10 +107,10 @@ function BacklogTriggerCard({ title, description, dept, codaUrl, date }) {
         </div>
       </div>
       {run && (
-        <div className="mt-2 text-[10px] text-[#777] flex items-center gap-3">
+        <div className="mt-2 text-[10px] text-[#6f81ab] flex items-center gap-3">
           <span>Run #{run.run_number}</span>
           <span>{new Date(run.created_at).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' })}</span>
-          {run.html_url && <a href={run.html_url} target="_blank" rel="noreferrer" className="underline hover:text-[#999]">→ view logs</a>}
+          {run.html_url && <a href={run.html_url} target="_blank" rel="noreferrer" className="underline hover:text-[#93a2c2]">→ view logs</a>}
         </div>
       )}
     </div>
@@ -169,25 +169,25 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
   const buttons = actions || [{ label: 'RUN', extra: {}, variant: testMode ? 'secondary' : 'primary' }]
 
   return (
-    <div className="rounded-2xl border border-[#222] bg-[#111] p-7 hover:border-[#333] transition-colors">
+    <div className="rounded-2xl border border-[#2b3a5e] bg-[#131a2b] p-7 hover:border-[#34466e] transition-colors">
       <div className="flex items-start justify-between gap-4 mb-3">
         <div>
           <div className="text-lg font-bold text-white tracking-wide mb-2">
             {title}
             {testMode && <span className="ml-3 text-sm text-yellow-500 border border-yellow-500/40 rounded-md px-2 py-0.5">TEST</span>}
           </div>
-          <div className="text-base text-[#999]">{description}</div>
+          <div className="text-base text-[#93a2c2]">{description}</div>
         </div>
         <div className="flex items-center gap-4 flex-shrink-0">
           {showDryRun && (
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <div
                 onClick={() => setDryRun(v => !v)}
-                className={`w-10 h-5 rounded-full transition-colors relative ${dryRun ? 'bg-yellow-600' : 'bg-[#2a2a2a]'}`}
+                className={`w-10 h-5 rounded-full transition-colors relative ${dryRun ? 'bg-yellow-600' : 'bg-[#2b3a5e]'}`}
               >
-                <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-[#e5e5e5] transition-transform ${dryRun ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-[#dde6f5] transition-transform ${dryRun ? 'translate-x-5' : 'translate-x-0.5'}`} />
               </div>
-              <span className={`text-xs tracking-wider ${dryRun ? 'text-yellow-400' : 'text-[#777]'}`}>
+              <span className={`text-xs tracking-wider ${dryRun ? 'text-yellow-400' : 'text-[#6f81ab]'}`}>
                 DRY RUN
               </span>
             </label>
@@ -213,11 +213,11 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
         </div>
       )}
       {run && (
-        <div className="mt-2 text-[10px] text-[#777] flex items-center gap-3">
+        <div className="mt-2 text-[10px] text-[#6f81ab] flex items-center gap-3">
           <span>Run #{run.run_number}</span>
           <span>{new Date(run.created_at).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' })}</span>
           {run.html_url && (
-            <a href={run.html_url} target="_blank" rel="noreferrer" className="underline hover:text-[#777]">
+            <a href={run.html_url} target="_blank" rel="noreferrer" className="underline hover:text-[#6f81ab]">
               → view logs
             </a>
           )}
@@ -316,6 +316,66 @@ function OrderSyncCookieBanner() {
   )
 }
 
+const COOKIE_LIFETIME_DAYS = 14
+
+function HealthPanel() {
+  const [cookieDays, setCookieDays] = useState(null) // days left, null = unknown
+  const [runs, setRuns] = useState({})
+
+  useEffect(() => {
+    if (!localStorage.getItem('bc9000_github_pat')) return
+    getSecretInfo('FLOAT_SESSION_COOKIE').then(info => {
+      if (info?.updated_at) {
+        const ageDays = (Date.now() - new Date(info.updated_at).getTime()) / 86400000
+        setCookieDays(Math.round(COOKIE_LIFETIME_DAYS - ageDays))
+      }
+    }).catch(() => {})
+    for (const [key, file] of Object.entries(WORKFLOWS)) {
+      getLatestRun(file).then(run => {
+        if (run) setRuns(r => ({ ...r, [key]: run }))
+      }).catch(() => {})
+    }
+  }, [])
+
+  const cookieColor = cookieDays === null ? 'text-[#6f81ab]'
+    : cookieDays <= 1 ? 'text-red-400'
+    : cookieDays <= 4 ? 'text-yellow-400'
+    : 'text-green-400'
+  const cookieText = cookieDays === null ? '?'
+    : cookieDays <= 0 ? 'протух!'
+    : `~${cookieDays} дн.`
+
+  const runItems = [
+    { key: 'floatCheck', label: 'Float Check' },
+    { key: 'orderSync', label: 'Order Sync' },
+  ]
+
+  return (
+    <div className="rounded-xl border border-[#2b3a5e] bg-[#131a2b] px-5 py-3 flex flex-wrap items-center gap-x-7 gap-y-2 text-sm">
+      <span className="text-[#6f81ab] tracking-wider text-xs">HEALTH</span>
+      <span className="text-[#93a2c2]">
+        🍪 Float cookie: <span className={cookieColor}>{cookieText}</span>
+      </span>
+      {runItems.map(({ key, label }) => {
+        const run = runs[key]
+        const ok = run?.conclusion === 'success'
+        return (
+          <span key={key} className="text-[#93a2c2]">
+            {label}:{' '}
+            {run ? (
+              <span className={ok ? 'text-green-400' : 'text-red-400'}>
+                {ok ? '✓' : '✕'} {new Date(run.created_at).toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' })}
+              </span>
+            ) : (
+              <span className="text-[#6f81ab]">—</span>
+            )}
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const [date, setDate] = useState(todayPlus1())
 
@@ -324,20 +384,21 @@ export default function Dashboard() {
       <NoPATBanner />
       <FloatFailBanner />
       <OrderSyncCookieBanner />
+      <HealthPanel />
 
       {/* Date selector */}
       <div>
-        <div className="text-base text-[#888] tracking-wider mb-3">TARGET DATE</div>
+        <div className="text-base text-[#8191b6] tracking-wider mb-3">TARGET DATE</div>
         <div className="flex items-center gap-3">
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="rounded-lg bg-[#111] border border-[#2a2a2a] text-[#e5e5e5] text-base px-5 py-3 font-mono focus:outline-none focus:border-[#555]"
+            className="rounded-lg bg-[#131a2b] border border-[#2b3a5e] text-[#dde6f5] text-base px-5 py-3 font-mono focus:outline-none focus:border-[#51679c]"
           />
           <button
             onClick={() => setDate(todayPlus1())}
-            className="text-xs text-[#777] hover:text-[#888] underline"
+            className="text-xs text-[#6f81ab] hover:text-[#8191b6] underline"
           >
             reset to tomorrow
           </button>
@@ -346,9 +407,9 @@ export default function Dashboard() {
 
       {/* Section: Float */}
       <div>
-        <div className="text-sm text-[#777] tracking-widest mb-5 flex items-center gap-3">
+        <div className="text-sm text-[#6f81ab] tracking-widest mb-5 flex items-center gap-3">
           <span>── FLOAT CHECK</span>
-          <span className="flex-1 border-t border-[#1a1a1a]" />
+          <span className="flex-1 border-t border-[#1a2336]" />
         </div>
         <div className="space-y-2">
           <WorkflowCard
@@ -373,9 +434,9 @@ export default function Dashboard() {
 
       {/* Section: Backlog Assembly */}
       <div>
-        <div className="text-sm text-[#777] tracking-widest mb-5 flex items-center gap-3">
+        <div className="text-sm text-[#6f81ab] tracking-widest mb-5 flex items-center gap-3">
           <span>── ASSEMBLE BACKLOG</span>
-          <span className="flex-1 border-t border-[#1a1a1a]" />
+          <span className="flex-1 border-t border-[#1a2336]" />
         </div>
         <div className="space-y-2">
           <BacklogTriggerCard
@@ -397,9 +458,9 @@ export default function Dashboard() {
 
       {/* Section: Orders */}
       <div>
-        <div className="text-sm text-[#777] tracking-widest mb-5 flex items-center gap-3">
+        <div className="text-sm text-[#6f81ab] tracking-widest mb-5 flex items-center gap-3">
           <span>── ORDER SYNC</span>
-          <span className="flex-1 border-t border-[#1a1a1a]" />
+          <span className="flex-1 border-t border-[#1a2336]" />
         </div>
         <WorkflowCard
           title="Sync Orders"

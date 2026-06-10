@@ -21,13 +21,13 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="border-b border-[#2a2a2a] px-8 py-5 flex items-center justify-between">
+      <header className="border-b border-[#2b3a5e] px-8 py-5 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <RobotLogo size={36} />
           <span className="text-white font-bold text-xl tracking-widest select-none">
             BACKLOG-COLLECTOR-9000
           </span>
-          <span className="text-[#777] text-xs tracking-wider select-none">v1.3</span>
+          <span className="text-[#6f81ab] text-xs tracking-wider select-none">v1.4</span>
         </div>
 
         <div className="flex items-center gap-6">
@@ -40,8 +40,8 @@ export default function Layout() {
                 className={({ isActive }) =>
                   `px-5 py-2.5 text-base tracking-wider rounded-lg border transition-colors ${
                     isActive
-                      ? 'border-[#3a3a3a] text-white bg-[#1c1c1c]'
-                      : 'border-transparent text-[#999] hover:text-[#ccc] hover:bg-[#161616]'
+                      ? 'border-[#3b4f7c] text-white bg-[#1d2740]'
+                      : 'border-transparent text-[#93a2c2] hover:text-[#c9d3e6] hover:bg-[#151d30]'
                   }`
                 }
               >
@@ -52,7 +52,7 @@ export default function Layout() {
 
           <button
             onClick={() => setSettingsOpen(true)}
-            className="px-5 py-2.5 text-base tracking-wider rounded-lg border border-[#2a2a2a] text-[#999] hover:text-[#ccc] hover:border-[#444] transition-colors"
+            className="px-5 py-2.5 text-base tracking-wider rounded-lg border border-[#2b3a5e] text-[#93a2c2] hover:text-[#c9d3e6] hover:border-[#44598c] transition-colors"
           >
             ⚙ SETTINGS
           </button>
@@ -65,7 +65,7 @@ export default function Layout() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#1a1a1a] px-6 py-4 text-center text-[#666] text-sm tracking-wider">
+      <footer className="border-t border-[#1a2336] px-6 py-4 text-center text-[#6173a0] text-sm tracking-wider">
         BACKLOG-COLLECTOR-9000 &nbsp;·&nbsp; AndrewRSG-PM &nbsp;·&nbsp; READ FLOAT, WRITE ORDERS
       </footer>
 

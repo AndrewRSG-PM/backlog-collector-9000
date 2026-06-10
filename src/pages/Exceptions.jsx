@@ -45,28 +45,28 @@ const FLOAT_TYPE_OPTIONS = [
 function FloatCheckGuide() {
   const [open, setOpen] = useState(false)
   return (
-    <div className="border border-[#1a1a1a]">
+    <div className="border border-[#1a2336]">
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 text-[#888] hover:text-[#888] transition-colors text-left"
+        className="w-full flex items-center justify-between px-4 py-3 text-[#8191b6] hover:text-[#8191b6] transition-colors text-left"
       >
         <span className="tracking-wider text-xs">ЯК ЦЕ ПРАЦЮЄ</span>
         <span className="text-xs">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
-        <div className="px-4 pb-4 pt-3 border-t border-[#1a1a1a] space-y-3 text-xs text-[#999]">
+        <div className="px-4 pb-4 pt-3 border-t border-[#1a2336] space-y-3 text-xs text-[#93a2c2]">
           <p>Float Check щодня перевіряє завантаження художників і надсилає звіт у Discord. Помічає:</p>
           <ul className="space-y-1 ml-2">
-            <li>• <span className="text-[#999]">&lt; 8h</span> — художник недозавантажений</li>
-            <li>• <span className="text-[#999]">&gt; 8h</span> — перевантажений (якщо немає виключення)</li>
+            <li>• <span className="text-[#93a2c2]">&lt; 8h</span> — художник недозавантажений</li>
+            <li>• <span className="text-[#93a2c2]">&gt; 8h</span> — перевантажений (якщо немає виключення)</li>
             <li>• <span className="text-yellow-700">Tentative</span> — задачі з непідтвердженим статусом</li>
           </ul>
-          <p className="border-t border-[#1a1a1a] pt-3">Виключення в цій таблиці:</p>
+          <p className="border-t border-[#1a2336] pt-3">Виключення в цій таблиці:</p>
           <ul className="space-y-1.5 ml-2">
-            <li>• <span className="text-[#888]">Максимум годин/день</span> — художник може мати більше 8h, це ок. Вкажи ліміт.</li>
-            <li>• <span className="text-[#888]">Пропустити художника</span> — якщо ім'я містить вказаний паттерн (напр. ⏳) — художник повністю ігнорується.</li>
-            <li>• <span className="text-[#888]">Пропустити по тегу</span> — задачі з цим тегом у Float ігноруються (напр. Fix Price).</li>
-            <li>• <span className="text-[#888]">Тип відгулу</span> — цей timeoff рахується як "недоступний", а не флагується як проблема.</li>
+            <li>• <span className="text-[#8191b6]">Максимум годин/день</span> — художник може мати більше 8h, це ок. Вкажи ліміт.</li>
+            <li>• <span className="text-[#8191b6]">Пропустити художника</span> — якщо ім'я містить вказаний паттерн (напр. ⏳) — художник повністю ігнорується.</li>
+            <li>• <span className="text-[#8191b6]">Пропустити по тегу</span> — задачі з цим тегом у Float ігноруються (напр. Fix Price).</li>
+            <li>• <span className="text-[#8191b6]">Тип відгулу</span> — цей timeoff рахується як "недоступний", а не флагується як проблема.</li>
           </ul>
         </div>
       )}
@@ -140,7 +140,7 @@ function FloatCheckEditor({ file }) {
     }
   }
 
-  if (loading) return <div className="text-[#777] text-xs py-4">Завантаження...</div>
+  if (loading) return <div className="text-[#6f81ab] text-xs py-4">Завантаження...</div>
 
   return (
     <div className="space-y-4">
@@ -151,22 +151,22 @@ function FloatCheckEditor({ file }) {
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-[#2a2a2a]">
-              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">ЗНАЧЕННЯ</th>
-              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">ТИП ВИКЛЮЧЕННЯ</th>
-              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">ЕФЕКТ</th>
-              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">ПРИМІТКА</th>
+            <tr className="border-b border-[#2b3a5e]">
+              <th className="text-left text-[#8191b6] tracking-wider py-3 pr-4 font-normal text-xs">ЗНАЧЕННЯ</th>
+              <th className="text-left text-[#8191b6] tracking-wider py-3 pr-4 font-normal text-xs">ТИП ВИКЛЮЧЕННЯ</th>
+              <th className="text-left text-[#8191b6] tracking-wider py-3 pr-4 font-normal text-xs">ЕФЕКТ</th>
+              <th className="text-left text-[#8191b6] tracking-wider py-3 pr-4 font-normal text-xs">ПРИМІТКА</th>
               <th className="w-8" />
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && (
-              <tr><td colSpan={5} className="text-[#777] py-6 text-center text-sm">— порожньо —</td></tr>
+              <tr><td colSpan={5} className="text-[#6f81ab] py-6 text-center text-sm">— порожньо —</td></tr>
             )}
             {rows.map((row, i) => {
               const opt = FLOAT_TYPE_OPTIONS.find(o => o.value === row.type) || FLOAT_TYPE_OPTIONS[0]
               return (
-                <tr key={i} className="border-b border-[#1a1a1a] hover:bg-[#111] group">
+                <tr key={i} className="border-b border-[#1a2336] hover:bg-[#131a2b] group">
                   {/* Name/value input */}
                   <td className="py-2 pr-3">
                     <input
@@ -174,7 +174,7 @@ function FloatCheckEditor({ file }) {
                       value={row.name || ''}
                       onChange={e => updateRow(i, 'name', e.target.value)}
                       placeholder={opt.namePlaceholder}
-                      className="bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#e5e5e5] px-3 py-2 text-sm font-mono focus:outline-none focus:bg-[#0d0d0d] w-48"
+                      className="bg-transparent border border-transparent hover:border-[#2b3a5e] focus:border-[#44598c] text-[#dde6f5] px-3 py-2 text-sm font-mono focus:outline-none focus:bg-[#0e1220] w-48"
                     />
                   </td>
                   {/* Type dropdown */}
@@ -182,7 +182,7 @@ function FloatCheckEditor({ file }) {
                     <select
                       value={row.type || 'max_hours'}
                       onChange={e => updateRow(i, 'type', e.target.value)}
-                      className="bg-[#111] border border-[#2a2a2a] text-[#ccc] px-3 py-2 text-sm focus:outline-none focus:border-[#444] w-52"
+                      className="bg-[#131a2b] border border-[#2b3a5e] text-[#c9d3e6] px-3 py-2 text-sm focus:outline-none focus:border-[#44598c] w-52"
                     >
                       {FLOAT_TYPE_OPTIONS.map(o => (
                         <option key={o.value} value={o.value}>{o.label}</option>
@@ -197,12 +197,12 @@ function FloatCheckEditor({ file }) {
                           type="number"
                           value={row.value || ''}
                           onChange={e => updateRow(i, 'value', e.target.value)}
-                          className="w-16 bg-transparent border border-[#2a2a2a] focus:border-[#444] text-[#e5e5e5] px-3 py-2 text-sm font-mono focus:outline-none focus:bg-[#0d0d0d] text-center"
+                          className="w-16 bg-transparent border border-[#2b3a5e] focus:border-[#44598c] text-[#dde6f5] px-3 py-2 text-sm font-mono focus:outline-none focus:bg-[#0e1220] text-center"
                         />
-                        <span className="text-[#888] text-xs">год/день</span>
+                        <span className="text-[#8191b6] text-xs">год/день</span>
                       </div>
                     ) : (
-                      <span className="text-[#777] text-xs italic px-1">{opt.effectLabel}</span>
+                      <span className="text-[#6f81ab] text-xs italic px-1">{opt.effectLabel}</span>
                     )}
                   </td>
                   {/* Note */}
@@ -212,13 +212,13 @@ function FloatCheckEditor({ file }) {
                       value={row.note || ''}
                       onChange={e => updateRow(i, 'note', e.target.value)}
                       placeholder="необов'язково"
-                      className="bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#888] px-3 py-2 text-xs font-mono focus:outline-none focus:bg-[#0d0d0d] w-40"
+                      className="bg-transparent border border-transparent hover:border-[#2b3a5e] focus:border-[#44598c] text-[#8191b6] px-3 py-2 text-xs font-mono focus:outline-none focus:bg-[#0e1220] w-40"
                     />
                   </td>
                   <td className="py-2">
                     <button
                       onClick={() => deleteRow(i)}
-                      className="text-[#666] hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity px-2"
+                      className="text-[#6173a0] hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity px-2"
                     >✕</button>
                   </td>
                 </tr>
@@ -228,12 +228,12 @@ function FloatCheckEditor({ file }) {
         </table>
       </div>
       <div className="flex items-center gap-3 pt-1">
-        <button onClick={addRow} className="text-sm text-[#999] hover:text-[#aaa] border border-[#2a2a2a] hover:border-[#444] px-4 py-2 transition-colors">+ ADD ROW</button>
-        <button onClick={save} disabled={saving} className="text-sm tracking-wider border border-[#444] text-[#aaa] hover:border-[#888] hover:text-white px-5 py-2 transition-colors disabled:opacity-40">
+        <button onClick={addRow} className="text-sm text-[#93a2c2] hover:text-[#a6b3cd] border border-[#2b3a5e] hover:border-[#44598c] px-4 py-2 transition-colors">+ ADD ROW</button>
+        <button onClick={save} disabled={saving} className="text-sm tracking-wider border border-[#44598c] text-[#a6b3cd] hover:border-[#8191b6] hover:text-white px-5 py-2 transition-colors disabled:opacity-40">
           {saving ? '...' : saved ? '✓ ЗБЕРЕЖЕНО' : 'SAVE'}
         </button>
-        <button onClick={load} className="text-xs text-[#777] hover:text-[#777] underline">reload</button>
-        <span className="text-[#666] text-[10px] ml-auto">{file}</span>
+        <button onClick={load} className="text-xs text-[#6f81ab] hover:text-[#6f81ab] underline">reload</button>
+        <span className="text-[#6173a0] text-[10px] ml-auto">{file}</span>
       </div>
     </div>
   )
@@ -311,14 +311,14 @@ function SkipTasksEditor() {
     }
   }
 
-  if (loading) return <div className="text-[#777] text-xs py-4">Завантаження...</div>
+  if (loading) return <div className="text-[#6f81ab] text-xs py-4">Завантаження...</div>
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-[#888]">
+      <p className="text-xs text-[#8191b6]">
         Задачі в цьому списку не отримують Order в Monday.{' '}
-        <span className="text-[#999]">Точний збіг</span> — повна назва задачі.{' '}
-        <span className="text-[#999]">Містить</span> — будь-яка задача, де є цей підрядок (напр. "QA" пропустить і "QA", і "QA pass").
+        <span className="text-[#93a2c2]">Точний збіг</span> — повна назва задачі.{' '}
+        <span className="text-[#93a2c2]">Містить</span> — будь-яка задача, де є цей підрядок (напр. "QA" пропустить і "QA", і "QA pass").
       </p>
       {error && (
         <div className="text-red-400 text-xs border border-red-900/40 px-3 py-2 bg-red-950/20">✕ {error}</div>
@@ -326,32 +326,32 @@ function SkipTasksEditor() {
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-[#2a2a2a]">
-              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">НАЗВА ЗАДАЧІ</th>
-              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">ЗБІГ</th>
-              <th className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">ПРИМІТКА</th>
+            <tr className="border-b border-[#2b3a5e]">
+              <th className="text-left text-[#8191b6] tracking-wider py-3 pr-4 font-normal text-xs">НАЗВА ЗАДАЧІ</th>
+              <th className="text-left text-[#8191b6] tracking-wider py-3 pr-4 font-normal text-xs">ЗБІГ</th>
+              <th className="text-left text-[#8191b6] tracking-wider py-3 pr-4 font-normal text-xs">ПРИМІТКА</th>
               <th className="w-8" />
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && (
-              <tr><td colSpan={4} className="text-[#777] py-6 text-center text-sm">— порожньо —</td></tr>
+              <tr><td colSpan={4} className="text-[#6f81ab] py-6 text-center text-sm">— порожньо —</td></tr>
             )}
             {rows.map((row, i) => (
-              <tr key={i} className="border-b border-[#1a1a1a] hover:bg-[#111] group">
+              <tr key={i} className="border-b border-[#1a2336] hover:bg-[#131a2b] group">
                 <td className="py-2 pr-3">
                   <input
                     type="text"
                     value={row.name}
                     onChange={e => updateRow(i, 'name', e.target.value)}
-                    className="bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#e5e5e5] px-3 py-2 text-sm font-mono focus:outline-none focus:bg-[#0d0d0d] w-64"
+                    className="bg-transparent border border-transparent hover:border-[#2b3a5e] focus:border-[#44598c] text-[#dde6f5] px-3 py-2 text-sm font-mono focus:outline-none focus:bg-[#0e1220] w-64"
                   />
                 </td>
                 <td className="py-2 pr-3">
                   <select
                     value={row.match}
                     onChange={e => updateRow(i, 'match', e.target.value)}
-                    className="bg-[#111] border border-[#2a2a2a] text-[#ccc] px-3 py-2 text-sm focus:outline-none focus:border-[#444]"
+                    className="bg-[#131a2b] border border-[#2b3a5e] text-[#c9d3e6] px-3 py-2 text-sm focus:outline-none focus:border-[#44598c]"
                   >
                     <option value="exact">точний збіг</option>
                     <option value="contains">містить</option>
@@ -363,11 +363,11 @@ function SkipTasksEditor() {
                     value={row.note}
                     onChange={e => updateRow(i, 'note', e.target.value)}
                     placeholder="необов'язково"
-                    className="bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#888] px-3 py-2 text-xs font-mono focus:outline-none focus:bg-[#0d0d0d] w-40"
+                    className="bg-transparent border border-transparent hover:border-[#2b3a5e] focus:border-[#44598c] text-[#8191b6] px-3 py-2 text-xs font-mono focus:outline-none focus:bg-[#0e1220] w-40"
                   />
                 </td>
                 <td className="py-2">
-                  <button onClick={() => deleteRow(i)} className="text-[#666] hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity px-2">✕</button>
+                  <button onClick={() => deleteRow(i)} className="text-[#6173a0] hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity px-2">✕</button>
                 </td>
               </tr>
             ))}
@@ -375,11 +375,11 @@ function SkipTasksEditor() {
         </table>
       </div>
       <div className="flex items-center gap-3 pt-1">
-        <button onClick={addRow} className="text-sm text-[#999] hover:text-[#aaa] border border-[#2a2a2a] hover:border-[#444] px-4 py-2 transition-colors">+ ADD ROW</button>
-        <button onClick={save} disabled={saving} className="text-sm tracking-wider border border-[#444] text-[#aaa] hover:border-[#888] hover:text-white px-5 py-2 transition-colors disabled:opacity-40">
+        <button onClick={addRow} className="text-sm text-[#93a2c2] hover:text-[#a6b3cd] border border-[#2b3a5e] hover:border-[#44598c] px-4 py-2 transition-colors">+ ADD ROW</button>
+        <button onClick={save} disabled={saving} className="text-sm tracking-wider border border-[#44598c] text-[#a6b3cd] hover:border-[#8191b6] hover:text-white px-5 py-2 transition-colors disabled:opacity-40">
           {saving ? '...' : saved ? '✓ ЗБЕРЕЖЕНО' : 'SAVE'}
         </button>
-        <button onClick={load} className="text-xs text-[#777] hover:text-[#777] underline">reload</button>
+        <button onClick={load} className="text-xs text-[#6f81ab] hover:text-[#6f81ab] underline">reload</button>
       </div>
     </div>
   )
@@ -418,11 +418,11 @@ function PmMultiSelect({ value, onChange, availablePms }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5 min-w-[200px] py-1">
       {selected.map(pm => (
-        <span key={pm} className="inline-flex items-center gap-1 bg-[#1e1e1e] border border-[#333] text-[#ccc] text-xs px-2 py-1">
+        <span key={pm} className="inline-flex items-center gap-1 bg-[#1e1e1e] border border-[#34466e] text-[#c9d3e6] text-xs px-2 py-1">
           {pm}
           <button
             onClick={() => removePm(pm)}
-            className="text-[#666] hover:text-red-400 leading-none ml-0.5"
+            className="text-[#6173a0] hover:text-red-400 leading-none ml-0.5"
           >✕</button>
         </span>
       ))}
@@ -431,20 +431,20 @@ function PmMultiSelect({ value, onChange, availablePms }) {
           <button
             ref={btnRef}
             onClick={toggleOpen}
-            className="text-xs border border-dashed border-[#444] text-[#777] hover:text-[#aaa] hover:border-[#666] px-2 py-1 transition-colors"
+            className="text-xs border border-dashed border-[#44598c] text-[#6f81ab] hover:text-[#a6b3cd] hover:border-[#6173a0] px-2 py-1 transition-colors"
           >+ PM</button>
           {open && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
               <div
-                className="fixed z-50 bg-[#141414] border border-[#2a2a2a] shadow-xl min-w-[180px]"
+                className="fixed z-50 bg-[#141414] border border-[#2b3a5e] shadow-xl min-w-[180px]"
                 style={{ top: dropPos.top, left: dropPos.left }}
               >
                 {remaining.map(pm => (
                   <button
                     key={pm}
                     onClick={() => addPm(pm)}
-                    className="block w-full text-left text-sm text-[#ccc] hover:bg-[#1e1e1e] hover:text-white px-3 py-2 transition-colors"
+                    className="block w-full text-left text-sm text-[#c9d3e6] hover:bg-[#1e1e1e] hover:text-white px-3 py-2 transition-colors"
                   >
                     {pm}
                   </button>
@@ -455,7 +455,7 @@ function PmMultiSelect({ value, onChange, availablePms }) {
         </>
       )}
       {selected.length === 0 && remaining.length === 0 && (
-        <span className="text-[#555] text-xs italic">— немає PM —</span>
+        <span className="text-[#51679c] text-xs italic">— немає PM —</span>
       )}
     </div>
   )
@@ -466,30 +466,30 @@ function PmMultiSelect({ value, onChange, availablePms }) {
 function ProjectExceptionsGuide() {
   const [open, setOpen] = useState(false)
   return (
-    <div className="border border-[#1a1a1a]">
+    <div className="border border-[#1a2336]">
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 text-[#888] hover:text-[#888] transition-colors text-left"
+        className="w-full flex items-center justify-between px-4 py-3 text-[#8191b6] hover:text-[#8191b6] transition-colors text-left"
       >
         <span className="tracking-wider text-xs">ЯК ЦЕ ПРАЦЮЄ</span>
         <span className="text-xs">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
-        <div className="px-4 pb-4 text-xs text-[#888] space-y-3 border-t border-[#1a1a1a] pt-3">
+        <div className="px-4 pb-4 text-xs text-[#8191b6] space-y-3 border-t border-[#1a2336] pt-3">
           <p>
             Таблиця вирішує дві задачі: знаходить правильний Monday-проект для Float-проекту
             і/або призначає PM-овераїд для тегів у Float Check.
           </p>
           <ul className="space-y-2 ml-2">
             <li>
-              • <span className="text-[#999]">Проект у Float</span> — частина або повна назва проекту у Float (регістр не важливий).
+              • <span className="text-[#93a2c2]">Проект у Float</span> — частина або повна назва проекту у Float (регістр не важливий).
             </li>
             <li>
-              • <span className="text-[#999]">Проект у Monday</span> — якщо назва у Float і Monday відрізняються, вкажи тут Monday-назву.
+              • <span className="text-[#93a2c2]">Проект у Monday</span> — якщо назва у Float і Monday відрізняються, вкажи тут Monday-назву.
               Залиш порожнім якщо назви збігаються або потрібен тільки PM-овераїд.
             </li>
             <li>
-              • <span className="text-[#999]">PM (override)</span> — один або кілька ПМів, яких буде тегнуто в Discord
+              • <span className="text-[#93a2c2]">PM (override)</span> — один або кілька ПМів, яких буде тегнуто в Discord
               для цього проекту замість автоматичного пошуку в Monday.
               Потрібно якщо проекту немає в Monday, або якщо проект веде кілька ПМів.
             </li>
@@ -563,7 +563,7 @@ function TableEditor({ config, availablePms = [] }) {
     }
   }
 
-  if (loading) return <div className="text-[#777] text-xs py-4">Завантаження {config.file}...</div>
+  if (loading) return <div className="text-[#6f81ab] text-xs py-4">Завантаження {config.file}...</div>
 
   return (
     <div className="space-y-3">
@@ -574,9 +574,9 @@ function TableEditor({ config, availablePms = [] }) {
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-[#2a2a2a]">
+            <tr className="border-b border-[#2b3a5e]">
               {config.columns.map(col => (
-                <th key={col} className="text-left text-[#888] tracking-wider py-3 pr-4 font-normal text-xs">
+                <th key={col} className="text-left text-[#8191b6] tracking-wider py-3 pr-4 font-normal text-xs">
                   {(COLUMN_LABELS[col] || col.replace(/_/g, ' ')).toUpperCase()}
                 </th>
               ))}
@@ -586,11 +586,11 @@ function TableEditor({ config, availablePms = [] }) {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={config.columns.length + 1} className="text-[#777] py-6 text-center text-sm">— порожньо —</td>
+                <td colSpan={config.columns.length + 1} className="text-[#6f81ab] py-6 text-center text-sm">— порожньо —</td>
               </tr>
             )}
             {rows.map((row, i) => (
-              <tr key={i} className="border-b border-[#1a1a1a] hover:bg-[#111] group">
+              <tr key={i} className="border-b border-[#1a2336] hover:bg-[#131a2b] group">
                 {config.columns.map(col => (
                   <td key={col} className="py-1.5 pr-3">
                     {col === 'pm_override' && config.columnTypes?.pm_override === 'pm_multi'
@@ -603,7 +603,7 @@ function TableEditor({ config, availablePms = [] }) {
                           type="text"
                           value={row[col] || ''}
                           onChange={e => updateCell(i, col, e.target.value)}
-                          className="w-full bg-transparent border border-transparent hover:border-[#2a2a2a] focus:border-[#444] text-[#e5e5e5] px-3 py-2 text-sm font-mono focus:outline-none focus:bg-[#0d0d0d] min-w-[160px]"
+                          className="w-full bg-transparent border border-transparent hover:border-[#2b3a5e] focus:border-[#44598c] text-[#dde6f5] px-3 py-2 text-sm font-mono focus:outline-none focus:bg-[#0e1220] min-w-[160px]"
                         />
                     }
                   </td>
@@ -611,7 +611,7 @@ function TableEditor({ config, availablePms = [] }) {
                 <td className="py-1.5">
                   <button
                     onClick={() => deleteRow(i)}
-                    className="text-[#666] hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity px-2"
+                    className="text-[#6173a0] hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity px-2"
                   >✕</button>
                 </td>
               </tr>
@@ -620,12 +620,12 @@ function TableEditor({ config, availablePms = [] }) {
         </table>
       </div>
       <div className="flex items-center gap-3 pt-1">
-        <button onClick={addRow} className="text-sm text-[#999] hover:text-[#aaa] border border-[#2a2a2a] hover:border-[#444] px-4 py-2 transition-colors">+ ADD ROW</button>
-        <button onClick={save} disabled={saving} className="text-sm tracking-wider border border-[#444] text-[#aaa] hover:border-[#888] hover:text-white px-5 py-2 transition-colors disabled:opacity-40">
+        <button onClick={addRow} className="text-sm text-[#93a2c2] hover:text-[#a6b3cd] border border-[#2b3a5e] hover:border-[#44598c] px-4 py-2 transition-colors">+ ADD ROW</button>
+        <button onClick={save} disabled={saving} className="text-sm tracking-wider border border-[#44598c] text-[#a6b3cd] hover:border-[#8191b6] hover:text-white px-5 py-2 transition-colors disabled:opacity-40">
           {saving ? '...' : saved ? '✓ ЗБЕРЕЖЕНО' : 'SAVE'}
         </button>
-        <button onClick={load} className="text-xs text-[#777] hover:text-[#777] underline">reload</button>
-        <span className="text-[#666] text-[10px] ml-auto">{config.file}</span>
+        <button onClick={load} className="text-xs text-[#6f81ab] hover:text-[#6f81ab] underline">reload</button>
+        <span className="text-[#6173a0] text-[10px] ml-auto">{config.file}</span>
       </div>
     </div>
   )
@@ -721,23 +721,23 @@ export default function Exceptions() {
   return (
     <div className="space-y-6">
       <div>
-        <div className="text-xs text-[#777] tracking-widest mb-1">CONFIG MANAGEMENT</div>
+        <div className="text-xs text-[#6f81ab] tracking-widest mb-1">CONFIG MANAGEMENT</div>
         <h1 className="text-lg font-bold text-white tracking-wide">Exceptions</h1>
-        <p className="text-xs text-[#888] mt-1">
+        <p className="text-xs text-[#8191b6] mt-1">
           Зміни комітяться в репо і підхоплюються наступним workflow run.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-1.5 border-b border-[#1a1a1a] pb-3">
+      <div className="flex flex-wrap gap-1.5 border-b border-[#1a2336] pb-3">
         {TABS.map(t => (
           <button
             key={t.key}
             onClick={() => setActive(t.key)}
             className={`text-sm tracking-wider px-4 py-2 rounded-lg border transition-colors ${
               active === t.key
-                ? 'border-[#3a3a3a] text-white bg-[#1c1c1c]'
-                : 'border-transparent text-[#888] hover:text-[#ccc] hover:bg-[#161616]'
+                ? 'border-[#3b4f7c] text-white bg-[#1d2740]'
+                : 'border-transparent text-[#8191b6] hover:text-[#c9d3e6] hover:bg-[#151d30]'
             }`}
           >
             {t.title}
@@ -752,7 +752,7 @@ export default function Exceptions() {
       {tab && (
         <div>
           <div className="mb-2"><ScopeBadge scope={tab.scope} /></div>
-          <div className="text-sm text-[#888] mb-4">{tab.description}</div>
+          <div className="text-sm text-[#8191b6] mb-4">{tab.description}</div>
           {renderContent()}
         </div>
       )}

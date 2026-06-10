@@ -30,9 +30,9 @@ function SecretField({ label, hint, placeholder, secretName }) {
 
   return (
     <div>
-      <label className="block text-xs text-[#888] tracking-wider mb-2">
+      <label className="block text-xs text-[#8191b6] tracking-wider mb-2">
         {label}
-        {hint && <span className="text-[#888] ml-2 normal-case">{hint}</span>}
+        {hint && <span className="text-[#8191b6] ml-2 normal-case">{hint}</span>}
       </label>
       <div className="flex gap-2">
         <input
@@ -40,12 +40,12 @@ function SecretField({ label, hint, placeholder, secretName }) {
           value={value}
           onChange={e => setValue(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 bg-[#0d0d0d] border border-[#2a2a2a] text-[#e5e5e5] text-xs px-3 py-2 font-mono focus:outline-none focus:border-[#555] placeholder-[#666]"
+          className="flex-1 bg-[#0e1220] border border-[#2b3a5e] text-[#dde6f5] text-xs px-3 py-2 font-mono focus:outline-none focus:border-[#51679c] placeholder-[#6173a0]"
         />
         <button
           onClick={handleUpdate}
           disabled={status === 'saving' || !value.trim()}
-          className="px-4 py-2 border border-[#444] text-[#aaa] hover:border-[#888] hover:text-white text-xs tracking-wider transition-colors disabled:opacity-40"
+          className="px-4 py-2 border border-[#44598c] text-[#a6b3cd] hover:border-[#8191b6] hover:text-white text-xs tracking-wider transition-colors disabled:opacity-40"
         >
           {status === 'saving' ? '...' : status === 'ok' ? '✓ UPDATED' : 'UPDATE'}
         </button>
@@ -81,19 +81,19 @@ export default function SettingsModal({ onClose }) {
       className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-[#111] border border-[#2a2a2a] w-full max-w-lg mx-4">
+      <div className="bg-[#131a2b] border border-[#2b3a5e] w-full max-w-lg mx-4">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#2a2a2a]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#2b3a5e]">
           <span className="text-xs tracking-widest text-white font-bold">⚙ SETTINGS</span>
-          <button onClick={onClose} className="text-[#999] hover:text-white text-lg leading-none">✕</button>
+          <button onClick={onClose} className="text-[#93a2c2] hover:text-white text-lg leading-none">✕</button>
         </div>
 
         <div className="px-5 py-5 space-y-6">
           {/* GitHub PAT */}
           <div>
-            <label className="block text-xs text-[#888] tracking-wider mb-2">
+            <label className="block text-xs text-[#8191b6] tracking-wider mb-2">
               GITHUB PAT
-              <span className="text-[#888] ml-2 normal-case">(actions:write + contents:write + secrets:write)</span>
+              <span className="text-[#8191b6] ml-2 normal-case">(actions:write + contents:write + secrets:write)</span>
             </label>
             <div className="flex gap-2">
               <input
@@ -101,22 +101,22 @@ export default function SettingsModal({ onClose }) {
                 value={pat}
                 onChange={e => setPat(e.target.value)}
                 placeholder="github_pat_..."
-                className="flex-1 bg-[#0d0d0d] border border-[#2a2a2a] text-[#e5e5e5] text-xs px-3 py-2 font-mono focus:outline-none focus:border-[#555] placeholder-[#666]"
+                className="flex-1 bg-[#0e1220] border border-[#2b3a5e] text-[#dde6f5] text-xs px-3 py-2 font-mono focus:outline-none focus:border-[#51679c] placeholder-[#6173a0]"
               />
               <button
                 onClick={() => setPatVisible(!patVisible)}
-                className="px-3 py-2 border border-[#2a2a2a] text-[#999] hover:text-[#aaa] text-xs"
+                className="px-3 py-2 border border-[#2b3a5e] text-[#93a2c2] hover:text-[#a6b3cd] text-xs"
               >
                 {patVisible ? 'HIDE' : 'SHOW'}
               </button>
               <button
                 onClick={savePat}
-                className="px-4 py-2 border border-[#444] text-[#aaa] hover:border-[#888] hover:text-white text-xs tracking-wider transition-colors"
+                className="px-4 py-2 border border-[#44598c] text-[#a6b3cd] hover:border-[#8191b6] hover:text-white text-xs tracking-wider transition-colors"
               >
                 {saved ? '✓ SAVED' : 'SAVE'}
               </button>
             </div>
-            <p className="text-[#777] text-xs mt-1.5">
+            <p className="text-[#6f81ab] text-xs mt-1.5">
               Stored in localStorage. Never sent to any server other than GitHub.
             </p>
           </div>
@@ -173,11 +173,11 @@ export default function SettingsModal({ onClose }) {
             secretName="MAKE_3D_URL"
           />
 
-          <div className="pt-2 border-t border-[#1a1a1a]">
+          <div className="pt-2 border-t border-[#1a2336]">
             <a
               href="guides"
               onClick={onClose}
-              className="text-xs text-[#888] hover:text-[#888] underline tracking-wider"
+              className="text-xs text-[#8191b6] hover:text-[#8191b6] underline tracking-wider"
             >
               → HOW TO GET TOKENS (GUIDES)
             </a>

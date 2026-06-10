@@ -97,6 +97,16 @@ export async function updateGitHubSecret(secretName, secretValue) {
   return true
 }
 
+// Get metadata for a repo secret (name, created_at, updated_at) — value is never exposed
+export async function getSecretInfo(secretName) {
+  const res = await fetch(
+    `${BASE}/repos/${OWNER}/${REPO}/actions/secrets/${secretName}`,
+    { headers: headers() }
+  )
+  if (!res.ok) return null
+  return res.json()
+}
+
 // Get annotations for a workflow run (checks for warning flags)
 export async function getRunAnnotations(runId) {
   try {

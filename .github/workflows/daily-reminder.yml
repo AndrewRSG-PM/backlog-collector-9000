@@ -3,6 +3,7 @@ name: Daily Backlog Reminder
 on:
   schedule:
     - cron: '45 14 * * 1-5'  # 17:45 Kyiv (EEST, UTC+3). Взимку (UTC+2) змінити на '45 15'
+  workflow_dispatch:
 
 jobs:
   remind:
@@ -13,6 +14,11 @@ jobs:
           DISCORD_WEBHOOK_PROD: ${{ secrets.DISCORD_WEBHOOK_PROD }}
           PM_ROLE_ID: '1329466362476625933'
         run: |
-          curl -s -X POST "$DISCORD_WEBHOOK_PROD" \
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$DISCORD_WEBHOOK_PROD" \
             -H "Content-Type: application/json" \
-            -d "{\"content\": \"<@&${PM_ROLE_ID}> \U0001F4CB За 20 хвилин збиратиметься беклог — перевірте та скоригуйте плани у Float якщо потрібно.\"}"
+            -d "{\"content\": \"<@&${PM_ROLE_ID}> \\uD83D\\uDCCB За 20 хвилин збиратиметься беклог — перевірте та скоригуйте плани у Float якщо потрібно.\"}")
+          echo "Discord HTTP status: $STATUS"
+          if [ "$STATUS" -ge 300 ]; then
+            echo "::error::Discord webhook returned HTTP $STATUS"
+            exit 1
+          fi

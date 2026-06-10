@@ -17,12 +17,16 @@ html {
 }
 
 body {
-  background-color: #0d0d0d;
-  color: #e5e5e5;
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  background-color: #0e1220;
+  color: #dde6f5;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 1rem;
   margin: 0;
   min-height: 100vh;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', 'Courier New', monospace !important;
 }
 
 #root {
@@ -42,11 +46,11 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #111;
+  background: #131a2b;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
+  background: #2b3a5e;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: #44598c;
 }

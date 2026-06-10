@@ -255,6 +255,7 @@ async function main() {
 
   let totalUpdated   = 0
   let totalUnmatched = 0
+  const dupReport    = []  // Monday-side duplicate task names: {board, artist, task, count}
 
   for (const a of artists) {
     const personId  = a.people_id
@@ -293,16 +294,26 @@ async function main() {
     if (myMonday.length === 0) continue
 
     // Build lookup maps
-    const mondayByName = {}   // lowercase name → item id
+    const mondayByName = {}   // lowercase name → [item ids] (duplicates supported)
     const mondayByFP   = {}   // float project name lower → [item ids]
 
     for (const item of myMonday) {
-      mondayByName[item.name.toLowerCase().trim()] = item.id
+      const nameKey = item.name.toLowerCase().trim()
+      if (!mondayByName[nameKey]) mondayByName[nameKey] = []
+      mondayByName[nameKey].push(item.id)
       const fpText = item.column_values?.find(c => c.id === fpColId)?.text
       if (fpText) {
         const fpKey = fpText.toLowerCase().trim()
         if (!mondayByFP[fpKey]) mondayByFP[fpKey] = []
         mondayByFP[fpKey].push(item.id)
+      }
+    }
+
+    // Collect Monday-side duplicates for the end-of-run report
+    for (const [nameKey, ids] of Object.entries(mondayByName)) {
+      if (ids.length > 1) {
+        const original = myMonday.find(i => i.name.toLowerCase().trim() === nameKey)?.name || nameKey
+        dupReport.push({ board: boardName, artist: cleanName, task: original, count: ids.length })
       }
     }
 
@@ -321,18 +332,21 @@ async function main() {
       const nameLower = taskName.toLowerCase().trim()
       const nameNorm  = nameLower.replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim()
 
-      // Tier 1: exact name
-      let itemId   = mondayByName[nameLower] || null
+      // Tier 1: exact name — take the next unassigned Monday duplicate
+      let itemId   = (mondayByName[nameLower] || []).find(id => !assignedItems.has(id)) || null
       let matchHow = itemId ? 'exact' : null
 
       // Tier 2: fuzzy name
       if (!itemId) {
-        for (const [mKey, mId] of Object.entries(mondayByName)) {
+        for (const [mKey, mIds] of Object.entries(mondayByName)) {
           const mNorm = mKey.replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim()
           if (nameNorm.includes(mNorm) || mNorm.includes(nameNorm)) {
-            itemId   = mId
-            matchHow = 'fuzzy-name'
-            break
+            const free = mIds.find(id => !assignedItems.has(id))
+            if (free) {
+              itemId   = free
+              matchHow = 'fuzzy-name'
+              break
+            }
           }
         }
       }
@@ -342,7 +356,7 @@ async function main() {
         const fpName = floatProjectNames[ft.project_id]
         if (fpName) {
           const fpKey = fpName.toLowerCase().trim()
-          const candidates = mondayByFP[fpKey] || []
+          const candidates = (mondayByFP[fpKey] || []).filter(id => !assignedItems.has(id))
           if (candidates.length === 1) {
             itemId   = candidates[0]
             matchHow = 'proj'
@@ -361,23 +375,18 @@ async function main() {
       }
 
       if (itemId) {
-        if (assignedItems.has(itemId)) {
-          // Duplicate — already assigned at an earlier (better) position, skip write but log with position
-          console.log(`  [${orderNum}] ${taskName} → item ${itemId} (dup, order kept from earlier position)`)
-        } else {
-          const tag = matchHow !== 'exact' ? `~${orderNum} (${matchHow})` : `${orderNum}`
-          console.log(`  [${tag}] ${taskName} → item ${itemId}`)
-          if (!DRY_RUN) {
-            const mutation = `mutation { change_simple_column_value(board_id: ${boardId}, item_id: ${itemId}, column_id: "${orderColId}", value: "${orderNum}") { id } }`
-            try {
-              await mondayPost(mutation)
-            } catch (err) {
-              console.error(`  ❌ Monday write failed for item ${itemId}: ${err.message}`)
-            }
+        const tag = matchHow !== 'exact' ? `~${orderNum} (${matchHow})` : `${orderNum}`
+        console.log(`  [${tag}] ${taskName} → item ${itemId}`)
+        if (!DRY_RUN) {
+          const mutation = `mutation { change_simple_column_value(board_id: ${boardId}, item_id: ${itemId}, column_id: "${orderColId}", value: "${orderNum}") { id } }`
+          try {
+            await mondayPost(mutation)
+          } catch (err) {
+            console.error(`  ❌ Monday write failed for item ${itemId}: ${err.message}`)
           }
-          assignedItems.add(itemId)
-          totalUpdated++
         }
+        assignedItems.add(itemId)
+        totalUpdated++
       } else {
         const projLabel = ft.project_id && floatProjectNames[ft.project_id]
           ? ` [project: ${floatProjectNames[ft.project_id]}]` : ''
@@ -391,6 +400,30 @@ async function main() {
   console.log('\n=== Done ===')
   if (DRY_RUN) process.stdout.write('[DRY RUN] ')
   console.log(`Updated: ${totalUpdated} | Unmatched: ${totalUnmatched}`)
+
+  // Duplicate report → Discord (so PMs can clean up the boards)
+  if (dupReport.length > 0) {
+    console.log(`\n⚠️ Monday duplicates found: ${dupReport.length}`)
+    const lines = ['⚠️ **Order Sync — знайдені дублікати задач у Monday:**']
+    for (const d of dupReport) {
+      console.log(`  [${d.board}] ${d.artist}: "${d.task}" ×${d.count}`)
+      lines.push(`- [${d.board}] ${d.artist}: "${d.task}" ×${d.count}`)
+    }
+    lines.push('Ордери проставлені кожному рядку за порядком у Float. Перевірте, чи дублі не помилка.')
+    const webhook = process.env.DISCORD_WEBHOOK_PROD || ''
+    if (!DRY_RUN && webhook) {
+      try {
+        const res = await fetch(webhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: lines.join('\n') }),
+        })
+        console.log(res.ok ? '✅ Duplicate report sent to Discord' : `❌ Discord HTTP ${res.status}`)
+      } catch (err) {
+        console.error(`❌ Discord send failed: ${err.message}`)
+      }
+    }
+  }
 }
 
 main().catch(err => { console.error('❌', err.message); process.exit(1) })
