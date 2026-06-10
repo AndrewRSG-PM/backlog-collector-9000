@@ -189,10 +189,26 @@ export default function Guides() {
 
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-white font-bold tracking-wider">v1.3</span>
-                <span className="text-[#51679c] text-xs">08.06.2026</span>
+                <span className="text-white font-bold tracking-wider">v1.4</span>
+                <span className="text-[#51679c] text-xs">10.06.2026</span>
               </div>
               <ul className="space-y-1 text-[#93a2c2]">
+                <li>— Float Check: кнопки MORNING і EVENING в одній картці. Morning додає нагадування оновити Float перед звітом</li>
+                <li>— Order Sync: дублі задач у Monday тепер отримують власні ордери (кожна Float-задача → наступний вільний рядок)</li>
+                <li>— Order Sync: звіт про знайдені дублі в Discord після кожного рану</li>
+                <li>— Health-панель: днів до протухання Float cookie + статус останніх ранів</li>
+                <li>— Exceptions: зрозумілі назви табів + бейджі «на що впливає» (Float Check / Order Sync)</li>
+                <li>— Новий дизайн: темно-синя тема, заокруглені кути, шрифт Inter</li>
+                <li>— Fix: daily reminder 17:45 не відправлявся (зламаний emoji escape → невалідний JSON). Додано перевірку HTTP-статусу і ручний запуск</li>
+              </ul>
+            </div>
+
+            <div className="border-t border-[#1a2336] pt-4">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-[#a6b3cd] font-bold tracking-wider">v1.3</span>
+                <span className="text-[#51679c] text-xs">08.06.2026</span>
+              </div>
+              <ul className="space-y-1 text-[#6f81ab]">
                 <li>— Float visual sort order: Playwright + session cookie → правильний порядок задач</li>
                 <li>— OrderSyncCookieBanner: попередження коли FLOAT_SESSION_COOKIE протух</li>
                 <li>— Fix: NO_MENTIONS режим для кількох PM на одному проекті</li>
