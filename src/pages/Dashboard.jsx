@@ -37,10 +37,10 @@ function ActionButton({ label, onClick, disabled, variant = 'primary', className
       onClick={onClick}
       disabled={disabled}
       className={`
-        px-7 py-3.5 text-base tracking-wider font-bold border transition-all
+        px-7 py-3 text-base tracking-wider font-bold rounded-lg transition-all
         ${variant === 'primary'
-          ? 'border-[#e5e5e5] text-white hover:bg-[#1a1a1a] disabled:opacity-30 disabled:cursor-not-allowed'
-          : 'border-[#444] text-[#888] hover:border-[#888] hover:text-[#ccc] disabled:opacity-30 disabled:cursor-not-allowed'
+          ? 'bg-[#e5e5e5] text-[#111] hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed'
+          : 'border border-[#3a3a3a] text-[#999] hover:border-[#666] hover:text-[#ddd] disabled:opacity-30 disabled:cursor-not-allowed'
         }
         ${className}
       `}
@@ -86,7 +86,7 @@ function BacklogTriggerCard({ title, description, dept, codaUrl, date }) {
   }
 
   return (
-    <div className="border border-[#2a2a2a] p-7 hover:border-[#333] transition-colors">
+    <div className="rounded-2xl border border-[#222] bg-[#111] p-7 hover:border-[#333] transition-colors">
       <div className="flex items-start justify-between gap-4 mb-3">
         <div>
           <div className="text-lg font-bold text-white tracking-wide mb-2">{title}</div>
@@ -117,8 +117,8 @@ function BacklogTriggerCard({ title, description, dept, codaUrl, date }) {
   )
 }
 
-function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode = false, showDryRun = false }) {
-  const [loading, setLoading] = useState(false)
+function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode = false, showDryRun = false, actions = null }) {
+  const [loadingLabel, setLoadingLabel] = useState(null)
   const [error, setError] = useState(null)
   const [run, setRun] = useState(null)
   const [polling, setPolling] = useState(false)
@@ -146,14 +146,14 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
     return () => clearInterval(interval)
   }, [polling, run, fetchRun])
 
-  async function trigger() {
-    setLoading(true)
+  async function trigger(extra = {}, label = 'RUN') {
+    setLoadingLabel(label)
     setError(null)
     try {
       const extraInputs = {}
       if (testMode) extraInputs.test_mode = 'true'
       if (showDryRun && dryRun) extraInputs.dry_run = 'true'
-      await dispatchWorkflow(workflowFile, { ...inputs, ...extraInputs })
+      await dispatchWorkflow(workflowFile, { ...inputs, ...extra, ...extraInputs })
       // Wait a moment then start polling
       setTimeout(() => {
         fetchRun()
@@ -162,17 +162,19 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
     } catch (e) {
       setError(e.message)
     } finally {
-      setLoading(false)
+      setLoadingLabel(null)
     }
   }
 
+  const buttons = actions || [{ label: 'RUN', extra: {}, variant: testMode ? 'secondary' : 'primary' }]
+
   return (
-    <div className="border border-[#2a2a2a] p-7 hover:border-[#333] transition-colors">
+    <div className="rounded-2xl border border-[#222] bg-[#111] p-7 hover:border-[#333] transition-colors">
       <div className="flex items-start justify-between gap-4 mb-3">
         <div>
           <div className="text-lg font-bold text-white tracking-wide mb-2">
             {title}
-            {testMode && <span className="ml-3 text-sm text-yellow-500 border border-yellow-500/40 px-2 py-0.5">TEST</span>}
+            {testMode && <span className="ml-3 text-sm text-yellow-500 border border-yellow-500/40 rounded-md px-2 py-0.5">TEST</span>}
           </div>
           <div className="text-base text-[#999]">{description}</div>
         </div>
@@ -191,12 +193,15 @@ function WorkflowCard({ title, description, workflowFile, inputs = {}, testMode 
             </label>
           )}
           {run && <StatusBadge status={run.status} conclusion={run.conclusion} />}
-          <ActionButton
-            label={loading ? '...' : 'RUN'}
-            onClick={trigger}
-            disabled={loading}
-            variant={testMode ? 'secondary' : 'primary'}
-          />
+          {buttons.map(b => (
+            <ActionButton
+              key={b.label}
+              label={loadingLabel === b.label ? '...' : b.label}
+              onClick={() => trigger(b.extra || {}, b.label)}
+              disabled={loadingLabel !== null}
+              variant={b.variant || 'primary'}
+            />
+          ))}
         </div>
       </div>
       {error && (
@@ -238,7 +243,7 @@ function NoPATBanner() {
   if (!noPAT) return null
 
   return (
-    <div className="border border-orange-900/50 bg-orange-950/20 px-5 py-3 flex items-center justify-between gap-4">
+    <div className="rounded-xl border border-orange-900/50 bg-orange-950/20 px-5 py-3 flex items-center justify-between gap-4">
       <div className="text-orange-400 text-sm">
         ⚠ GitHub PAT не встановлено — кнопки RUN і SAVE не працюватимуть.{' '}
         <a
@@ -271,7 +276,7 @@ function FloatFailBanner() {
   if (!failed) return null
 
   return (
-    <div className="border border-red-900/50 bg-red-950/20 px-5 py-3 flex items-center justify-between gap-4">
+    <div className="rounded-xl border border-red-900/50 bg-red-950/20 px-5 py-3 flex items-center justify-between gap-4">
       <span className="text-red-400 text-sm">
         ⚠ Останній Float Check завершився з помилкою. Зверніться до Андрія або Діми для оновлення Float API Key.
       </span>
@@ -302,7 +307,7 @@ function OrderSyncCookieBanner() {
   if (!expired) return null
 
   return (
-    <div className="border border-yellow-900/50 bg-yellow-950/20 px-5 py-3">
+    <div className="rounded-xl border border-yellow-900/50 bg-yellow-950/20 px-5 py-3">
       <div className="text-yellow-400 text-sm">
         ⚠ Float session cookie протух — <strong>ОРДЕРИ МОЖУТЬ БУТИ ПРОСТАВЛЕНІ НЕПРАВИЛЬНО.</strong>{' '}
         Зверніться до <strong>Андрія</strong> для оновлення FLOAT_SESSION_COOKIE в Settings.
@@ -328,7 +333,7 @@ export default function Dashboard() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="bg-[#0d0d0d] border border-[#2a2a2a] text-[#e5e5e5] text-base px-5 py-3 font-mono focus:outline-none focus:border-[#555]"
+            className="rounded-lg bg-[#111] border border-[#2a2a2a] text-[#e5e5e5] text-base px-5 py-3 font-mono focus:outline-none focus:border-[#555]"
           />
           <button
             onClick={() => setDate(todayPlus1())}
@@ -348,15 +353,13 @@ export default function Dashboard() {
         <div className="space-y-2">
           <WorkflowCard
             title="Float Check"
-            description="Перевіряє завантаження художників у Float, відправляє звіт в Discord з тегами PM."
+            description="Перевіряє завантаження художників у Float, відправляє звіт в Discord з тегами PM. EVENING — основний вечірній запуск. MORNING — той самий звіт + нагадування оновити Float зранку."
             workflowFile={WORKFLOWS.floatCheck}
             inputs={{ date }}
-          />
-          <WorkflowCard
-            title="Morning Check"
-            description="Ранковий запуск — нагадує ПМам оновити Float перед звітом, потім відправляє звичайний Float Check."
-            workflowFile={WORKFLOWS.floatCheck}
-            inputs={{ date, morning_mode: 'true' }}
+            actions={[
+              { label: 'MORNING', extra: { morning_mode: 'true' }, variant: 'secondary' },
+              { label: 'EVENING', extra: {}, variant: 'primary' },
+            ]}
           />
           <WorkflowCard
             title="Float Check — Test"

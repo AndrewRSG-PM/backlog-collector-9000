@@ -633,18 +633,36 @@ function TableEditor({ config, availablePms = [] }) {
 
 // ─── Tab config ──────────────────────────────────────────────────────────────
 
+const SCOPES = {
+  float:  { label: 'FLOAT CHECK — звіт у Discord', cls: 'bg-sky-950/50 text-sky-300 border-sky-800/50' },
+  orders: { label: 'ORDER SYNC — ордери в Monday', cls: 'bg-emerald-950/50 text-emerald-300 border-emerald-800/50' },
+  both:   { label: 'FLOAT CHECK + ORDER SYNC',      cls: 'bg-violet-950/50 text-violet-300 border-violet-800/50' },
+}
+
+function ScopeBadge({ scope }) {
+  const s = SCOPES[scope]
+  if (!s) return null
+  return (
+    <span className={`inline-block text-[11px] tracking-wider border rounded-md px-2 py-0.5 ${s.cls}`}>
+      {s.label}
+    </span>
+  )
+}
+
 const TABS = [
   {
     key: 'float_check_exceptions',
-    title: 'Float Check',
-    description: 'Виключення для перевірки завантаженості художників.',
+    title: 'Завантаженість художників',
+    scope: 'float',
+    description: 'Виключення для звіту Float Check: максимум годин/день, пропуск художника чи тегу, типи відгулів. На ордери в Monday не впливає.',
     renderer: 'float_check',
     file: 'config/float_check_exceptions.json',
   },
   {
     key: 'name_exceptions',
-    title: 'Name Exceptions',
-    description: "Ім'я художника у Float ≠ пошуковий термін у Monday.",
+    title: 'Імена Float ↔ Monday',
+    scope: 'orders',
+    description: "База розбіжностей імен для Order Sync: якщо ім'я художника у Float пишеться інакше, ніж у Monday — додай відповідність тут. На звіт Float Check не впливає.",
     renderer: 'table',
     file: 'config/name_exceptions.json',
     columns: ['float_name', 'monday_search', 'note'],
@@ -652,14 +670,16 @@ const TABS = [
   },
   {
     key: 'skip_tasks',
-    title: 'Skip Tasks',
-    description: 'Задачі, які не отримують Order в Monday.',
+    title: 'Задачі без ордера',
+    scope: 'orders',
+    description: 'Для Order Sync: ці задачі пропускаються при проставлянні Order у Monday (QA, синки, Art Direction тощо).',
     renderer: 'skip_tasks',
   },
   {
     key: 'project_exceptions',
-    title: 'Project Exceptions',
-    description: 'Float project → Monday project або pm_override.',
+    title: 'Проекти + PM Override',
+    scope: 'both',
+    description: 'Відповідність проекту Float → Monday (для ордерів) та pm_override — який PM тегається у звіті Float Check.',
     renderer: 'table',
     file: 'config/project_exceptions.json',
     columns: ['float_project', 'monday_project', 'pm_override', 'note'],
@@ -668,8 +688,9 @@ const TABS = [
   },
   {
     key: 'pm_discord',
-    title: 'PM Discord',
-    description: "Ім'я PM → Discord user ID для тегів у Float Check.",
+    title: 'PM Discord ID',
+    scope: 'float',
+    description: "Ім'я PM → Discord user ID. Використовується для тегів PM у звіті Float Check.",
     renderer: 'table',
     file: 'config/pm_discord.json',
     columns: ['pm_name', 'discord_id', 'note'],
@@ -708,18 +729,21 @@ export default function Exceptions() {
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-1 border-b border-[#1a1a1a] pb-3">
+      <div className="flex flex-wrap gap-1.5 border-b border-[#1a1a1a] pb-3">
         {TABS.map(t => (
           <button
             key={t.key}
             onClick={() => setActive(t.key)}
-            className={`text-sm tracking-wider px-4 py-2 border transition-colors ${
+            className={`text-sm tracking-wider px-4 py-2 rounded-lg border transition-colors ${
               active === t.key
-                ? 'border-[#e5e5e5] text-white bg-[#1a1a1a]'
-                : 'border-transparent text-[#888] hover:text-[#888] hover:border-[#333]'
+                ? 'border-[#3a3a3a] text-white bg-[#1c1c1c]'
+                : 'border-transparent text-[#888] hover:text-[#ccc] hover:bg-[#161616]'
             }`}
           >
             {t.title}
+            <span className={`ml-2 inline-block w-1.5 h-1.5 rounded-full align-middle ${
+              t.scope === 'float' ? 'bg-sky-400' : t.scope === 'orders' ? 'bg-emerald-400' : 'bg-violet-400'
+            }`} />
           </button>
         ))}
       </div>
@@ -727,6 +751,7 @@ export default function Exceptions() {
       {/* Active tab content */}
       {tab && (
         <div>
+          <div className="mb-2"><ScopeBadge scope={tab.scope} /></div>
           <div className="text-sm text-[#888] mb-4">{tab.description}</div>
           {renderContent()}
         </div>

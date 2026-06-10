@@ -38,10 +38,10 @@ export default function Layout() {
                 to={to}
                 end={to === '/'}
                 className={({ isActive }) =>
-                  `px-5 py-2.5 text-base tracking-wider border transition-colors ${
+                  `px-5 py-2.5 text-base tracking-wider rounded-lg border transition-colors ${
                     isActive
-                      ? 'border-[#e5e5e5] text-white bg-[#1a1a1a]'
-                      : 'border-transparent text-[#999] hover:text-[#aaa] hover:border-[#333]'
+                      ? 'border-[#3a3a3a] text-white bg-[#1c1c1c]'
+                      : 'border-transparent text-[#999] hover:text-[#ccc] hover:bg-[#161616]'
                   }`
                 }
               >
@@ -52,7 +52,7 @@ export default function Layout() {
 
           <button
             onClick={() => setSettingsOpen(true)}
-            className="px-5 py-2.5 text-base tracking-wider border border-[#2a2a2a] text-[#999] hover:text-[#aaa] hover:border-[#444] transition-colors"
+            className="px-5 py-2.5 text-base tracking-wider rounded-lg border border-[#2a2a2a] text-[#999] hover:text-[#ccc] hover:border-[#444] transition-colors"
           >
             ⚙ SETTINGS
           </button>
