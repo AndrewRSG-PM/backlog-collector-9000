@@ -2,7 +2,7 @@
 // float-check.js — Node.js port of float-check.ps1
 // Reads config from config/*.json (repo), env: FLOAT_API_KEY,
 // DISCORD_WEBHOOK_PROD, DISCORD_WEBHOOK_TEST
-// Inputs (via env from workflow): TARGET_DATE, NO_MENTIONS, TEST_MODE
+// Inputs (via env from workflow): TARGET_DATE, NO_MENTIONS, TEST_MODE, MORNING_MODE
 
 import { readFileSync } from 'fs'
 import { fileURLToPath } from 'url'
@@ -23,6 +23,7 @@ function smartTomorrow() {
 const DATE          = process.env.TARGET_DATE  || smartTomorrow()
 const NO_MENTIONS   = process.env.NO_MENTIONS  === 'true'
 const TEST_MODE     = process.env.TEST_MODE    === 'true'
+const MORNING_MODE  = process.env.MORNING_MODE === 'true'
 const FLOAT_API_KEY = process.env.FLOAT_API_KEY || ''
 const WEBHOOK_URL   = TEST_MODE
   ? (process.env.DISCORD_WEBHOOK_TEST  || '')
@@ -479,6 +480,15 @@ async function main() {
   console.log(`\nMessage length: ${message.length} chars`)
 
   if (WEBHOOK_URL) {
+    if (MORNING_MODE) {
+      const morningText = [
+        '🌅 Ранкова перевірка!',
+        'Оновіть Float:',
+        '- перевірте задачі своїх художників на сьогодні',
+        '- якщо вчора не оновили плани — будь ласка, зробіть це зараз',
+      ].join('\n')
+      await sendDiscord(WEBHOOK_URL, morningText)
+    }
     await sendDiscord(WEBHOOK_URL, message)
     console.log('✅ Discord sent')
   } else {

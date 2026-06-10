@@ -353,6 +353,12 @@ export default function Dashboard() {
             inputs={{ date }}
           />
           <WorkflowCard
+            title="Morning Check"
+            description="Ранковий запуск — нагадує ПМам оновити Float перед звітом, потім відправляє звичайний Float Check."
+            workflowFile={WORKFLOWS.floatCheck}
+            inputs={{ date, morning_mode: 'true' }}
+          />
+          <WorkflowCard
             title="Float Check — Test"
             description="Те саме, але в тестовий Discord канал. Без тегів PM."
             workflowFile={WORKFLOWS.floatCheck}

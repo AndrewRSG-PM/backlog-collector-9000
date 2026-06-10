@@ -15,6 +15,10 @@ on:
         description: 'Send to test Discord webhook'
         required: false
         default: 'false'
+      morning_mode:
+        description: 'Morning check — sends reminder to update Float before the report'
+        required: false
+        default: 'false'
 
 jobs:
   float-check:
@@ -33,4 +37,5 @@ jobs:
           TARGET_DATE: ${{ inputs.date }}
           NO_MENTIONS: ${{ inputs.no_mentions }}
           TEST_MODE: ${{ inputs.test_mode }}
+          MORNING_MODE: ${{ inputs.morning_mode }}
         run: node scripts/float-check.js
