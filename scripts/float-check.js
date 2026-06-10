@@ -480,16 +480,10 @@ async function main() {
   console.log(`\nMessage length: ${message.length} chars`)
 
   if (WEBHOOK_URL) {
-    if (MORNING_MODE) {
-      const morningText = [
-        '🌅 Ранкова перевірка!',
-        'Оновіть Float:',
-        '- перевірте задачі своїх художників на сьогодні',
-        '- якщо вчора не оновили плани — будь ласка, зробіть це зараз',
-      ].join('\n')
-      await sendDiscord(WEBHOOK_URL, morningText)
-    }
-    await sendDiscord(WEBHOOK_URL, message)
+    const morningHeader = MORNING_MODE
+      ? '🌅 Ранкова перевірка!\nОновіть Float:\n- перевірте задачі своїх художників на сьогодні\n- якщо вчора не оновили плани — будь ласка, зробіть це зараз\n\n'
+      : ''
+    await sendDiscord(WEBHOOK_URL, morningHeader + message)
     console.log('✅ Discord sent')
   } else {
     console.log('ℹ️ No webhook URL — printed to console only')
