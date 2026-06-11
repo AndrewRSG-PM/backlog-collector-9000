@@ -309,12 +309,15 @@ async function main() {
 
   // Aggregate tasks per person
   const byPerson = {}
+  const tasksByPerson = {}  // pid → [tasks] (for duplicate detection)
   for (const t of tasks) {
     for (const pid of getPersonIds(t)) {
       if (!byPerson[pid]) byPerson[pid] = { hours: 0, hasTentative: false, projectIds: new Set() }
       byPerson[pid].hours += parseFloat(t.hours || 0)
       if (t.status === 1) byPerson[pid].hasTentative = true
       if (t.project_id && !isSkipTask(t.name || '')) byPerson[pid].projectIds.add(t.project_id)
+      if (!tasksByPerson[pid]) tasksByPerson[pid] = []
+      tasksByPerson[pid].push(t)
     }
   }
 
@@ -473,6 +476,31 @@ async function main() {
     }
 
     msgLines.push(`✅ OK: ${sec.ok} | 🏖️ Off/Dead: ${sec.off}`)
+  }
+
+  // Duplicate tasks in Float: exact same name + same project for one artist on the date.
+  // Skip-tasks (QA, Art Direction etc.) are excluded — they repeat across projects legitimately.
+  const dupLines = []
+  for (const a of artists) {
+    const pid       = a.people_id
+    const cleanName = (a.name || '').replace(/^[⏳⌛🔄⚡]\s*/, '').trim()
+    const counts = {}
+    for (const t of (tasksByPerson[pid] || [])) {
+      const tn = (t.name || '').trim()
+      if (!tn || isSkipTask(tn)) continue
+      const key = `${tn.toLowerCase()}|${t.project_id || ''}`
+      if (!counts[key]) counts[key] = { name: tn, project: projectNames[t.project_id] || '', n: 0 }
+      counts[key].n++
+    }
+    for (const c of Object.values(counts)) {
+      if (c.n > 1) dupLines.push(`— ${cleanName}: "${c.name}" ×${c.n}${c.project ? ` (${c.project})` : ''}`)
+    }
+  }
+  if (dupLines.length > 0) {
+    msgLines.push('')
+    msgLines.push(`**📑 Дублі задач у Float (${dupLines.length}):**`)
+    dupLines.forEach(l => msgLines.push(l))
+    msgLines.push('Перевірте, чи дубль не помилка планування.')
   }
 
   const message = msgLines.join('\n')

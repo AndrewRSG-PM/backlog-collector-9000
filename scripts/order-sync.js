@@ -401,27 +401,11 @@ async function main() {
   if (DRY_RUN) process.stdout.write('[DRY RUN] ')
   console.log(`Updated: ${totalUpdated} | Unmatched: ${totalUnmatched}`)
 
-  // Duplicate report → Discord (so PMs can clean up the boards)
+  // Monday-side duplicates — console only (Discord dup report lives in float-check)
   if (dupReport.length > 0) {
     console.log(`\n⚠️ Monday duplicates found: ${dupReport.length}`)
-    const lines = ['⚠️ **Order Sync — знайдені дублікати задач у Monday:**']
     for (const d of dupReport) {
       console.log(`  [${d.board}] ${d.artist}: "${d.task}" ×${d.count}`)
-      lines.push(`- [${d.board}] ${d.artist}: "${d.task}" ×${d.count}`)
-    }
-    lines.push('Ордери проставлені кожному рядку за порядком у Float. Перевірте, чи дублі не помилка.')
-    const webhook = process.env.DISCORD_WEBHOOK_PROD || ''
-    if (!DRY_RUN && webhook) {
-      try {
-        const res = await fetch(webhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: lines.join('\n') }),
-        })
-        console.log(res.ok ? '✅ Duplicate report sent to Discord' : `❌ Discord HTTP ${res.status}`)
-      } catch (err) {
-        console.error(`❌ Discord send failed: ${err.message}`)
-      }
     }
   }
 }

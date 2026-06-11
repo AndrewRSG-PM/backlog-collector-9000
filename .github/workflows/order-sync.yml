@@ -34,7 +34,6 @@ jobs:
           FLOAT_API_KEY: ${{ secrets.FLOAT_API_KEY }}
           MONDAY_TOKEN: ${{ secrets.MONDAY_TOKEN }}
           FLOAT_SESSION_COOKIE: ${{ secrets.FLOAT_SESSION_COOKIE }}
-          DISCORD_WEBHOOK_PROD: ${{ secrets.DISCORD_WEBHOOK_PROD }}
           TARGET_DATE: ${{ inputs.date }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: node scripts/order-sync.js
