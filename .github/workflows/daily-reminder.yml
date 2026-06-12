@@ -1,8 +1,8 @@
 name: Daily Backlog Reminder
 
 on:
-  schedule:
-    - cron: '45 14 * * 1-5'  # 17:45 Kyiv (EEST, UTC+3). Взимку (UTC+2) змінити на '45 15'
+  # schedule disabled — reminder moved to Make.com
+  # - cron: '45 14 * * 1-5'  # 17:45 Kyiv (EEST, UTC+3). Взимку (UTC+2) змінити на '45 15'
   workflow_dispatch:
 
 jobs:
