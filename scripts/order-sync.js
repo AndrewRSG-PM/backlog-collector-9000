@@ -270,10 +270,11 @@ async function main() {
     const fpColId      = cols.floatProjectCol
 
     // Float tasks for this person today
+    // Multi-person tasks come back with people_id: null + people_ids: [id1, id2]
     // If svc/api3: sort by priority ascending (more negative = higher in Float calendar)
     // If official API: use response order (best available approximation)
     const floatTasks = allTasks
-      .filter(t => t.people_id === personId)
+      .filter(t => (t.people_id ? [t.people_id] : (t.people_ids || [])).includes(personId))
       .sort((a, b) => {
         if (a.priority != null && b.priority != null) return a.priority - b.priority
         return 0 // preserve API response order
