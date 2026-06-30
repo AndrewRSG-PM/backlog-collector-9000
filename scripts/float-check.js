@@ -77,6 +77,12 @@ const pmDiscordRows        = loadJson('pm_discord.json')
 const maxHoursConfig   = {}  // cleanName → maxHours
 const skipTagsConfig   = []  // tag names to skip entirely
 const offTimeoffConfig = []  // timeoff type names to count as off
+const skipTasksConfig  = new Set()  // task names to skip entirely in float-check (normalized, exact)
+
+// Normalize a task name the same way isSkipTask() does (strip leading emoji, lowercase, trim)
+function normTaskName(name) {
+  return (name || '').replace(/^[^\x00-\x7F]+\s*/, '').toLowerCase().trim()
+}
 
 for (const row of floatCheckExceptions) {
   const name  = (row.name  || '').trim()
@@ -90,6 +96,8 @@ for (const row of floatCheckExceptions) {
     skipTagsConfig.push(name)
   } else if (type === 'timeoff_type' && value === 'count_as_off') {
     offTimeoffConfig.push(name)
+  } else if (type === 'skip_task' && value === 'skip_entirely') {
+    skipTasksConfig.add(normTaskName(name))
   }
 }
 
@@ -124,7 +132,7 @@ for (const row of pmDiscordRows) {
 // Keep pmDiscord as alias for pm_override lookups (backwards compat)
 const pmDiscord = pmDiscordByName
 
-console.log(`Config: ${Object.keys(maxHoursConfig).length} max_hours | ${skipTagsConfig.length} skip tags | ${offTimeoffConfig.length} off timeoffs`)
+console.log(`Config: ${Object.keys(maxHoursConfig).length} max_hours | ${skipTagsConfig.length} skip tags | ${offTimeoffConfig.length} off timeoffs | ${skipTasksConfig.size} skip tasks`)
 console.log(`Project exceptions: ${Object.keys(projExcMap).length} | PM Discord: ${Object.keys(pmDiscord).length}`)
 
 
@@ -148,8 +156,8 @@ function fmtDay(dateStr) {
 // ─── Task skip logic (for adjacent hints + project id collection) ─────────────
 const SKIP_EXACT_ADJ = new Set(['art direction', 'rsg org', 'tech support', 'playables \\ creatives pm support'])
 function isSkipTask(name) {
-  const norm = name.replace(/^[^\x00-\x7F]+\s*/, '').toLowerCase().trim()
-  return /QA/i.test(name) || SKIP_EXACT_ADJ.has(norm)
+  const norm = normTaskName(name)
+  return /QA/i.test(name) || SKIP_EXACT_ADJ.has(norm) || skipTasksConfig.has(norm)
 }
 
 // ─── PM mention resolution ───────────────────────────────────────────────────

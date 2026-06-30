@@ -32,6 +32,15 @@ const FLOAT_TYPE_OPTIONS = [
     effectLabel: 'пропустити повністю',
   },
   {
+    value: 'skip_task',
+    label: 'Пропустити задачу',
+    nameLabel: 'Назва задачі',
+    namePlaceholder: 'Art Direction',
+    valueType: 'fixed',
+    valueFixed: 'skip_entirely',
+    effectLabel: 'пропустити повністю',
+  },
+  {
     value: 'timeoff_type',
     label: 'Тип відгулу / відпустки',
     nameLabel: 'Тип у Float',
@@ -66,6 +75,7 @@ function FloatCheckGuide() {
             <li>• <span className="text-[#8191b6]">Максимум годин/день</span> — художник може мати більше 8h, це ок. Вкажи ліміт.</li>
             <li>• <span className="text-[#8191b6]">Пропустити художника</span> — якщо ім'я містить вказаний паттерн (напр. ⏳) — художник повністю ігнорується.</li>
             <li>• <span className="text-[#8191b6]">Пропустити по тегу</span> — задачі з цим тегом у Float ігноруються (напр. Fix Price).</li>
+            <li>• <span className="text-[#8191b6]">Пропустити задачу</span> — задача з точно такою назвою не враховується у Float Check (не рахується як проект і не тегає PM, напр. Art Direction, RSG ORG). Тільки точний збіг назви.</li>
             <li>• <span className="text-[#8191b6]">Тип відгулу</span> — цей timeoff рахується як "недоступний", а не флагується як проблема.</li>
           </ul>
         </div>
