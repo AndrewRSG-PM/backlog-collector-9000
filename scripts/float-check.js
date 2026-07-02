@@ -153,6 +153,24 @@ function fmtDay(dateStr) {
   return dateStr.slice(8, 10) + '.' + dateStr.slice(5, 7)
 }
 
+// ─── Per-person work schedule ─────────────────────────────────────────────────
+// Float `work_days_hours` is Sunday-indexed: [Sun, Mon, Tue, Wed, Thu, Fri, Sat].
+// `work_days_hours_history` holds dated overrides ({ "YYYY-MM-DD": [...] }); the
+// top-level field can be STALE after a schedule change, so always resolve the
+// latest history entry <= target date. Returns true if DATE is a 0-hour day for
+// this person (e.g. a 4-day week where Friday is non-working).
+const TARGET_DOW = new Date(DATE + 'T12:00:00Z').getUTCDay()  // 0=Sun … 6=Sat
+function isNonWorkingDay(person) {
+  const hist = person.work_days_hours_history
+  let arr = person.work_days_hours
+  if (hist && typeof hist === 'object') {
+    const keys = Object.keys(hist).filter(k => k <= DATE).sort()
+    if (keys.length) arr = hist[keys[keys.length - 1]]
+  }
+  if (!Array.isArray(arr) || arr.length < 7) return false
+  return parseFloat(arr[TARGET_DOW] || 0) === 0
+}
+
 // ─── Task skip logic (for adjacent hints + project id collection) ─────────────
 const SKIP_EXACT_ADJ = new Set(['art direction', 'rsg org', 'tech support', 'playables \\ creatives pm support'])
 function isSkipTask(name) {
@@ -350,6 +368,10 @@ async function main() {
     const sec       = sections[grp]
 
     if (offSet.has(pid)) { sec.off++; continue }
+
+    // Non-working day per this person's Float work schedule (e.g. 4-day week) →
+    // count as off, don't flag as unscheduled/under-loaded.
+    if (isNonWorkingDay(a)) { sec.off++; continue }
 
     const info = byPerson[pid] || { hours: 0, hasTentative: false, projectIds: new Set() }
     const hrs  = info.hours
