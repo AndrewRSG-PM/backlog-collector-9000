@@ -1,13 +1,62 @@
 [
-  { "pm_name": "Nick Boichenko",     "float_name": "PM Nikita",    "discord_id": "1331997837860405260" },
-  { "pm_name": "Alina Shevchuk",     "float_name": "PM Alina S",   "discord_id": "1329372254450225177" },
-  { "pm_name": "Andrew Holovko",     "float_name": "PM Andrew",    "discord_id": "1473964446652039168" },
-  { "pm_name": "Anna Riapolova",     "float_name": "PM ANNA",      "discord_id": "894601664093356063"  },
-  { "pm_name": "Hanna Pavlovska",    "float_name": "PM Hanna",     "discord_id": "1187007896341463175" },
-  { "pm_name": "Oleksandr Salabai",  "float_name": "PM Aleksandr", "discord_id": "923128286266130432"  },
-  { "pm_name": "Polina Chaviak",     "float_name": "PM Polina",    "discord_id": "1074700213354238094" },
-  { "pm_name": "Roman Tkachenko",    "float_name": "PM Roman",     "discord_id": "1033054881189203978" },
-  { "pm_name": "Yegor Khrushch",     "float_name": "PM YEGOR",     "discord_id": "1256354350721138750" },
-  { "pm_name": "Valeriia Dubina",    "float_name": "PM Lera",      "discord_id": "1498262798256570419" },
-  { "pm_name": "Anna Lozynska",      "float_name": "Ann RSG PM Jr","discord_id": "1507345186181742715" }
+  {
+    "pm_name": "Nick Boichenko",
+    "float_name": "PM Nikita",
+    "discord_id": "1331997837860405260"
+  },
+  {
+    "pm_name": "Alina Shevchuk",
+    "float_name": "PM Alina S",
+    "discord_id": "1329372254450225177"
+  },
+  {
+    "pm_name": "Andrew Holovko",
+    "float_name": "PM Andrew",
+    "discord_id": "1473964446652039168"
+  },
+  {
+    "pm_name": "Anna Riapolova",
+    "float_name": "PM ANNA",
+    "discord_id": "894601664093356063"
+  },
+  {
+    "pm_name": "Hanna Pavlovska",
+    "float_name": "PM Hanna",
+    "discord_id": "1187007896341463175"
+  },
+  {
+    "pm_name": "Oleksandr Salabai",
+    "float_name": "PM Aleksandr",
+    "discord_id": "923128286266130432"
+  },
+  {
+    "pm_name": "Polina Chaviak",
+    "float_name": "PM Polina",
+    "discord_id": "1074700213354238094"
+  },
+  {
+    "pm_name": "Roman Tkachenko",
+    "float_name": "PM Roman",
+    "discord_id": "1033054881189203978"
+  },
+  {
+    "pm_name": "Yegor Khrushch",
+    "float_name": "PM YEGOR",
+    "discord_id": "1256354350721138750"
+  },
+  {
+    "pm_name": "Valeriia Dubina",
+    "float_name": "PM Lera",
+    "discord_id": "1498262798256570419"
+  },
+  {
+    "pm_name": "Anna Lozynska",
+    "float_name": "Ann RSG PM Jr",
+    "discord_id": "1507345186181742715"
+  },
+  {
+    "pm_name": "Aliona Chernenko",
+    "discord_id": "1513512059512553604",
+    "note": ""
+  }
 ]
