@@ -78,6 +78,10 @@ const maxHoursConfig   = {}  // cleanName → maxHours
 const skipTagsConfig   = []  // tag names to skip entirely
 const offTimeoffConfig = []  // timeoff type names to count as off
 const skipTasksConfig  = new Set()  // task names to skip entirely in float-check (normalized, exact)
+// Name patterns → skip the person entirely (fixed-price artists). Both hourglass
+// variants are built-in defaults so we never regress: ⌛ U+231B and ⏳ U+23F3.
+// Matched with String.includes (UI promises "містить"), not startsWith.
+const skipNamePatterns = ['⌛', '⏳']
 
 // Normalize a task name the same way isSkipTask() does (strip leading emoji, lowercase, trim)
 function normTaskName(name) {
@@ -98,6 +102,8 @@ for (const row of floatCheckExceptions) {
     offTimeoffConfig.push(name)
   } else if (type === 'skip_task' && value === 'skip_entirely') {
     skipTasksConfig.add(normTaskName(name))
+  } else if (type === 'name_pattern' && value === 'skip_entirely') {
+    if (!skipNamePatterns.includes(name)) skipNamePatterns.push(name)
   }
 }
 
@@ -319,7 +325,7 @@ async function main() {
   const artists = allPeople.filter(p => {
     if (!allDeptIds.has(p.department?.department_id)) return false
     if (p.active !== 1) return false
-    if (/^⌛/.test(p.name || '')) return false
+    if (skipNamePatterns.some(pat => (p.name || '').includes(pat))) return false
     // skip tags
     const tags = Array.isArray(p.tags) ? p.tags.map(t => t.name) :
                  p.tags ? [p.tags.name] : []
