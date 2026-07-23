@@ -4,9 +4,12 @@ name: Daily Float Check
 # Evening 17:50 Kyiv → report for TOMORROW. Morning 09:30 Kyiv → report for TODAY (with morning reminder header).
 # Cloud-run (GitHub Actions) — fires regardless of anyone's computer being on.
 on:
-  schedule:
-    - cron: '50 14 * * 0-4'   # 17:50 Kyiv (EEST/UTC+3) Sun-Thu → TOMORROW.  Winter (UTC+2): change to '50 15'
-    - cron: '30 6 * * 1-5'    # 09:30 Kyiv (EEST/UTC+3) Mon-Fri → TODAY.     Winter (UTC+2): change to '30 7'
+  # GitHub cron is unreliable (scheduled runs delayed 1-2h) — driven by an EXTERNAL
+  # scheduler (Make.com / cron-job.org) hitting the workflow_dispatch API instead.
+  # Kept here (commented) as documentation / optional fallback.
+  # schedule:
+  #   - cron: '50 14 * * 0-4'   # 17:50 Kyiv (EEST/UTC+3) Sun-Thu → TOMORROW.  Winter (UTC+2): '50 15'
+  #   - cron: '30 6 * * 1-5'    # 09:30 Kyiv (EEST/UTC+3) Mon-Fri → TODAY.     Winter (UTC+2): '30 7'
   workflow_dispatch:
     inputs:
       phase:

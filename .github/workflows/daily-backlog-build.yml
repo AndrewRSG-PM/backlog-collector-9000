@@ -4,9 +4,12 @@ name: Daily Backlog Build
 # Evening 18:20 Kyiv -> build for TOMORROW. Morning 08:50 Kyiv -> REbuild for TODAY (picks up late plan edits).
 # Cloud-run (GitHub Actions + Make.com) — fully independent of anyone's computer.
 on:
-  schedule:
-    - cron: '20 15 * * 0-4'   # 18:20 Kyiv (EEST/UTC+3) Sun-Thu -> TOMORROW.  Winter (UTC+2): change to '20 16'
-    - cron: '50 5 * * 1-5'    # 08:50 Kyiv (EEST/UTC+3) Mon-Fri -> TODAY.     Winter (UTC+2): change to '50 6'
+  # GitHub cron is unreliable (scheduled runs delayed 1-2h) — driven by an EXTERNAL
+  # scheduler (Make.com / cron-job.org) hitting the workflow_dispatch API instead.
+  # Kept here (commented) as documentation / optional fallback.
+  # schedule:
+  #   - cron: '20 15 * * 0-4'   # 18:20 Kyiv (EEST/UTC+3) Sun-Thu -> TOMORROW.  Winter (UTC+2): '20 16'
+  #   - cron: '50 5 * * 1-5'    # 08:50 Kyiv (EEST/UTC+3) Mon-Fri -> TODAY.     Winter (UTC+2): '50 6'
   workflow_dispatch:
     inputs:
       phase:
