@@ -1,7 +1,74 @@
-﻿import { useState } from 'react'
-import { updateGitHubSecret } from '../lib/github'
+﻿import { useState, useEffect } from 'react'
+import { updateGitHubSecret, readConfigFile, writeConfigFile } from '../lib/github'
 
 const STORAGE_KEY = 'bc9000_github_pat'
+const COOKIE_META_FILE = 'config/cookie_meta.json'
+
+// Stores the REAL Float session cookie expiry (read from DevTools) so the dashboard
+// can warn accurately before it dies — instead of guessing a fixed lifetime.
+function CookieExpiryField() {
+  const [value, setValue] = useState('')     // datetime-local string YYYY-MM-DDTHH:mm
+  const [sha, setSha] = useState(null)
+  const [status, setStatus] = useState(null) // null | 'saving' | 'ok' | 'error'
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    readConfigFile(COOKIE_META_FILE)
+      .then(({ data, sha: s }) => {
+        setSha(s)
+        const exp = data?.float_session_cookie_expires || ''
+        if (exp) setValue(exp.slice(0, 16))   // trim seconds for datetime-local
+      })
+      .catch(() => {})
+  }, [])
+
+  async function save() {
+    if (!localStorage.getItem(STORAGE_KEY)) {
+      setError('GitHub PAT not set — save PAT first.'); setStatus('error'); return
+    }
+    if (!value) return
+    setStatus('saving'); setError('')
+    try {
+      await writeConfigFile(
+        COOKIE_META_FILE,
+        { float_session_cookie_expires: value },
+        sha,
+        'config: update cookie expiry',
+      )
+      const { sha: s } = await readConfigFile(COOKIE_META_FILE)
+      setSha(s)
+      setStatus('ok')
+      setTimeout(() => setStatus(null), 3000)
+    } catch (e) {
+      setError(e.message); setStatus('error')
+    }
+  }
+
+  return (
+    <div>
+      <label className="block text-xs text-[#8191b6] tracking-wider mb-2">
+        FLOAT COOKIE — EXPIRES
+        <span className="text-[#8191b6] ml-2 normal-case">(DevTools → Cookies → float2sessprd → Expires; для точного попередження на дашборді)</span>
+      </label>
+      <div className="flex gap-2">
+        <input
+          type="datetime-local"
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          className="flex-1 bg-[#0e1220] border border-[#2b3a5e] text-[#dde6f5] text-xs px-3 py-2 font-mono focus:outline-none focus:border-[#51679c] [color-scheme:dark]"
+        />
+        <button
+          onClick={save}
+          disabled={status === 'saving' || !value}
+          className="px-4 py-2 border border-[#44598c] text-[#a6b3cd] hover:border-[#8191b6] hover:text-white text-xs tracking-wider transition-colors disabled:opacity-40"
+        >
+          {status === 'saving' ? '...' : status === 'ok' ? '✓ SAVED' : 'SAVE'}
+        </button>
+      </div>
+      {status === 'error' && <p className="text-red-400 text-xs mt-1.5">✕ {error}</p>}
+    </div>
+  )
+}
 
 function SecretField({ label, hint, placeholder, secretName }) {
   const [value, setValue] = useState('')
@@ -158,6 +225,9 @@ export default function SettingsModal({ onClose }) {
             placeholder="ttgapcpimq7c2..."
             secretName="FLOAT_SESSION_COOKIE"
           />
+
+          {/* Real expiry of the cookie above — powers the dashboard early-warning banner */}
+          <CookieExpiryField />
 
           {/* Make.com Webhooks */}
           <SecretField

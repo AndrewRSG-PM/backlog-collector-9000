@@ -1,5 +1,16 @@
 ﻿import { useState, useEffect, useCallback } from 'react'
-import { dispatchWorkflow, getLatestRun, getRunAnnotations, getSecretInfo } from '../lib/github'
+import { dispatchWorkflow, getLatestRun, getRunAnnotations, getSecretInfo, readConfigFile } from '../lib/github'
+
+const COOKIE_META_FILE = 'config/cookie_meta.json'
+
+// Days until the Float session cookie expires, from the real expiry stored in
+// config/cookie_meta.json. Returns null if unknown/unreadable.
+function daysUntil(iso) {
+  if (!iso) return null
+  const t = new Date(iso).getTime()
+  if (Number.isNaN(t)) return null
+  return Math.floor((t - Date.now()) / 86400000)
+}
 
 const CODA_2D_URL = 'https://coda.io/d/RSG-2D-Team_d6SntNSj1Co/AutoOverview-Monday_suz0ScO-#_lupvs87t'
 const CODA_3D_URL = 'https://coda.io/d/RSG-3D-Team_dwKVAnig23m/AutoOverview-Monday_suOd-2bZ#_lugrhTam'
@@ -316,6 +327,50 @@ function OrderSyncCookieBanner() {
   )
 }
 
+// Proactive early-warning banner: fires BEFORE the cookie dies (not after a failed
+// run like OrderSyncCookieBanner). Uses the real expiry from config/cookie_meta.json.
+function CookieExpiryBanner() {
+  const [days, setDays] = useState(null)
+  const [expiresIso, setExpiresIso] = useState(null)
+
+  useEffect(() => {
+    readConfigFile(COOKIE_META_FILE)
+      .then(({ data }) => {
+        const iso = data?.float_session_cookie_expires
+        setExpiresIso(iso || null)
+        setDays(daysUntil(iso))
+      })
+      .catch(() => {})
+  }, [])
+
+  // Only shout when it matters: expired or ≤3 days left.
+  if (days === null || days > 3) return null
+
+  const expired = days <= 0
+  const when = expiresIso
+    ? new Date(expiresIso).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' })
+    : ''
+  const cls = expired
+    ? 'border-red-900/50 bg-red-950/20 text-red-400'
+    : 'border-yellow-900/50 bg-yellow-950/20 text-yellow-400'
+
+  return (
+    <div className={`rounded-xl border px-5 py-3 flex items-center justify-between gap-4 ${cls}`}>
+      <div className="text-sm">
+        🍪 {expired
+          ? <>Float session cookie <strong>ПРОТУХ</strong> ({when}) — order-sync падатиме, поки не оновиш.</>
+          : <>Float session cookie протухає <strong>через {days} дн.</strong> ({when}) — онови завчасно, інакше order-sync впаде.</>}
+      </div>
+      <button
+        onClick={() => document.dispatchEvent(new CustomEvent('open-settings'))}
+        className="text-xs border border-current opacity-80 hover:opacity-100 px-3 py-1.5 transition-opacity flex-shrink-0"
+      >
+        ОНОВИТИ COOKIE
+      </button>
+    </div>
+  )
+}
+
 const COOKIE_LIFETIME_DAYS = 14
 
 function HealthPanel() {
@@ -323,11 +378,18 @@ function HealthPanel() {
   const [runs, setRuns] = useState({})
 
   useEffect(() => {
+    // Prefer the REAL expiry (config/cookie_meta.json); fall back to the lifetime guess.
+    readConfigFile(COOKIE_META_FILE)
+      .then(({ data }) => {
+        const d = daysUntil(data?.float_session_cookie_expires)
+        if (d !== null) setCookieDays(d)
+      })
+      .catch(() => {})
     if (!localStorage.getItem('bc9000_github_pat')) return
     getSecretInfo('FLOAT_SESSION_COOKIE').then(info => {
       if (info?.updated_at) {
         const ageDays = (Date.now() - new Date(info.updated_at).getTime()) / 86400000
-        setCookieDays(Math.round(COOKIE_LIFETIME_DAYS - ageDays))
+        setCookieDays(prev => prev !== null ? prev : Math.round(COOKIE_LIFETIME_DAYS - ageDays))
       }
     }).catch(() => {})
     for (const [key, file] of Object.entries(WORKFLOWS)) {
@@ -383,6 +445,7 @@ export default function Dashboard() {
     <div className="space-y-8">
       <NoPATBanner />
       <FloatFailBanner />
+      <CookieExpiryBanner />
       <OrderSyncCookieBanner />
       <HealthPanel />
 
