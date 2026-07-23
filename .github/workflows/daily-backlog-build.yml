@@ -1,0 +1,82 @@
+name: Daily Backlog Build
+
+# Full backlog pipeline: assemble (Make.com, 2D+3D) -> 10-min buffer -> order-sync (exact priority).
+# Evening 18:20 Kyiv -> build for TOMORROW. Morning 08:50 Kyiv -> REbuild for TODAY (picks up late plan edits).
+# Cloud-run (GitHub Actions + Make.com) — fully independent of anyone's computer.
+on:
+  schedule:
+    - cron: '20 15 * * 0-4'   # 18:20 Kyiv (EEST/UTC+3) Sun-Thu -> TOMORROW.  Winter (UTC+2): change to '20 16'
+    - cron: '50 5 * * 1-5'    # 08:50 Kyiv (EEST/UTC+3) Mon-Fri -> TODAY.     Winter (UTC+2): change to '50 6'
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: 'evening | morning'
+        required: false
+        default: 'morning'
+      dry_run:
+        description: 'order-sync dry-run (no Order written to Monday)'
+        required: false
+        default: 'true'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Resolve phase + date
+        id: cfg
+        run: |
+          PHASE="${{ github.event.inputs.phase }}"
+          SCHED="${{ github.event.schedule }}"
+          if [ "$SCHED" = "50 5 * * 1-5" ]; then PHASE="morning"; fi
+          if [ "$SCHED" = "20 15 * * 0-4" ]; then PHASE="evening"; fi
+          if [ "$PHASE" = "morning" ]; then
+            DATE="$(TZ=Europe/Kyiv date +%F)"
+          else
+            DATE="$(node -e "const d=new Date();d.setDate(d.getDate()+1);if(d.getDay()===6)d.setDate(d.getDate()+2);if(d.getDay()===0)d.setDate(d.getDate()+1);process.stdout.write(d.toISOString().slice(0,10))")"
+          fi
+          echo "phase=$PHASE" >> "$GITHUB_OUTPUT"
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          M=$(echo "$DATE" | cut -d'-' -f2 | sed 's/^0//')
+          D=$(echo "$DATE" | cut -d'-' -f3 | sed 's/^0//')
+          Y=$(echo "$DATE" | cut -d'-' -f1)
+          echo "make_date=${M}/${D}/${Y}" >> "$GITHUB_OUTPUT"
+          echo "Resolved phase=$PHASE date=$DATE make_date=${M}/${D}/${Y}"
+
+      - name: Notify Discord (start)
+        run: |
+          curl -s -X POST "${{ secrets.DISCORD_WEBHOOK_PROD }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\":\"Assembling backlog (${{ steps.cfg.outputs.phase }}) — ${{ steps.cfg.outputs.date }}. 2D+3D then order-sync in 10 min.\"}"
+
+      - name: Assemble 2D
+        run: curl -s "https://hook.eu1.make.com/0r2v6scul53iv537kxfl3fh1pht0nxh9?Date=${{ steps.cfg.outputs.make_date }}&user=AndrewHolovko"
+
+      - name: Assemble 3D
+        run: curl -s "https://hook.eu1.make.com/0cx7d1wpl2ouudadg7d61u742mqgiy6w?Date=${{ steps.cfg.outputs.make_date }}&user=AndrewHolovko"
+
+      - name: Buffer — let Make.com populate Monday (10 min)
+        run: sleep 600
+
+      - name: Order Sync
+        env:
+          FLOAT_API_KEY: ${{ secrets.FLOAT_API_KEY }}
+          MONDAY_TOKEN: ${{ secrets.MONDAY_TOKEN }}
+          FLOAT_SESSION_COOKIE: ${{ secrets.FLOAT_SESSION_COOKIE }}
+          TARGET_DATE: ${{ steps.cfg.outputs.date }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: node scripts/order-sync.js
+
+      - name: Notify Discord (pipeline failed)
+        if: failure()
+        run: |
+          curl -s -X POST "${{ secrets.DISCORD_WEBHOOK_PROD }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\":\"ALERT: backlog pipeline failed (${{ steps.cfg.outputs.phase }} ${{ steps.cfg.outputs.date }}) at order-sync — FLOAT_SESSION_COOKIE likely expired. Update it in BK9K Settings. Backlog assembled but Order NOT set.\"}"

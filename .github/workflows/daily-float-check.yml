@@ -1,0 +1,50 @@
+name: Daily Float Check
+
+# Scheduled float-check report to Discord (prod webhook).
+# Evening 17:50 Kyiv → report for TOMORROW. Morning 09:30 Kyiv → report for TODAY (with morning reminder header).
+# Cloud-run (GitHub Actions) — fires regardless of anyone's computer being on.
+on:
+  schedule:
+    - cron: '50 14 * * 0-4'   # 17:50 Kyiv (EEST/UTC+3) Sun-Thu → TOMORROW.  Winter (UTC+2): change to '50 15'
+    - cron: '30 6 * * 1-5'    # 09:30 Kyiv (EEST/UTC+3) Mon-Fri → TODAY.     Winter (UTC+2): change to '30 7'
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: 'evening | morning'
+        required: false
+        default: 'morning'
+
+jobs:
+  float-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve phase + date
+        id: cfg
+        run: |
+          PHASE="${{ github.event.inputs.phase }}"
+          SCHED="${{ github.event.schedule }}"
+          if [ "$SCHED" = "30 6 * * 1-5" ]; then PHASE="morning"; fi
+          if [ "$SCHED" = "50 14 * * 0-4" ]; then PHASE="evening"; fi
+          if [ "$PHASE" = "morning" ]; then
+            echo "date=$(TZ=Europe/Kyiv date +%F)" >> "$GITHUB_OUTPUT"   # today (Kyiv)
+            echo "morning=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "date=" >> "$GITHUB_OUTPUT"                             # empty → smartTomorrow in script
+            echo "morning=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "phase=$PHASE" >> "$GITHUB_OUTPUT"
+          echo "Resolved phase=$PHASE"
+
+      - name: Run Float Check
+        env:
+          FLOAT_API_KEY: ${{ secrets.FLOAT_API_KEY }}
+          MONDAY_TOKEN: ${{ secrets.MONDAY_TOKEN }}
+          DISCORD_WEBHOOK_PROD: ${{ secrets.DISCORD_WEBHOOK_PROD }}
+          TARGET_DATE: ${{ steps.cfg.outputs.date }}
+          MORNING_MODE: ${{ steps.cfg.outputs.morning }}
+        run: node scripts/float-check.js

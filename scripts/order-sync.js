@@ -209,30 +209,30 @@ function shouldSkip(taskName) {
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 async function main() {
-  // Try to get Float session JWT for priority-aware sorting (svc/api3)
-  let sessionJwt = null
-  if (FLOAT_SESSION_COOKIE) {
-    try {
-      sessionJwt = await getFloatSessionJWT()
-    } catch (e) {
-      console.warn(`⚠️ Float session JWT failed: ${e.message} — falling back to official API (approximate sort order)`)
-      // GitHub Actions annotation — picked up by BK9K UI to show warning banner
-      console.log('::warning::FLOAT_SESSION_COOKIE_EXPIRED')
-    }
-  } else {
-    console.log('ℹ️ FLOAT_SESSION_COOKIE not set — using official API (approximate sort order)')
-    console.log('::warning::FLOAT_SESSION_COOKIE_EXPIRED')
+  // Priority-aware sorting REQUIRES the Float session JWT (svc/api3). Backlog order
+  // must be EXACT or not written at all — no approximate fallback (Andrew's rule).
+  // A missing/expired cookie aborts the run so Order is never set from a wrong order.
+  if (!FLOAT_SESSION_COOKIE) {
+    console.log('::error::FLOAT_SESSION_COOKIE_EXPIRED')
+    console.error('❌ FLOAT_SESSION_COOKIE not set — cannot resolve exact task priority. Aborting (no approximate order). Set it in BK9K Settings.')
+    process.exit(1)
+  }
+  let sessionJwt
+  try {
+    sessionJwt = await getFloatSessionJWT()
+  } catch (e) {
+    console.log('::error::FLOAT_SESSION_COOKIE_EXPIRED')
+    console.error(`❌ Float session JWT failed: ${e.message} — cookie likely expired. Aborting (no approximate order). Update FLOAT_SESSION_COOKIE in BK9K Settings.`)
+    process.exit(1)
   }
 
   console.log('Fetching Float data...')
   const [allPeople, allTasks, floatProjects] = await Promise.all([
     floatGetAll('/people'),
-    sessionJwt
-      ? floatGetAllOld(`/tasks/all?start_date=${DATE}&end_date=${DATE}`, sessionJwt)
-      : floatGetAll(`/tasks?start_date=${DATE}&end_date=${DATE}`),
+    floatGetAllOld(`/tasks/all?start_date=${DATE}&end_date=${DATE}`, sessionJwt),
     floatGetAll('/projects'),
   ])
-  console.log(`Tasks fetched via: ${sessionJwt ? 'svc/api3 (priority sort)' : 'official API (approximate sort)'}`)
+  console.log('Tasks fetched via: svc/api3 (priority sort)')
 
   const floatProjectNames = {}
   for (const p of floatProjects) floatProjectNames[p.project_id] = p.name
