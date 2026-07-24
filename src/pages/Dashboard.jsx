@@ -111,12 +111,20 @@ function BacklogTriggerCard({ title, description, dept, codaUrl, date }) {
             variant="secondary"
           />
           <ActionButton
-            label="RUN"
+            label={loading ? '...' : 'RUN'}
             onClick={trigger}
-            disabled={true}
+            disabled={loading}
           />
         </div>
       </div>
+      {error && (
+        <div className="text-red-400 text-xs mt-2 border border-red-900/40 px-3 py-2 bg-red-950/20">
+          ✕ {error}
+          {error.includes('401') || error.includes('Bad credentials') ? (
+            <span className="ml-2">— <a href="/guides" className="underline hover:text-red-300">Set GitHub PAT in Settings</a></span>
+          ) : null}
+        </div>
+      )}
       {run && (
         <div className="mt-2 text-[10px] text-[#6f81ab] flex items-center gap-3">
           <span>Run #{run.run_number}</span>
