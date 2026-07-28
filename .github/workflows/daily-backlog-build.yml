@@ -36,7 +36,10 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ hashFiles('package-lock.json') }}
       - name: Install Playwright Chromium
-        run: npx playwright install chromium --with-deps
+        # No --with-deps: ubuntu-latest already ships every Chromium lib (all "already
+        # newest" in logs); --with-deps only adds fonts we don't need (headless JWT
+        # capture renders nothing) and its apt step hangs on font-mirror stalls.
+        run: npx playwright install chromium
 
       - name: Resolve phase + date
         id: cfg
