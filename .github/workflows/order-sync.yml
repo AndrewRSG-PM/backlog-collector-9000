@@ -28,7 +28,9 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ hashFiles('package-lock.json') }}
       - name: Install Playwright Chromium
-        run: npx playwright install chromium --with-deps
+        # No --with-deps: ubuntu-latest already has every Chromium lib; --with-deps only
+        # adds fonts (unused for headless JWT capture) and its apt step stalls on mirror hangs.
+        run: npx playwright install chromium
       - name: Run Order Sync
         env:
           FLOAT_API_KEY: ${{ secrets.FLOAT_API_KEY }}
