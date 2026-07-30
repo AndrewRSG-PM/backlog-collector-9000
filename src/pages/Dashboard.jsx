@@ -3,13 +3,15 @@ import { dispatchWorkflow, getLatestRun, getRunAnnotations, getSecretInfo, readC
 
 const COOKIE_META_FILE = 'config/cookie_meta.json'
 
-// Days until the Float session cookie expires, from the real expiry stored in
-// config/cookie_meta.json. Returns null if unknown/unreadable.
-function daysUntil(iso) {
+// Cookie expiry status from the real expiry in config/cookie_meta.json.
+// `expired` is true ONLY when the timestamp is actually in the past; `days` is the
+// remaining whole days rounded UP (so <24h future = 1 day, never a misleading 0).
+// Returns null if unknown/unreadable.
+function cookieStatus(iso) {
   if (!iso) return null
-  const t = new Date(iso).getTime()
-  if (Number.isNaN(t)) return null
-  return Math.floor((t - Date.now()) / 86400000)
+  const ms = new Date(iso).getTime() - Date.now()
+  if (Number.isNaN(ms)) return null
+  return { expired: ms <= 0, days: Math.max(0, Math.ceil(ms / 86400000)) }
 }
 
 const CODA_2D_URL = 'https://coda.io/d/RSG-2D-Team_d6SntNSj1Co/AutoOverview-Monday_suz0ScO-#_lupvs87t'
@@ -338,7 +340,7 @@ function OrderSyncCookieBanner() {
 // Proactive early-warning banner: fires BEFORE the cookie dies (not after a failed
 // run like OrderSyncCookieBanner). Uses the real expiry from config/cookie_meta.json.
 function CookieExpiryBanner() {
-  const [days, setDays] = useState(null)
+  const [st, setSt] = useState(null)
   const [expiresIso, setExpiresIso] = useState(null)
 
   useEffect(() => {
@@ -346,15 +348,15 @@ function CookieExpiryBanner() {
       .then(({ data }) => {
         const iso = data?.float_session_cookie_expires
         setExpiresIso(iso || null)
-        setDays(daysUntil(iso))
+        setSt(cookieStatus(iso))
       })
       .catch(() => {})
   }, [])
 
-  // Only shout when it matters: expired or ≤3 days left.
-  if (days === null || days > 3) return null
+  // Only shout when it matters: already expired, or ≤3 days left.
+  if (!st || (!st.expired && st.days > 3)) return null
 
-  const expired = days <= 0
+  const { expired, days } = st
   const when = expiresIso
     ? new Date(expiresIso).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' })
     : ''
@@ -382,22 +384,23 @@ function CookieExpiryBanner() {
 const COOKIE_LIFETIME_DAYS = 14
 
 function HealthPanel() {
-  const [cookieDays, setCookieDays] = useState(null) // days left, null = unknown
+  const [cookie, setCookie] = useState(null) // { expired, days } | null
   const [runs, setRuns] = useState({})
 
   useEffect(() => {
     // Prefer the REAL expiry (config/cookie_meta.json); fall back to the lifetime guess.
     readConfigFile(COOKIE_META_FILE)
       .then(({ data }) => {
-        const d = daysUntil(data?.float_session_cookie_expires)
-        if (d !== null) setCookieDays(d)
+        const st = cookieStatus(data?.float_session_cookie_expires)
+        if (st) setCookie(st)
       })
       .catch(() => {})
     if (!localStorage.getItem('bc9000_github_pat')) return
     getSecretInfo('FLOAT_SESSION_COOKIE').then(info => {
       if (info?.updated_at) {
         const ageDays = (Date.now() - new Date(info.updated_at).getTime()) / 86400000
-        setCookieDays(prev => prev !== null ? prev : Math.round(COOKIE_LIFETIME_DAYS - ageDays))
+        const days = Math.round(COOKIE_LIFETIME_DAYS - ageDays)
+        setCookie(prev => prev !== null ? prev : { expired: days <= 0, days: Math.max(0, days) })
       }
     }).catch(() => {})
     for (const [key, file] of Object.entries(WORKFLOWS)) {
@@ -407,13 +410,13 @@ function HealthPanel() {
     }
   }, [])
 
-  const cookieColor = cookieDays === null ? 'text-[#6f81ab]'
-    : cookieDays <= 1 ? 'text-red-400'
-    : cookieDays <= 4 ? 'text-yellow-400'
+  const cookieColor = !cookie ? 'text-[#6f81ab]'
+    : cookie.expired || cookie.days <= 1 ? 'text-red-400'
+    : cookie.days <= 4 ? 'text-yellow-400'
     : 'text-green-400'
-  const cookieText = cookieDays === null ? '?'
-    : cookieDays <= 0 ? 'протух!'
-    : `~${cookieDays} дн.`
+  const cookieText = !cookie ? '?'
+    : cookie.expired ? 'протух!'
+    : `~${cookie.days} дн.`
 
   const runItems = [
     { key: 'floatCheck', label: 'Float Check' },
