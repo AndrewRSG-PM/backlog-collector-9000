@@ -345,10 +345,8 @@ async function main() {
   const tasksByPerson = {}  // pid → [tasks] (for duplicate detection)
   for (const t of tasks) {
     for (const pid of getPersonIds(t)) {
-      if (!byPerson[pid]) byPerson[pid] = { hours: 0, coverageHours: 0, hasTentative: false, projectIds: new Set() }
-      const th = parseFloat(t.hours || 0)
-      byPerson[pid].hours += th
-      if (!isOverhead(t.name)) byPerson[pid].coverageHours += th   // production hours = coverage
+      if (!byPerson[pid]) byPerson[pid] = { hours: 0, hasTentative: false, projectIds: new Set() }
+      byPerson[pid].hours += parseFloat(t.hours || 0)
       if (t.status === 1) byPerson[pid].hasTentative = true
       if (t.project_id) byPerson[pid].projectIds.add(t.project_id)
       if (!tasksByPerson[pid]) tasksByPerson[pid] = []
@@ -382,7 +380,7 @@ async function main() {
     // count as off, don't flag as unscheduled/under-loaded.
     if (isNonWorkingDay(a)) { sec.off++; continue }
 
-    const info = byPerson[pid] || { hours: 0, coverageHours: 0, hasTentative: false, projectIds: new Set() }
+    const info = byPerson[pid] || { hours: 0, hasTentative: false, projectIds: new Set() }
     const hrs  = info.hours
     const tent = info.hasTentative
 
@@ -428,17 +426,13 @@ async function main() {
       return lines
     }
 
-    const coverage = info.coverageHours || 0
     const maxHours = maxHoursConfig[cleanName] ?? 8
 
-    // UNDER-COVERED: production shortfall > 3h (coverage < 5h of an 8h day). Needs work →
-    // show adjacent production hints, tag the PRODUCTION PM (QA/overhead PMs can't fill it).
-    // Exception: a single QA task > 8h is a real QA overload (handled by the overload branch), not under-coverage.
-    if (coverage < 5 && !singleBigQa) {
-      let label
-      if (hrs === 0)           label = ' - not scheduled'
-      else if (coverage === 0) label = ` - 0h продакшну (${hrs}h QA/overhead)`
-      else                     label = ` - недобір продакшну: ${coverage}h (${hrs}h всього)`
+    // UNDERLOAD: strictly < 8h total in the plan → flag (task type is irrelevant here).
+    // Show adjacent hints (QA excluded) and tag the PRODUCTION PM — a QA/overhead PM
+    // can't fill the gap, so if there is no production task, no PM is tagged.
+    if (hrs < 8) {
+      const label = hrs === 0 ? ' - not scheduled' : ` - < 8h (${hrs}h)`
       const entry = { line: `* **${cleanName}** [${dept}]${label}`, pms: prodMentions, adjLines: buildAdjLines(pid) }
       if (prodMentions.length > 1) sec.conflicting.push({ ...entry, adjLines: undefined })
       else                         sec.noTasks.push(entry)
