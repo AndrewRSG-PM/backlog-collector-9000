@@ -179,8 +179,11 @@ function isNonWorkingDay(person) {
 
 // ─── Task skip logic (for adjacent hints + project id collection) ─────────────
 const SKIP_EXACT_ADJ = new Set(['art direction', 'rsg org', 'tech support', 'playables \\ creatives pm support'])
+// Real production tasks that would otherwise be caught by the broad /QA/ rule → never skip.
+const NEVER_SKIP = new Set(['export + qa'])
 function isSkipTask(name) {
   const norm = normTaskName(name)
+  if (NEVER_SKIP.has(norm)) return false
   return /QA/i.test(name) || SKIP_EXACT_ADJ.has(norm) || skipTasksConfig.has(norm)
 }
 
