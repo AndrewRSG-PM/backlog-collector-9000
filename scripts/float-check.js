@@ -428,14 +428,17 @@ async function main() {
 
     const maxHours = maxHoursConfig[cleanName] ?? 8
 
-    // UNDERLOAD: strictly < 8h total in the plan → flag (task type is irrelevant here).
-    // Show adjacent hints (QA excluded) and tag the PRODUCTION PM — a QA/overhead PM
-    // can't fill the gap, so if there is no production task, no PM is tagged.
+    // UNDERLOAD: strictly < 8h total → flag (task type irrelevant to the flag itself).
+    // Adjacent hints (which task to pull in) only make sense for a real gap ≥ 3h. For a
+    // 1–2h shortfall just tag the production PM to top up — no hints. QA/overhead PM
+    // can't fill a gap, so if there's no production task, no PM is tagged.
     if (hrs < 8) {
-      const label = hrs === 0 ? ' - not scheduled' : ` - < 8h (${hrs}h)`
-      const entry = { line: `* **${cleanName}** [${dept}]${label}`, pms: prodMentions, adjLines: buildAdjLines(pid) }
-      if (prodMentions.length > 1) sec.conflicting.push({ ...entry, adjLines: undefined })
-      else                         sec.noTasks.push(entry)
+      const label  = hrs === 0 ? ' - not scheduled' : ` - < 8h (${hrs}h)`
+      const bigGap = (8 - hrs) >= 3
+      const entry  = { line: `* **${cleanName}** [${dept}]${label}`, pms: prodMentions }
+      if (prodMentions.length > 1) sec.conflicting.push(entry)
+      else if (bigGap)             sec.noTasks.push({ ...entry, adjLines: buildAdjLines(pid) })
+      else                         sec.flags.push(entry)   // 1–2h gap → per-PM flag, no hints
       continue
     }
 
