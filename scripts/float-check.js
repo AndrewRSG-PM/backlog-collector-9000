@@ -170,14 +170,20 @@ function isNonWorkingDay(person) {
 }
 
 // ─── Task counting policy ─────────────────────────────────────────────────────
-// Float Check counts EVERY task as workload, regardless of name (QA, Art Direction,
-// overheads — all real hours). The ONLY thing that makes a person "off" is a timeoff
-// or a non-working day in their schedule. Task-name skipping lives ONLY in order-sync.
-// QA gets special handling in TWO narrow spots only (NOT hour counting):
-//  (1) never suggested as a movable task in adjacent-day hints;
-//  (2) excluded from PM tagging on OVERLOAD (QA time won't move) — UNLESS the day's
-//      single task is a QA task > 8h (then that QA IS the overload → tag its PM).
-const isQaTask = (name) => /QA/i.test(name || '')
+// Float Check counts EVERY task in HOURS, regardless of name (QA, Art Direction,
+// overheads — all real hours). A person is "off" only on a timeoff / non-working day.
+// But QA & overhead do NOT count as "coverage" of the day — they are hours, not
+// production. Used in three narrow spots (never in the raw hour total):
+//  (1) QA never suggested as a movable task in adjacent-day hints;
+//  (2) QA excluded from PM tagging on OVERLOAD (won't move) — unless the day's single
+//      task is a QA task > 8h (then that QA IS the overload → tag its PM);
+//  (3) coverage (production hours) = total minus QA+overhead → drives underload.
+const normName = (name) => (name || '').replace(/^[^\x00-\x7F]+\s*/, '').toLowerCase().trim()
+const OVERHEAD_EXACT = new Set(['art direction', 'rsg org', 'tech support', 'playables \\ creatives pm support'])
+// Real production tasks that merely contain "QA" and must NOT be treated as QA/overhead.
+const NEVER_QA = new Set(['export + qa'])
+const isQaTask   = (name) => !NEVER_QA.has(normName(name)) && /QA/i.test(name || '')
+const isOverhead = (name) => !NEVER_QA.has(normName(name)) && (/QA/i.test(name || '') || OVERHEAD_EXACT.has(normName(name)))
 
 // ─── PM mention resolution ───────────────────────────────────────────────────
 // Priority 1: project_exceptions → pm_override (manual)
@@ -339,8 +345,10 @@ async function main() {
   const tasksByPerson = {}  // pid → [tasks] (for duplicate detection)
   for (const t of tasks) {
     for (const pid of getPersonIds(t)) {
-      if (!byPerson[pid]) byPerson[pid] = { hours: 0, hasTentative: false, projectIds: new Set() }
-      byPerson[pid].hours += parseFloat(t.hours || 0)
+      if (!byPerson[pid]) byPerson[pid] = { hours: 0, coverageHours: 0, hasTentative: false, projectIds: new Set() }
+      const th = parseFloat(t.hours || 0)
+      byPerson[pid].hours += th
+      if (!isOverhead(t.name)) byPerson[pid].coverageHours += th   // production hours = coverage
       if (t.status === 1) byPerson[pid].hasTentative = true
       if (t.project_id) byPerson[pid].projectIds.add(t.project_id)
       if (!tasksByPerson[pid]) tasksByPerson[pid] = []
@@ -374,21 +382,23 @@ async function main() {
     // count as off, don't flag as unscheduled/under-loaded.
     if (isNonWorkingDay(a)) { sec.off++; continue }
 
-    const info = byPerson[pid] || { hours: 0, hasTentative: false, projectIds: new Set() }
+    const info = byPerson[pid] || { hours: 0, coverageHours: 0, hasTentative: false, projectIds: new Set() }
     const hrs  = info.hours
     const tent = info.hasTentative
 
     // Resolve PM mentions — 3-day window: tag the PM with the most hours across dayBefore + target + dayAfter.
-    // pmHoursNoQa = same, but excluding QA tasks (used for the overload case per rule 2).
+    // pmHoursNoQa = excluding QA (overload tagging); pmHoursProd = excluding QA+overhead (underload tagging).
     const pmHours = {}
     const pmHoursNoQa = {}
+    const pmHoursProd = {}
     for (const t of (threeDayTasksByPerson[pid] || [])) {
       if (!t.project_id) continue
       const m = getPmMention(t.project_id, projectNames[t.project_id])
       if (!m) continue
       const h = parseFloat(t.hours || 0)
       pmHours[m] = (pmHours[m] || 0) + h
-      if (!isQaTask(t.name)) pmHoursNoQa[m] = (pmHoursNoQa[m] || 0) + h
+      if (!isQaTask(t.name))   pmHoursNoQa[m] = (pmHoursNoQa[m] || 0) + h
+      if (!isOverhead(t.name)) pmHoursProd[m] = (pmHoursProd[m] || 0) + h
     }
     const dominantOf = (map) => {
       const keys = Object.keys(map)
@@ -396,7 +406,8 @@ async function main() {
       const maxH = Math.max(...Object.values(map))
       return keys.filter(pm => map[pm] === maxH)
     }
-    const mentions = dominantOf(pmHours)
+    const mentions     = dominantOf(pmHours)
+    const prodMentions = dominantOf(pmHoursProd)   // underload: production PMs only
     // Overload PM tags: drop QA-derived PMs (QA won't move) — unless the day's single
     // task is a QA task > 8h, in which case that QA IS the overload → tag normally.
     const todayTasks  = tasksByPerson[pid] || []
@@ -417,35 +428,38 @@ async function main() {
       return lines
     }
 
-    const isConflicting = mentions.length > 1
-
-    // No real project tasks → noTasks
-    if (info.projectIds.size === 0) {
-      const hrsLabel = hrs > 0 ? ` - < 8h (${hrs}h)` : ' - not scheduled'
-      sec.noTasks.push({ line: `* **${cleanName}** [${dept}]${hrsLabel}`, pms: [], adjLines: buildAdjLines(pid) })
-      continue
-    }
-
-    // hrs=0 and no tentative → noTasks
-    if (hrs === 0 && !tent) {
-      const entry = { line: `* **${cleanName}** [${dept}] - not scheduled`, pms: mentions, adjLines: buildAdjLines(pid) }
-      if (isConflicting) sec.conflicting.push({ ...entry, adjLines: undefined })
-      else               sec.noTasks.push(entry)
-      continue
-    }
-
+    const coverage = info.coverageHours || 0
     const maxHours = maxHoursConfig[cleanName] ?? 8
-    const issues   = []
-    let overload   = false
-    if (hrs < 8)             issues.push(`< 8h (${hrs}h)`)
-    else if (hrs > maxHours) { issues.push(`> ${maxHours}h (${hrs}h)`); overload = true }
-    if (tent)                issues.push('Tentative')
 
-    if (issues.length > 0) {
-      const usePms = overload ? overloadMentions : mentions   // rule 2: overload uses QA-excluded PMs
-      const entry = { line: `* **${cleanName}** [${dept}] - ${issues.join(' / ')}`, pms: usePms }
-      if (usePms.length > 1) sec.conflicting.push(entry)
-      else                   sec.flags.push(entry)
+    // UNDER-COVERED: production shortfall > 3h (coverage < 5h of an 8h day). Needs work →
+    // show adjacent production hints, tag the PRODUCTION PM (QA/overhead PMs can't fill it).
+    // Exception: a single QA task > 8h is a real QA overload (handled by the overload branch), not under-coverage.
+    if (coverage < 5 && !singleBigQa) {
+      let label
+      if (hrs === 0)           label = ' - not scheduled'
+      else if (coverage === 0) label = ` - 0h продакшну (${hrs}h QA/overhead)`
+      else                     label = ` - недобір продакшну: ${coverage}h (${hrs}h всього)`
+      const entry = { line: `* **${cleanName}** [${dept}]${label}`, pms: prodMentions, adjLines: buildAdjLines(pid) }
+      if (prodMentions.length > 1) sec.conflicting.push({ ...entry, adjLines: undefined })
+      else                         sec.noTasks.push(entry)
+      continue
+    }
+
+    // OVERLOAD: total hours over cap. Tag excludes QA (won't move).
+    if (hrs > maxHours) {
+      const issues = [`> ${maxHours}h (${hrs}h)`]
+      if (tent) issues.push('Tentative')
+      const entry = { line: `* **${cleanName}** [${dept}] - ${issues.join(' / ')}`, pms: overloadMentions }
+      if (overloadMentions.length > 1) sec.conflicting.push(entry)
+      else                             sec.flags.push(entry)
+      continue
+    }
+
+    // Covered enough (5–8h production, not over cap). Only tentative worth flagging.
+    if (tent) {
+      const entry = { line: `* **${cleanName}** [${dept}] - Tentative`, pms: mentions }
+      if (mentions.length > 1) sec.conflicting.push(entry)
+      else                     sec.flags.push(entry)
     } else {
       sec.ok++
     }
@@ -498,9 +512,9 @@ async function main() {
         msgLines.push('')
       }
 
-      // Не заплановані
+      // Недовантажені / не заплановані (недобір продакшну > 3h)
       if (sec.noTasks.length > 0) {
-        msgLines.push(`**🚫 Не заплановані (${sec.noTasks.length}):**`)
+        msgLines.push(`**🚫 Недовантажені / не заплановані (${sec.noTasks.length}):**`)
         for (const item of sec.noTasks) {
           const pmStr = item.pms.length > 0 && !NO_MENTIONS ? ` | ${item.pms.join(' ')}` : ''
           msgLines.push(`${item.line}${pmStr}`)
