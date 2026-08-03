@@ -172,8 +172,12 @@ function isNonWorkingDay(person) {
 // ─── Task counting policy ─────────────────────────────────────────────────────
 // Float Check counts EVERY task as workload, regardless of name (QA, Art Direction,
 // overheads — all real hours). The ONLY thing that makes a person "off" is a timeoff
-// or a non-working day in their schedule. Task-name skipping lives ONLY in order-sync
-// (those tasks just don't get an Order). So there is intentionally NO isSkipTask here.
+// or a non-working day in their schedule. Task-name skipping lives ONLY in order-sync.
+// QA gets special handling in TWO narrow spots only (NOT hour counting):
+//  (1) never suggested as a movable task in adjacent-day hints;
+//  (2) excluded from PM tagging on OVERLOAD (QA time won't move) — UNLESS the day's
+//      single task is a QA task > 8h (then that QA IS the overload → tag its PM).
+const isQaTask = (name) => /QA/i.test(name || '')
 
 // ─── PM mention resolution ───────────────────────────────────────────────────
 // Priority 1: project_exceptions → pm_override (manual)
@@ -293,6 +297,7 @@ async function main() {
   for (const [dir, src] of [['before', tasksBefore], ['after', tasksAfter]]) {
     for (const t of src) {
       if (!t.hours || parseFloat(t.hours) < 2) continue
+      if (isQaTask(t.name)) continue  // rule 1: never suggest moving QA to fill a gap
       for (const pid of getPersonIds(t)) {
         if (!adjByPerson[pid]) adjByPerson[pid] = { before: [], after: [] }
         adjByPerson[pid][dir].push({ hours: parseFloat(t.hours), projectId: t.project_id, taskName: t.name })
@@ -373,21 +378,30 @@ async function main() {
     const hrs  = info.hours
     const tent = info.hasTentative
 
-    // Resolve PM mentions — 3-day window: tag the PM with the most hours across dayBefore + target + dayAfter
+    // Resolve PM mentions — 3-day window: tag the PM with the most hours across dayBefore + target + dayAfter.
+    // pmHoursNoQa = same, but excluding QA tasks (used for the overload case per rule 2).
     const pmHours = {}
+    const pmHoursNoQa = {}
     for (const t of (threeDayTasksByPerson[pid] || [])) {
       if (!t.project_id) continue
       const m = getPmMention(t.project_id, projectNames[t.project_id])
       if (!m) continue
-      pmHours[m] = (pmHours[m] || 0) + parseFloat(t.hours || 0)
+      const h = parseFloat(t.hours || 0)
+      pmHours[m] = (pmHours[m] || 0) + h
+      if (!isQaTask(t.name)) pmHoursNoQa[m] = (pmHoursNoQa[m] || 0) + h
     }
-    const mentions = []
-    if (Object.keys(pmHours).length > 0) {
-      const maxH = Math.max(...Object.values(pmHours))
-      for (const [pm, h] of Object.entries(pmHours)) {
-        if (h === maxH) mentions.push(pm)
-      }
+    const dominantOf = (map) => {
+      const keys = Object.keys(map)
+      if (!keys.length) return []
+      const maxH = Math.max(...Object.values(map))
+      return keys.filter(pm => map[pm] === maxH)
     }
+    const mentions = dominantOf(pmHours)
+    // Overload PM tags: drop QA-derived PMs (QA won't move) — unless the day's single
+    // task is a QA task > 8h, in which case that QA IS the overload → tag normally.
+    const todayTasks  = tasksByPerson[pid] || []
+    const singleBigQa = todayTasks.length === 1 && isQaTask(todayTasks[0].name) && parseFloat(todayTasks[0].hours || 0) > 8
+    const overloadMentions = singleBigQa ? mentions : dominantOf(pmHoursNoQa)
 
     // Adjacent lines builder
     function buildAdjLines(personId) {
@@ -422,14 +436,16 @@ async function main() {
 
     const maxHours = maxHoursConfig[cleanName] ?? 8
     const issues   = []
+    let overload   = false
     if (hrs < 8)             issues.push(`< 8h (${hrs}h)`)
-    else if (hrs > maxHours) issues.push(`> ${maxHours}h (${hrs}h)`)
+    else if (hrs > maxHours) { issues.push(`> ${maxHours}h (${hrs}h)`); overload = true }
     if (tent)                issues.push('Tentative')
 
     if (issues.length > 0) {
-      const entry = { line: `* **${cleanName}** [${dept}] - ${issues.join(' / ')}`, pms: mentions }
-      if (isConflicting) sec.conflicting.push(entry)
-      else               sec.flags.push(entry)
+      const usePms = overload ? overloadMentions : mentions   // rule 2: overload uses QA-excluded PMs
+      const entry = { line: `* **${cleanName}** [${dept}] - ${issues.join(' / ')}`, pms: usePms }
+      if (usePms.length > 1) sec.conflicting.push(entry)
+      else                   sec.flags.push(entry)
     } else {
       sec.ok++
     }
