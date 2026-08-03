@@ -75,18 +75,12 @@ const pmDiscordRows        = loadJson('pm_discord.json')
 
 // Build lookups from config rows
 const maxHoursConfig   = {}  // cleanName → maxHours
-const skipTagsConfig   = []  // tag names to skip entirely
+const skipTagsConfig   = []  // tag names to skip the PERSON entirely (fixed-price artists)
 const offTimeoffConfig = []  // timeoff type names to count as off
-const skipTasksConfig  = new Set()  // task names to skip entirely in float-check (normalized, exact)
-// Name patterns → skip the person entirely (fixed-price artists). Both hourglass
+// Name patterns → skip the PERSON entirely (fixed-price artists). Both hourglass
 // variants are built-in defaults so we never regress: ⌛ U+231B and ⏳ U+23F3.
 // Matched with String.includes (UI promises "містить"), not startsWith.
 const skipNamePatterns = ['⌛', '⏳']
-
-// Normalize a task name the same way isSkipTask() does (strip leading emoji, lowercase, trim)
-function normTaskName(name) {
-  return (name || '').replace(/^[^\x00-\x7F]+\s*/, '').toLowerCase().trim()
-}
 
 for (const row of floatCheckExceptions) {
   const name  = (row.name  || '').trim()
@@ -100,8 +94,6 @@ for (const row of floatCheckExceptions) {
     skipTagsConfig.push(name)
   } else if (type === 'timeoff_type' && value === 'count_as_off') {
     offTimeoffConfig.push(name)
-  } else if (type === 'skip_task' && value === 'skip_entirely') {
-    skipTasksConfig.add(normTaskName(name))
   } else if (type === 'name_pattern' && value === 'skip_entirely') {
     if (!skipNamePatterns.includes(name)) skipNamePatterns.push(name)
   }
@@ -138,7 +130,7 @@ for (const row of pmDiscordRows) {
 // Keep pmDiscord as alias for pm_override lookups (backwards compat)
 const pmDiscord = pmDiscordByName
 
-console.log(`Config: ${Object.keys(maxHoursConfig).length} max_hours | ${skipTagsConfig.length} skip tags | ${offTimeoffConfig.length} off timeoffs | ${skipTasksConfig.size} skip tasks`)
+console.log(`Config: ${Object.keys(maxHoursConfig).length} max_hours | ${skipTagsConfig.length} skip tags | ${offTimeoffConfig.length} off timeoffs`)
 console.log(`Project exceptions: ${Object.keys(projExcMap).length} | PM Discord: ${Object.keys(pmDiscord).length}`)
 
 
@@ -177,15 +169,11 @@ function isNonWorkingDay(person) {
   return parseFloat(arr[TARGET_DOW] || 0) === 0
 }
 
-// ─── Task skip logic (for adjacent hints + project id collection) ─────────────
-const SKIP_EXACT_ADJ = new Set(['art direction', 'rsg org', 'tech support', 'playables \\ creatives pm support'])
-// Real production tasks that would otherwise be caught by the broad /QA/ rule → never skip.
-const NEVER_SKIP = new Set(['export + qa'])
-function isSkipTask(name) {
-  const norm = normTaskName(name)
-  if (NEVER_SKIP.has(norm)) return false
-  return /QA/i.test(name) || SKIP_EXACT_ADJ.has(norm) || skipTasksConfig.has(norm)
-}
+// ─── Task counting policy ─────────────────────────────────────────────────────
+// Float Check counts EVERY task as workload, regardless of name (QA, Art Direction,
+// overheads — all real hours). The ONLY thing that makes a person "off" is a timeoff
+// or a non-working day in their schedule. Task-name skipping lives ONLY in order-sync
+// (those tasks just don't get an Order). So there is intentionally NO isSkipTask here.
 
 // ─── PM mention resolution ───────────────────────────────────────────────────
 // Priority 1: project_exceptions → pm_override (manual)
@@ -305,7 +293,6 @@ async function main() {
   for (const [dir, src] of [['before', tasksBefore], ['after', tasksAfter]]) {
     for (const t of src) {
       if (!t.hours || parseFloat(t.hours) < 2) continue
-      if (isSkipTask(t.name || '')) continue
       for (const pid of getPersonIds(t)) {
         if (!adjByPerson[pid]) adjByPerson[pid] = { before: [], after: [] }
         adjByPerson[pid][dir].push({ hours: parseFloat(t.hours), projectId: t.project_id, taskName: t.name })
@@ -350,7 +337,7 @@ async function main() {
       if (!byPerson[pid]) byPerson[pid] = { hours: 0, hasTentative: false, projectIds: new Set() }
       byPerson[pid].hours += parseFloat(t.hours || 0)
       if (t.status === 1) byPerson[pid].hasTentative = true
-      if (t.project_id && !isSkipTask(t.name || '')) byPerson[pid].projectIds.add(t.project_id)
+      if (t.project_id) byPerson[pid].projectIds.add(t.project_id)
       if (!tasksByPerson[pid]) tasksByPerson[pid] = []
       tasksByPerson[pid].push(t)
     }
@@ -389,7 +376,7 @@ async function main() {
     // Resolve PM mentions — 3-day window: tag the PM with the most hours across dayBefore + target + dayAfter
     const pmHours = {}
     for (const t of (threeDayTasksByPerson[pid] || [])) {
-      if (!t.project_id || isSkipTask(t.name || '')) continue
+      if (!t.project_id) continue
       const m = getPmMention(t.project_id, projectNames[t.project_id])
       if (!m) continue
       pmHours[m] = (pmHours[m] || 0) + parseFloat(t.hours || 0)
@@ -518,7 +505,7 @@ async function main() {
   }
 
   // Duplicate tasks in Float: exact same name + same project for one artist on the date.
-  // Skip-tasks (QA, Art Direction etc.) are excluded — they repeat across projects legitimately.
+  // Keyed by name+project_id, so the same name on different projects is NOT a dup.
   const dupLines = []
   for (const a of artists) {
     const pid       = a.people_id
@@ -526,7 +513,7 @@ async function main() {
     const counts = {}
     for (const t of (tasksByPerson[pid] || [])) {
       const tn = (t.name || '').trim()
-      if (!tn || isSkipTask(tn)) continue
+      if (!tn) continue
       const key = `${tn.toLowerCase()}|${t.project_id || ''}`
       if (!counts[key]) counts[key] = { name: tn, project: projectNames[t.project_id] || '', n: 0 }
       counts[key].n++
