@@ -1,1 +1,11 @@
-[]
+[
+  { "float_id": 9986952,  "name": "RSG Planning" },
+  { "float_id": 8841340,  "name": "RSG Training" },
+  { "float_id": 7106444,  "name": "RSG Portfolio" },
+  { "float_id": 7106442,  "name": "RSG Office management" },
+  { "float_id": 8574314,  "name": "RSG AI" },
+  { "float_id": 10014465, "name": "RSG Marketing" },
+  { "float_id": 9355300,  "name": "RSG Learning" },
+  { "float_id": 10529117, "name": "RSG Freebies / Paid Assets" },
+  { "float_id": 9954523,  "name": "Last Pirate: Die Together" }
+]

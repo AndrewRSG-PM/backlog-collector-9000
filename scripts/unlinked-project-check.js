@@ -134,7 +134,8 @@ async function main() {
   for (const t of tasks) { if (t.project_id) taskCount[t.project_id] = (taskCount[t.project_id] || 0) + 1 }
 
   const boardMap = await fetchBoardMap()
-  const ignore = new Set((loadJson('unlinked_ignore.json') || []).map(String))
+  // ignore rows: either a bare Float id, or { float_id, name } for readability
+  const ignore = new Set((loadJson('unlinked_ignore.json') || []).map(r => String((r && typeof r === 'object') ? (r.float_id ?? r.id) : r)))
 
   const flags = []  // { name, id, count, pm }
   for (const [pidStr, count] of Object.entries(taskCount)) {
