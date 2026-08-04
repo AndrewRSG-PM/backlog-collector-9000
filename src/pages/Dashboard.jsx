@@ -112,10 +112,12 @@ function BacklogTriggerCard({ title, description, dept, codaUrl, date }) {
             onClick={() => window.open(codaUrl, '_blank')}
             variant="secondary"
           />
+          {/* RUN disabled: GitHub→Make webhook assembly duplicates the Coda COPY column
+              and drops Float notes. Assemble via the Coda button (CODA ↗) instead. */}
           <ActionButton
-            label={loading ? '...' : 'RUN'}
+            label="RUN"
             onClick={trigger}
-            disabled={loading}
+            disabled={true}
           />
         </div>
       </div>
