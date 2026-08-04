@@ -1,0 +1,29 @@
+name: Unlinked Project Check
+
+# Flags Float projects that have tasks this week but aren't fully linked on the Monday
+# "@Float Project ID" board (empty Project List / Link to Project board) → posts a
+# Discord report tagging the responsible PM. Manual only (run from BK9K dashboard).
+on:
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'Send to test Discord webhook'
+        required: false
+        default: 'false'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run Unlinked Project Check
+        env:
+          FLOAT_API_KEY: ${{ secrets.FLOAT_API_KEY }}
+          MONDAY_TOKEN: ${{ secrets.MONDAY_TOKEN }}
+          DISCORD_WEBHOOK_PROD: ${{ secrets.DISCORD_WEBHOOK_PROD }}
+          DISCORD_WEBHOOK_TEST: ${{ secrets.DISCORD_WEBHOOK_TEST }}
+          TEST_MODE: ${{ inputs.test_mode }}
+        run: node scripts/unlinked-project-check.js

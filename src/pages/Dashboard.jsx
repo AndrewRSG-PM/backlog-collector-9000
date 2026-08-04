@@ -21,6 +21,7 @@ const WORKFLOWS = {
   floatCheck:      'float-check.yml',
   orderSync:       'order-sync.yml',
   backlogAssemble: 'backlog-assemble.yml',
+  unlinkedCheck:   'unlinked-project-check.yml',
 }
 
 function todayPlus1() {
@@ -544,6 +545,19 @@ export default function Dashboard() {
           workflowFile={WORKFLOWS.orderSync}
           inputs={{ date }}
           showDryRun={true}
+        />
+      </div>
+
+      {/* Section: Project links check */}
+      <div>
+        <div className="text-sm text-[#6f81ab] tracking-widest mb-5 flex items-center gap-3">
+          <span>── PROJECT LINKS</span>
+          <span className="flex-1 border-t border-[#1a2336]" />
+        </div>
+        <WorkflowCard
+          title="Unlinked Project Check"
+          description="Знаходить проєкти з задачами на тиждень, які НЕ звʼязані у «@Float Project ID» (порожня Project List / Link to Project board) → назви не показуються. Пінгає PM у Discord."
+          workflowFile={WORKFLOWS.unlinkedCheck}
         />
       </div>
     </div>
