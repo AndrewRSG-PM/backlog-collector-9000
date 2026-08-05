@@ -412,16 +412,24 @@ async function main() {
     const singleBigQa = todayTasks.length === 1 && isQaTask(todayTasks[0].name) && parseFloat(todayTasks[0].hours || 0) > 8
     const overloadMentions = singleBigQa ? mentions : dominantOf(pmHoursNoQa)
 
-    // Adjacent lines builder
+    // Adjacent lines builder — one line per PROJECT (not per task) to keep it compact.
+    // Aggregates hours of the person's adjacent-day tasks by project → PM sees which
+    // projects to pull work from, not a wall of individual task names.
     function buildAdjLines(personId) {
       const lines = []
       if (!adjByPerson[personId]) return lines
-      for (const [dir, dayLabel] of [['before', fmtDay(dateBefore)], ['after', fmtDay(dateAfter)]]) {
+      const byProj = {}  // projectId → summed hours across before+after
+      for (const dir of ['before', 'after']) {
         for (const at of adjByPerson[personId][dir]) {
-          const pm    = getPmMention(at.projectId, projectNames[at.projectId])
-          const pmStr = pm && !NO_MENTIONS ? ` | ${pm}` : ''
-          lines.push(`  ↕ ${dayLabel}: ${at.taskName} (${at.hours}h)${pmStr} — можна поставити ${fmtDay(DATE)}?`)
+          byProj[at.projectId] = (byProj[at.projectId] || 0) + at.hours
         }
+      }
+      const entries = Object.entries(byProj).sort((a, b) => b[1] - a[1])
+      for (const [projId, hours] of entries) {
+        const projName = projectNames[projId] || 'без проєкту'
+        const pm    = getPmMention(projId, projectNames[projId])
+        const pmStr = pm && !NO_MENTIONS ? ` | ${pm}` : ''
+        lines.push(`  ↕ ${projName} (${hours}h)${pmStr} — можна поставити ${fmtDay(DATE)}?`)
       }
       return lines
     }
