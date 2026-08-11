@@ -690,11 +690,11 @@ const TABS = [
     key: 'pm_discord',
     title: 'PM Discord ID',
     scope: 'float',
-    description: "Ім'я PM → Discord user ID. Використовується для тегів PM у звіті Float Check.",
+    description: "Ім'я PM → Discord user ID. Тег PM у Float Check матчиться по «Ім'я у Float» (як зветься Float-акаунт, напр. «PM Aliona») — БЕЗ нього тег не спрацює, навіть якщо Discord ID заповнено.",
     renderer: 'table',
     file: 'config/pm_discord.json',
-    columns: ['pm_name', 'discord_id', 'note'],
-    placeholder: { pm_name: 'Andrew Holovko', discord_id: '1473964446652039168', note: '' },
+    columns: ['pm_name', 'float_name', 'discord_id', 'note'],
+    placeholder: { pm_name: 'Andrew Holovko', float_name: 'PM Andrew', discord_id: '1473964446652039168', note: '' },
   },
 ]
 
