@@ -326,6 +326,10 @@ async function main() {
   const artists = allPeople.filter(p => {
     if (!allDeptIds.has(p.department?.department_id)) return false
     if (p.active !== 1) return false
+    // Employment window: skip people who haven't started yet (start_date after target)
+    // or already left (end_date before target) — e.g. a new hire starting next Monday.
+    if (p.start_date && DATE < p.start_date) return false
+    if (p.end_date && DATE > p.end_date) return false
     if (skipNamePatterns.some(pat => (p.name || '').includes(pat))) return false
     // skip tags
     const tags = Array.isArray(p.tags) ? p.tags.map(t => t.name) :
